@@ -1,0 +1,42 @@
+# Environment
+.env
+.env.local
+*.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Data (keep seed CSVs, ignore extracted/generated)
+data/extracted/
+data/raw/
+*.json.bak
+
+# Models (large files)
+models/
+*.bin
+*.pt
+
+# Logs
+logs/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Railway / deployment
+.railway/
+
+# Docs session summaries (local only)
+docs/session_summary_*.html

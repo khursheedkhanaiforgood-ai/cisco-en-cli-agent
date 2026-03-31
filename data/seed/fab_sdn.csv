@@ -1,0 +1,55 @@
+tag,functional_intent,cisco_ios,cisco_iosxe,cisco_nxos,extreme_exos,extreme_voss,extreme_slxos,negation_cisco,negation_en,notes,source_ref,page_ref,confidence,is_verified
+FAB-SDN,Enable IS-IS routing process,"router isis","router isis","feature isis | router isis 1","configure isis instance <name>","router isis","","no router isis","","EXOS uses named IS-IS instances","CLI-XRef-Guide-2018","p.140",1.0,true
+FAB-SDN,SPBM / Fabric Connect global enable (VOSS),"","","","","router isis | spbm 1 | ip-multicast-over-fabric enable | isis spbm-instance 1","","","","VOSS IS-IS-based fabric; SPB is mandatory for Fabric Connect","VOSS-8.9-UG","p.200",1.0,true
+FAB-SDN,IS-IS enable on interface (VOSS),"","","","","isis spbm-instance 1 l1-metric 10","","","","Enables IS-IS adjacency and sets link metric on VOSS port","VOSS-8.9-UG","p.201",1.0,true
+FAB-SDN,IS-IS enable on interface (NX-OS),"","","interface <p> | ip router isis 1","","","","","","Applies IS-IS process to interface","NB-Session-2026","",1.0,true
+FAB-SDN,IS-IS enable on EXOS VLAN,"","","","configure isis add vlan <name>","","","","configure isis delete vlan <name>","Associates VLAN with IS-IS process on EXOS","EXOS-22.7-UG","p.350",0.8,true
+FAB-SDN,Show IS-IS adjacencies,"","show isis adjacency","show isis adjacency","show isis adjacency","show isis adjacency","","","","All platforms use same show command","CLI-XRef-Guide-2018","p.141",1.0,true
+FAB-SDN,Show IS-IS database (LSDB),"","show isis database","show isis database","show isis database","show isis lsdb","","","","","CLI-XRef-Guide-2018","p.141",1.0,true
+FAB-SDN,Show SPBM status (VOSS),"","","","","show isis spbm","","","","Shows SPBM B-VLANs and NNI port states","VOSS-8.9-UG","p.205",1.0,true
+FAB-SDN,Show SPBM LSDB (VOSS),"","","","","show isis lsdb","","","","Link-state database for SPB topology","VOSS-8.9-UG","p.205",1.0,true
+FAB-SDN,Auto-sense enable (VOSS ZTF),"","","","","auto-sense enable","","","","Zero-Touch Fabric; auto-discovers and connects to SPBM fabric","VOSS-8.9-UG","p.45",1.0,true
+FAB-SDN,Auto-sense onboarding I-SID/VLAN,"","","","","auto-sense onboarding i-sid <id> vlan <id>","","","","Associates onboarding VLAN with I-SID for ZTF attachment","VOSS-8.9-UG","p.46",1.0,true
+FAB-SDN,Show auto-sense port status,"","","","","show auto-sense port <p>","","","","Displays auto-sense state and assigned I-SID/VLAN","VOSS-8.9-UG","p.47",1.0,true
+FAB-SDN,Fabric Attach enable (EXOS),"","","","enable fabric attach","","","","disable fabric attach","EXOS Fabric Attach client — connects to VOSS BEB via LLDP","EXOS-22.7-UG","p.120",1.0,true
+FAB-SDN,Show Fabric Attach assignments (EXOS),"","","","show fabric attach assignments","","","","","Displays I-SID/VLAN mappings from Fabric Attach signaling","EXOS-22.7-UG","p.121",1.0,true
+FAB-SDN,Show Fabric Attach assignments (VOSS),"","","","","show fa assignment","","","","VOSS BEB view of Fabric Attach mappings from proxy nodes","VOSS-8.9-UG","p.210",1.0,true
+FAB-SDN,LLDP TLV for Fabric Attach (VOSS),"","","","","lldp tx-tlv port <p> include fabric-attach","","","","Required for FA signaling between VOSS and EXOS","VOSS-8.9-UG","p.212",1.0,true
+FAB-SDN,I-SID create and assign to VLAN (VOSS),"","","","","vlan i-sid <vlan-id> <isid>","","","no vlan i-sid <vlan-id>","Binds a C-VLAN to an I-SID (service instance) on SPBM fabric","VOSS-8.9-UG","p.215",1.0,true
+FAB-SDN,Fabric Attach I-SID assign (EXOS),"","","","configure fabric attach ports <p> i-sid <id> c-vid <vlan>","","","","configure fabric attach ports <p> i-sid <id> c-vid <vlan> delete","EXOS proxy FA maps C-VID to I-SID","EXOS-22.7-UG","p.122",1.0,true
+FAB-SDN,VXLAN feature enable (NX-OS),"","","feature nv overlay | feature vn-segment-vlan-based","","","","no feature nv overlay","","Required before configuring VXLAN overlays on NX-OS","NB-Session-2026","",1.0,true
+FAB-SDN,VXLAN NVE interface (NX-OS),"","","interface nve1 | source-interface loopback 0 | member vni <id>","","","","no interface nve1","","NVE is the VTEP logical interface","NB-Session-2026","",1.0,true
+FAB-SDN,VXLAN VTEP loopback IP (NX-OS),"","","interface loopback 0 | ip address <vtep-ip>/32","","","","no interface loopback 0","","VTEP source IP — must be reachable in underlay","NB-Session-2026","",1.0,true
+FAB-SDN,VXLAN VNI to VLAN mapping (NX-OS),"","","vlan <id> | vn-segment <vni>","","","","no vlan <id>","","Maps VLAN to VNI for VXLAN encapsulation","NB-Session-2026","",1.0,true
+FAB-SDN,VXLAN NVE member (IOS-XE),"","interface nve 1 | member vni <id>","","","","","no interface nve 1","","IOS-XE NVE for VXLAN","NB-Session-2026","",1.0,true
+FAB-SDN,BGP EVPN (NX-OS),"","","router bgp <asn> | neighbor <ip> remote-as <asn> | address-family l2vpn evpn","","","","no router bgp","","L2VPN EVPN AF for VXLAN control plane","NB-Session-2026","",1.0,true
+FAB-SDN,BGP EVPN RD/RT auto (NX-OS),"","","evpn | vni <id> l2 | rd auto | route-target import auto | route-target export auto","","","","","","Auto-derives RD and RT from VNI and ASN","NB-Session-2026","",1.0,true
+FAB-SDN,Show NVE peers (NX-OS),"","","show nve peers","","","","","","Lists remote VTEPs","NB-Session-2026","",1.0,true
+FAB-SDN,Show VXLAN NVE detail (NX-OS),"","","show nve interface nve1 detail","","","","","","","NB-Session-2026","",0.8,true
+FAB-SDN,Show BGP EVPN routes (NX-OS),"","","show bgp l2vpn evpn","","","","","","","NB-Session-2026","",1.0,true
+FAB-SDN,LISP enable (SD-Access IOS-XE),"","router lisp","","","","","no router lisp","","Cisco SD-Access underlay uses LISP for host mobility","NB-Session-2026","",1.0,true
+FAB-SDN,LISP instance mapping (IOS-XE),"","router lisp | instance-id <id> | dynamic-eid <name> | database-mapping <prefix> locator-set <name>","","","","","","","LISP EID-to-RLOC mapping configuration","NB-Session-2026","",1.0,true
+FAB-SDN,LISP show map-cache (IOS-XE),"","show lisp instance-id <id> map-cache","","","","","","","","NB-Session-2026","",1.0,true
+FAB-SDN,LISP map-cache verify (IOS-XE),"","show lisp instance-id <id> ipv4 map-cache","","","","","","","","NB-Session-2026","",1.0,true
+FAB-SDN,SD-Access border use-petr (IOS-XE),"","lisp instance-id <id> | use-petr <ip>","","","","","","","SD-Access proxy ETR for external traffic","NB-Session-2026","",0.8,true
+FAB-SDN,DvR (Distributed Virtual Routing) enable (VOSS),"","","","","dvr enable | dvr controller <ip>","","","dvr disable","VOSS DvR for distributed L3 in fabric","VOSS-8.9-UG","p.250",1.0,true
+FAB-SDN,DvR leaf mode boot flag (VOSS),"","","","","boot config flags dvr-leaf-mode","","","","Set at boot to configure node as DvR leaf","VOSS-8.9-UG","p.251",1.0,true
+FAB-SDN,Show DvR gateway (VOSS),"","","","","show dvr gateway","","","","","VOSS-8.9-UG","p.252",0.8,true
+FAB-SDN,VSN (macro-segmentation) VOSS,"","","","","vlan i-sid <id> <isid> | ip vrf <name> | vrf <name>","","","","VOSS Virtual Service Network for policy/VRF segmentation over SPBM","VOSS-8.9-UG","p.260",1.0,true
+FAB-SDN,NX-OS VXLAN flood-and-learn mode,"","","interface nve1 | member vni <id> ingress-replication protocol bgp","","","","","","BGP mode vs flood-and-learn for VXLAN","NB-Session-2026","",0.8,true
+FAB-SDN,Show IS-IS topology summary,"","show isis topology","show isis topology","show isis topology","show isis topology","","","","","NB-Session-2026","",0.8,true
+FAB-SDN,IS-IS NET address configure (VOSS),"","","","","router isis | net <net-address>","","","","NET defines IS-IS router identity (area + system-id)","VOSS-8.9-UG","p.200",1.0,true
+FAB-SDN,IS-IS NET address configure (NX-OS),"","","router isis 1 | net <net-address>","","","","no net","","","NB-Session-2026","",1.0,true
+FAB-SDN,VOSS SPBM B-VLAN create,"","","","","vlan create <id> name <name> type spbm-bvlan","","","vlan delete <id>","B-VLAN is the backbone VLAN for SPBM flooding","VOSS-8.9-UG","p.203",1.0,true
+FAB-SDN,VOSS SPBM assign B-VLAN to instance,"","","","","spbm 1 b-vid <id> primary | secondary","","","","Sets primary and secondary backbone VLANs for SPBM","VOSS-8.9-UG","p.204",1.0,true
+FAB-SDN,VOSS show SPBM services,"","","","","show isis spbm unicast-fib","","","","Shows SPBM unicast FIB entries (I-SID to MAC/port)","VOSS-8.9-UG","p.206",0.8,true
+FAB-SDN,NX-OS EVPN VNI L3 routing,"","","vni <id> l3 | vrf <name>","","","","","","L3 VNI maps VRF to VXLAN for L3 overlay","NB-Session-2026","",0.8,true
+FAB-SDN,Show fabric isis adjacency (EXOS),"","","","show isis adjacency","","","","","","EXOS-22.7-UG","p.350",1.0,true
+FAB-SDN,NX-OS VTEP anycast IP (BGP EVPN),"","","fabric forwarding anycast-gateway-mac <mac>","","","","","","Anycast gateway MAC for distributed L3 with BGP EVPN","NB-Session-2026","",0.8,true
+FAB-SDN,NX-OS feature fabric forwarding,"","","feature fabric forwarding","","","","no feature fabric forwarding","","Required for anycast gateway on NX-OS","NB-Session-2026","",0.8,true
+FAB-SDN,Show SPBM multicast entries (VOSS),"","","","","show isis spbm multicast-fib","","","","SPB multicast forwarding information base","VOSS-8.9-UG","p.207",0.8,true
+FAB-SDN,EXOS IS-IS enable globally,"","","","enable isis","","","","disable isis","Activates IS-IS process on EXOS","EXOS-22.7-UG","p.348",1.0,true
+FAB-SDN,Show NX-OS VNI summary,"","","show vni summary","","","","","","Lists all configured VNIs","NB-Session-2026","",0.8,true
+FAB-SDN,VOSS show auto-sense config,"","","","","show auto-sense config","","","","Displays ZTF auto-sense global configuration","VOSS-8.9-UG","p.48",0.8,true
+FAB-SDN,NX-OS show LISP (basic),"","","show lisp","","","","","","","NB-Session-2026","",0.8,true
+FAB-SDN,VOSS show DvR controller,"","","","","show dvr controller","","","","","VOSS-8.9-UG","p.252",0.8,true
