@@ -16,6 +16,11 @@ from src.ui.components.query_box import render_query_box
 from src.ui.components.bin_tabs import render_bin_tab
 from src.ui.components.db_browser import render_db_browser
 from src.ui.components.e2e_wizard import render_e2e_wizard
+from src.ui.components.rag_settings import init_rag_settings, render_rag_settings_panel
+from src.ui.components.data_ingest import render_data_ingest
+
+# Initialise RAG session state defaults
+init_rag_settings()
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -49,6 +54,8 @@ with st.sidebar:
         st.info("Database not connected")
 
     st.divider()
+    render_rag_settings_panel()
+    st.divider()
     st.caption("Powered by Claude claude-sonnet-4-6 + pgvector")
 
 # ── Main content ──────────────────────────────────────────────────────────────
@@ -59,7 +66,7 @@ st.markdown("*The New Rosetta Stone — Translate CLI commands across 6 network 
 tab_labels = (
     ["🤖 AI Query", "🏗️ E2E Design Wizard"]
     + [f"{TAG_LABELS[t]} {t}" for t in FUNCTIONAL_TAGS]
-    + ["🗄️ DB Browser"]
+    + ["🗄️ DB Browser", "📥 Add Data"]
 )
 top_tabs = st.tabs(tab_labels)
 
@@ -77,5 +84,9 @@ for i, tag in enumerate(FUNCTIONAL_TAGS):
         render_bin_tab(tag)
 
 # Tab 11 — DB Browser
-with top_tabs[-1]:
+with top_tabs[-2]:
     render_db_browser()
+
+# Tab 12 — Add Data (upload + crawler approval)
+with top_tabs[-1]:
+    render_data_ingest()

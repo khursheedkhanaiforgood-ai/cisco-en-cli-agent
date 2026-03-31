@@ -64,6 +64,8 @@ def render_query_box():
 
 def _run_query(query: str, os_filter, tag_filter):
     from src.agents.orchestrator import query as agent_query
+    from src.ui.components.rag_settings import get_rag_settings
+    rag = get_rag_settings()
 
     with st.spinner("Searching database and generating response..."):
         start = time.time()
@@ -72,7 +74,11 @@ def _run_query(query: str, os_filter, tag_filter):
                 user_query=query,
                 tag_filter=tag_filter,
                 os_filter=os_filter,
-                top_k=8,
+                top_k=rag["rag_top_k"],
+                threshold=rag["rag_threshold"],
+                verified_only=rag["rag_verified_only"],
+                min_confidence=rag["rag_min_confidence"],
+                search_mode=rag["rag_search_mode"],
             )
         except Exception as e:
             st.error(f"Error: {e}")

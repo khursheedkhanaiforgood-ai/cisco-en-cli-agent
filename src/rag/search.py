@@ -18,6 +18,9 @@ def search(
     os_filter: Optional[str] = None,
     limit: int = RAG_TOP_K,
     threshold: float = RAG_SIMILARITY_THRESHOLD,
+    verified_only: bool = False,
+    min_confidence: float = 0.0,
+    search_mode: str = "Semantic (vector)",
 ) -> list[dict]:
     """
     Semantic search over CLI mappings.
@@ -28,14 +31,43 @@ def search(
         os_filter: Optional OS column name (e.g. "extreme_exos")
         limit: Max number of results
         threshold: Minimum cosine similarity (0-1)
+        verified_only: If True, only return is_verified=True rows
+        min_confidence: Minimum confidence score filter
+        search_mode: "Semantic (vector)" | "Keyword (ILIKE)" | "Hybrid (semantic + keyword)"
 
     Returns:
         List of dicts with mapping data + similarity score
     """
+    # Route to keyword search if mode requires it
+    if "Keyword" in search_mode:
+        return keyword_search(query, tag_filter=tag_filter, limit=limit,
+                              min_confidence=min_confidence, verified_only=verified_only)
+    if "Hybrid" in search_mode:
+        sem = _semantic_search(query, tag_filter, os_filter, limit, threshold,
+                               verified_only, min_confidence)
+        kw  = keyword_search(query, tag_filter=tag_filter, limit=limit // 2,
+                             min_confidence=min_confidence, verified_only=verified_only)
+        # Merge deduped by id, semantic results first
+        seen = {r["id"] for r in sem}
+        return sem + [r for r in kw if r.get("id") not in seen]
+
+    return _semantic_search(query, tag_filter, os_filter, limit, threshold,
+                            verified_only, min_confidence)
+
+
+def _semantic_search(
+    query: str,
+    tag_filter: Optional[str],
+    os_filter: Optional[str],
+    limit: int,
+    threshold: float,
+    verified_only: bool,
+    min_confidence: float,
+) -> list[dict]:
+    """Core pgvector cosine similarity search."""
     start_time = time.time()
 
     query_vector = encode(query)
-    # Format as pgvector literal
     vector_str = "[" + ",".join(f"{v:.6f}" for v in query_vector) + "]"
 
     # Build WHERE clause
@@ -44,6 +76,10 @@ def search(
         conditions.append(f"tag = '{tag_filter}'")
     if os_filter:
         conditions.append(f"{os_filter} != ''")
+    if verified_only:
+        conditions.append("is_verified = true")
+    if min_confidence > 0.0:
+        conditions.append(f"confidence >= {min_confidence}")
 
     where_clause = " AND ".join(conditions)
 
@@ -106,14 +142,23 @@ def keyword_search(
     keyword: str,
     tag_filter: Optional[str] = None,
     limit: int = 50,
+    min_confidence: float = 0.0,
+    verified_only: bool = False,
 ) -> list[dict]:
-    """Fuzzy keyword search using pg_trgm (fallback / browse mode)."""
-    conditions = ["functional_intent ILIKE :kw"]
+    """Fuzzy keyword search using ILIKE (fallback / browse / keyword mode)."""
+    conditions = [
+        "(functional_intent ILIKE :kw OR cisco_ios ILIKE :kw OR cisco_iosxe ILIKE :kw "
+        "OR extreme_exos ILIKE :kw OR extreme_voss ILIKE :kw OR extreme_slxos ILIKE :kw)"
+    ]
     params = {"kw": f"%{keyword}%", "limit": limit}
 
     if tag_filter and tag_filter in FUNCTIONAL_TAGS:
-        conditions.append(f"tag = :tag")
+        conditions.append("tag = :tag")
         params["tag"] = tag_filter
+    if verified_only:
+        conditions.append("is_verified = true")
+    if min_confidence > 0.0:
+        conditions.append(f"confidence >= {min_confidence}")
 
     where_clause = " AND ".join(conditions)
     sql = text(f"""

@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def main(overwrite: bool = False, extract_pdf: bool = False):
+def main(overwrite: bool = False, extract_pdf: bool = False, load_themes: bool = True):
     logger.info("=" * 60)
     logger.info("  CISCO-EN CLI Mapping — Database Seed")
     logger.info("=" * 60)
@@ -27,16 +27,23 @@ def main(overwrite: bool = False, extract_pdf: bool = False):
 
     # 2. Load seed CSVs
     from src.extractors.csv_loader import load_all_seeds
-    logger.info("\n[2/3] Loading seed CSVs...")
+    logger.info("\n[2/4] Loading seed CSVs...")
     result = load_all_seeds(overwrite=overwrite)
     logger.info(f"  Added: {result['added']}  Skipped: {result['skipped']}  Errors: {result['errors']}")
 
-    # 3. Optional: Extract from PDFs
+    # 3. Load NotebookLM thematic data
+    if load_themes:
+        from src.database.seed_themes import load_themes as _load_themes
+        logger.info("\n[3/4] Loading NotebookLM thematic rows...")
+        t = _load_themes(overwrite=overwrite)
+        logger.info(f"  Added: {t['added']}  Skipped: {t['skipped']}  Errors: {t['errors']}")
+
+    # 4. Optional: Extract from PDFs
     if extract_pdf:
-        logger.info("\n[3/3] Extracting from PDFs...")
+        logger.info("\n[4/4] Extracting from PDFs...")
         _extract_pdfs()
     else:
-        logger.info("\n[3/3] PDF extraction skipped (use --pdf to enable)")
+        logger.info("\n[4/4] PDF extraction skipped (use --pdf to enable)")
 
     # 4. Stats
     from src.rag.search import get_stats
