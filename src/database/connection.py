@@ -50,32 +50,111 @@ def get_session() -> Session:
 
 def run_migrations():
     """Apply the initial SQL migration if tables don't exist yet."""
-    migration_file = BASE_DIR / "src" / "database" / "migrations" / "001_initial.sql"
     engine = get_engine()
 
-    with engine.connect() as conn:
-        # Check if main table already exists
-        result = conn.execute(text(
-            "SELECT EXISTS (SELECT 1 FROM information_schema.tables "
-            "WHERE table_name = 'cli_mappings')"
-        ))
-        exists = result.scalar()
+    # Use raw psycopg2 connection — handles $$ function bodies and multi-statement SQL correctly
+    raw_conn = engine.raw_connection()
+    try:
+        with raw_conn.cursor() as cur:
+            # Check if main table already exists
+            cur.execute(
+                "SELECT EXISTS (SELECT 1 FROM information_schema.tables "
+                "WHERE table_name = 'cli_mappings')"
+            )
+            exists = cur.fetchone()[0]
 
-        if not exists:
-            logger.info("Running initial migration...")
-            sql = migration_file.read_text()
-            # Execute statements one at a time (split on semicolons, skip empty)
-            for stmt in sql.split(";"):
-                stmt = stmt.strip()
-                if stmt:
-                    try:
-                        conn.execute(text(stmt))
-                    except Exception as e:
-                        logger.warning(f"Migration statement warning: {e}")
-            conn.commit()
-            logger.info("Migration complete.")
-        else:
-            logger.info("Schema already exists, skipping migration.")
+            if not exists:
+                logger.info("Running initial migration...")
+
+                # Step 1: Enable extensions
+                try:
+                    cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+                    logger.info("  pgvector extension enabled.")
+                except Exception as e:
+                    logger.warning(f"  pgvector extension warning: {e}")
+                try:
+                    cur.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm;")
+                except Exception as e:
+                    logger.warning(f"  pg_trgm extension warning: {e}")
+
+                # Step 2: Create tables
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS cli_mappings (
+                        id                  SERIAL PRIMARY KEY,
+                        tag                 VARCHAR(20) NOT NULL,
+                        functional_intent   TEXT NOT NULL,
+                        cisco_ios           TEXT DEFAULT '',
+                        cisco_iosxe         TEXT DEFAULT '',
+                        cisco_nxos          TEXT DEFAULT '',
+                        extreme_exos        TEXT DEFAULT '',
+                        extreme_voss        TEXT DEFAULT '',
+                        extreme_slxos       TEXT DEFAULT '',
+                        negation_cisco      TEXT DEFAULT '',
+                        negation_en         TEXT DEFAULT '',
+                        notes               TEXT DEFAULT '',
+                        source_ref          VARCHAR(255) DEFAULT '',
+                        page_ref            VARCHAR(100) DEFAULT '',
+                        embedding           vector(384),
+                        confidence          FLOAT DEFAULT 1.0,
+                        is_verified         BOOLEAN DEFAULT FALSE,
+                        created_at          TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        updated_at          TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    );
+                """)
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS extraction_runs (
+                        id              SERIAL PRIMARY KEY,
+                        source_type     VARCHAR(20) NOT NULL,
+                        source_name     VARCHAR(255) NOT NULL,
+                        rows_added      INTEGER DEFAULT 0,
+                        rows_updated    INTEGER DEFAULT 0,
+                        started_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        completed_at    TIMESTAMP WITH TIME ZONE,
+                        status          VARCHAR(20) DEFAULT 'running',
+                        error_message   TEXT
+                    );
+                """)
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS query_log (
+                        id                  SERIAL PRIMARY KEY,
+                        query_text          TEXT NOT NULL,
+                        tag_filter          VARCHAR(20),
+                        os_filter           VARCHAR(30),
+                        results_count       INTEGER,
+                        top_similarity      FLOAT,
+                        response_time_ms    INTEGER,
+                        created_at          TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    );
+                """)
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS crawler_urls (
+                        id              SERIAL PRIMARY KEY,
+                        url             TEXT UNIQUE NOT NULL,
+                        os_target       VARCHAR(30),
+                        last_crawled    TIMESTAMP WITH TIME ZONE,
+                        status          VARCHAR(20) DEFAULT 'pending',
+                        rows_produced   INTEGER DEFAULT 0,
+                        http_status     INTEGER,
+                        error_message   TEXT
+                    );
+                """)
+
+                # Step 3: Basic indexes (NOT ivfflat — requires data, created after seed)
+                try:
+                    cur.execute("CREATE INDEX IF NOT EXISTS idx_cli_tag ON cli_mappings(tag);")
+                    cur.execute("CREATE INDEX IF NOT EXISTS idx_cli_intent_trgm ON cli_mappings USING gin(functional_intent gin_trgm_ops);")
+                except Exception as e:
+                    logger.warning(f"  Index warning: {e}")
+
+                raw_conn.commit()
+                logger.info("Migration complete — tables created.")
+            else:
+                logger.info("Schema already exists, skipping migration.")
+    except Exception as e:
+        raw_conn.rollback()
+        raise
+    finally:
+        raw_conn.close()
 
 
 def init_db():

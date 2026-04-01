@@ -45,7 +45,24 @@ def main(overwrite: bool = False, extract_pdf: bool = False, load_themes: bool =
     else:
         logger.info("\n[4/4] PDF extraction skipped (use --pdf to enable)")
 
-    # 4. Stats
+    # 4. Build IVFFlat vector index now that rows exist
+    from src.database.connection import get_engine
+    from sqlalchemy import text as _text
+    try:
+        logger.info("\n[4/4] Building IVFFlat vector index...")
+        engine = get_engine()
+        with engine.connect() as conn:
+            conn.execute(_text(
+                "CREATE INDEX IF NOT EXISTS idx_cli_embedding "
+                "ON cli_mappings USING ivfflat(embedding vector_cosine_ops) "
+                "WITH (lists = 100);"
+            ))
+            conn.commit()
+        logger.info("  IVFFlat index created.")
+    except Exception as e:
+        logger.warning(f"  IVFFlat index warning (non-fatal): {e}")
+
+    # 5. Stats
     from src.rag.search import get_stats
     stats = get_stats()
     logger.info("\n" + "=" * 60)
