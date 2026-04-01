@@ -77,6 +77,9 @@ def render_e2e_wizard():
             st.rerun()
 
     if run and intent:
+        # Clear previous result before new run
+        st.session_state.pop("e2e_result", None)
+        st.session_state.pop("e2e_result_meta", None)
         _run_e2e(
             intent=intent,
             os_filter=None if os_filter == "All platforms" else os_filter,
@@ -85,49 +88,53 @@ def render_e2e_wizard():
     elif run:
         st.warning("Please describe your network design intent first.")
 
+    # Render cached result if exists (survives tab switching)
+    if not run and "e2e_result" in st.session_state:
+        _render_result(st.session_state["e2e_result"], st.session_state.get("e2e_result_meta", {}))
+
 
 def _run_e2e(intent: str, os_filter, selected_bins: list):
-    from src.agents.e2e_deploy_agent import e2e_query, DEPLOY_ORDER
+    from src.agents.e2e_deploy_agent import e2e_query
     from src.config import FUNCTIONAL_TAGS
 
-    # Parse selected bins back to tags
     bins = None
     if selected_bins:
         bins = [tag for tag in FUNCTIONAL_TAGS if any(tag in s for s in selected_bins)]
 
     with st.spinner("Analyzing intent → querying 9 service bins → generating E2E script..."):
         try:
-            result = e2e_query(
-                intent=intent,
-                os_filter=os_filter,
-                bins=bins,
-                top_k=5,
-            )
+            result = e2e_query(intent=intent, os_filter=os_filter, bins=bins, top_k=5)
         except Exception as e:
             st.error(f"E2E agent error: {e}")
             return
 
-    # Status strip
+    # Cache so result survives tab switching
+    st.session_state["e2e_result"] = result
+    st.session_state["e2e_result_meta"] = {"os_filter": os_filter}
+
+    _render_result(result, {"os_filter": os_filter})
+
+
+def _render_result(result: dict, meta: dict):
+    os_filter = meta.get("os_filter")
+
     cols = st.columns(3)
     cols[0].success(f"**Phases used:** {len(result['bins_used'])}")
     cols[1].info(f"**DB results:** {sum(len(v.get('results', [])) for v in result['bin_results'].values())} mappings")
     cols[2].info(f"**Target:** {os_filter or 'All 6 platforms'}")
 
     st.divider()
-
-    # E2E Script output
     st.subheader("📜 E2E CLI Deployment Script")
     st.markdown(result["e2e_script"])
 
-    # Download
     st.download_button(
         "⬇️ Download CLI Script",
         data=result["e2e_script"],
         file_name="e2e_cli_deployment.md",
         mime="text/markdown",
+        key="e2e_download",
     )
 
-    # Guardrail follow-up questions
     if result.get("guardrail_questions"):
         st.divider()
         st.subheader("🔍 Refine Your Design — Follow-up Questions")
@@ -135,8 +142,8 @@ def _run_e2e(intent: str, os_filter, selected_bins: list):
             st.markdown(f"- {q}")
         st.info("Answer any of these in a new query above to get a more targeted deployment script.")
 
-    # Per-bin details expander
     with st.expander("📊 Per-phase RAG details"):
         for tag, res in result["bin_results"].items():
-            st.markdown(f"**{tag}** — {len(res.get('results', []))} mappings (similarity avg: "
-                        f"{sum(r.get('similarity', 0) for r in res.get('results', [])) / max(len(res.get('results', [])), 1):.2f})")
+            cnt = len(res.get("results", []))
+            avg_sim = sum(r.get("similarity", 0) for r in res.get("results", [])) / max(cnt, 1)
+            st.markdown(f"**{tag}** — {cnt} mappings (similarity avg: {avg_sim:.2f})")
