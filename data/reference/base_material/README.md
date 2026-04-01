@@ -50,3 +50,7 @@ These files were used in the following order:
   which will parse them and add ~3,000–4,000 additional rows to the database.
 - The HTML lab guide (`EXOS-Layer2-Lab-Guide-Shareable.html`) is a hands-on reference
   for Switch Engine Layer 2 configuration patterns.
+
+---
+
+*© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | March 31, 2026*

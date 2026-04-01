@@ -118,3 +118,7 @@ When creating named port groups or policies:
 4. **Jumbo frames are global on Switch Engine** — cannot set per-port MTU.
 5. **Fabric Engine IF-PHYS commands** are limited in source documentation — mark uncertain entries `[Pending Source Verification]`.
 6. **NX-OS IF-PHYS still uses `interface` sub-mode** — `interface ethernet 1/1` is valid NX-OS syntax.
+
+---
+
+*© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | March 31, 2026*

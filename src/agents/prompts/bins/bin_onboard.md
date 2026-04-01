@@ -93,3 +93,7 @@ Extreme Universal Hardware (e.g., 5520, 5720) can run either Switch Engine or Fa
 4. **Universal Persona toggle** — only mention if user is asking about OS switching on Extreme hardware.
 5. **Fabric Engine identity = dual command** — `prompt` + `sys name` are both required; one alone is insufficient.
 6. If Fabric Engine commands are uncertain, add: `[Pending Source Verification — Fabric Engine commands should be confirmed against FE 9.x documentation]`
+
+---
+
+*© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | March 31, 2026*

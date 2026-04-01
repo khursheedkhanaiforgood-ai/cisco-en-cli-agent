@@ -153,3 +153,7 @@ FA allows devices that don't run SPBM to attach to the fabric as clients. The FA
 5. **NX-OS LISP vs IS-IS** — IOS-XE SD-Access uses LISP; NX-OS Nexus fabrics use IS-IS/BGP-EVPN. These are different architectures under the "Cisco fabric" umbrella.
 6. **Fabric Engine IS-IS sub-commands** — mark uncertain syntax as `[Pending Source Verification]`.
 7. **Fabric Attach (FA)** — only explain FA when user is asking about connecting non-SPBM edge devices to the Fabric Engine fabric.
+
+---
+
+*© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | March 31, 2026*

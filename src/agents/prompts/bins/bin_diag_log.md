@@ -102,3 +102,7 @@ Connectivity testing (ping/traceroute), log management, packet capture (ethanaly
 4. **NX-OS event-history** — useful for protocol FSM debugging; unique to NX-OS; mention it when diagnosing NX-OS protocol issues.
 5. **Switch Engine uses `show ports` not `show interfaces`** — the command noun is `ports`, not `interfaces`.
 6. **Fabric Engine DIAG-LOG syntax** is limited in source documentation — mark uncertain commands as `[Pending Source Verification]`.
+
+---
+
+*© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | March 31, 2026*

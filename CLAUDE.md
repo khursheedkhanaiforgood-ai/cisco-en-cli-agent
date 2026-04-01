@@ -92,3 +92,7 @@ streamlit run src/ui/app.py
 - Tag values include brackets: `[ONBOARD]` not `ONBOARD`
 - Empty OS commands: empty string `""` not `"N/A"` or `"—"`
 - Similarity threshold 0.35 — lower than typical because CLI queries are short/terse
+
+---
+
+*© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | March 31, 2026*

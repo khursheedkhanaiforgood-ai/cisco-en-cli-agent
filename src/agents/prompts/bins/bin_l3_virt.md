@@ -157,3 +157,7 @@ enable ipforwarding ipv6 vlan [vlan-name]   ! IPv6 forwarding — also mandatory
 5. **Switch Engine VRF = Virtual Router (VR)** — terminology is different from Cisco VRF; functionality is the same.
 6. **Fabric Engine L3 routing** has limited source documentation — mark uncertain sub-commands as `[Pending Source Verification]`.
 7. **OSPFv3 on Switch Engine** also needs `enable ipforwarding ipv6 vlan [name]` — the IPv6 equivalent of the dual-step rule.
+
+---
+
+*© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | March 31, 2026*

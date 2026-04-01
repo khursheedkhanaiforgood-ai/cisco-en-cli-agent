@@ -92,3 +92,7 @@ The `show` commands still work, but in production NX-OS shops, `show processes c
 3. **Fabric Engine SYS-INFO commands** have limited source documentation — mark uncertain entries as `[Pending Source Verification]`.
 4. **NX-OS production monitoring = telemetry**, not poll-and-show. Mention this when context involves NX-OS health/capacity management.
 5. **Naming convention:** Always use "Switch Engine" and "Fabric Engine" in responses, not legacy names, unless the user references the legacy name.
+
+---
+
+*© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | March 31, 2026*

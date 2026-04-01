@@ -71,3 +71,7 @@ AAA framework configuration (RADIUS/TACACS/LDAP), 802.1X/MAB port authentication
 3. **TrustSec SGT ≠ ONEPolicy role** — always explain the architectural difference; do not imply 1:1 CLI translation.
 4. **Fabric Engine EAPOL syntax** — mark uncertain sub-commands as `[Pending Source Verification]`.
 5. **RADIUS and TACACS in Switch Engine are separate services** — both require independent enable commands.
+
+---
+
+*© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | March 31, 2026*

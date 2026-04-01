@@ -121,3 +121,7 @@ The `vlan i-sid` command binds a traditional VLAN to an I-SID (I-Component Servi
 5. **ELRP is Extreme-only** — flag it as such when translating Cisco loop protection.
 6. **I-SID binding** — only relevant for Fabric Engine (VOSS) environments using SPBM fabric. Irrelevant for pure Switch Engine deployments.
 7. **Port notation** — always use correct Switch Engine notation (`slot:port` for stacked, plain number for standalone).
+
+---
+
+*© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | March 31, 2026*

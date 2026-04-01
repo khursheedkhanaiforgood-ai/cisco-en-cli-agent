@@ -39,3 +39,7 @@ The documents were NOT loaded directly into the database. Instead:
 
 **Do not delete these files.** They are the ground-truth reference for all guardrail decisions.
 If you need to extend or correct the AI's behavior for a specific bin, start here.
+
+---
+
+*© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | March 31, 2026*

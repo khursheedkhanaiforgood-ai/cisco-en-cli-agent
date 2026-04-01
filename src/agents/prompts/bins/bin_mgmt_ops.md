@@ -126,3 +126,7 @@ Configuration persistence (save/copy), SNMP management, NTP synchronization, sys
 6. **NX-API is NX-OS exclusive** — flag it as such; never suggest it for IOS-XE or Extreme.
 7. **Switch Engine SSH = `ssh2`** — not `ssh`. Always use the correct verb.
 8. **Fabric Engine MGMT-OPS** has limited source documentation — mark uncertain commands as `[Pending Source Verification]`.
+
+---
+
+*© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | March 31, 2026*
