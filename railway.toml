@@ -2,7 +2,7 @@
 builder = "nixpacks"
 
 [deploy]
-releaseCommand = "python -m src.database.seed"
+releaseCommand = "PYTHONPATH=/app python -m src.database.seed"
 startCommand = "streamlit run src/ui/app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true"
 healthcheckPath = "/_stcore/health"
 healthcheckTimeout = 60
