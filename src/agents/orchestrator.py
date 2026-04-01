@@ -16,6 +16,20 @@ logger = logging.getLogger(__name__)
 
 _client = None
 _system_prompt = None
+_bin_prompts: dict[str, str] = {}
+
+# Map tag → bin prompt filename
+_BIN_PROMPT_FILES = {
+    "[ONBOARD]":  "bin_onboard.md",
+    "[SEC-ID]":   "bin_sec_id.md",
+    "[SYS-INFO]": "bin_sys_info.md",
+    "[IF-PHYS]":  "bin_if_phys.md",
+    "[L2-SEG]":   "bin_l2_seg.md",
+    "[FAB-SDN]":  "bin_fab_sdn.md",
+    "[L3-VIRT]":  "bin_l3_virt.md",
+    "[DIAG-LOG]": "bin_diag_log.md",
+    "[MGMT-OPS]": "bin_mgmt_ops.md",
+}
 
 
 def _get_client() -> anthropic.Anthropic:
@@ -25,11 +39,23 @@ def _get_client() -> anthropic.Anthropic:
     return _client
 
 
-def _get_system_prompt() -> str:
-    global _system_prompt
+def _get_system_prompt(tag: Optional[str] = None) -> str:
+    global _system_prompt, _bin_prompts
     if _system_prompt is None:
         prompt_path = Path(__file__).parent / "prompts" / "system_master.md"
         _system_prompt = prompt_path.read_text()
+
+    if tag and tag in _BIN_PROMPT_FILES:
+        if tag not in _bin_prompts:
+            bin_path = Path(__file__).parent / "prompts" / "bins" / _BIN_PROMPT_FILES[tag]
+            try:
+                _bin_prompts[tag] = bin_path.read_text()
+            except FileNotFoundError:
+                _bin_prompts[tag] = ""
+        bin_guardrails = _bin_prompts.get(tag, "")
+        if bin_guardrails:
+            return _system_prompt + "\n\n---\n\n## Active Bin Guardrails\n\n" + bin_guardrails
+
     return _system_prompt
 
 
@@ -67,6 +93,10 @@ def query(
     tag_filter: Optional[str] = None,
     os_filter: Optional[str] = None,
     top_k: int = 8,
+    threshold: float = 0.35,
+    verified_only: bool = False,
+    min_confidence: float = 0.0,
+    search_mode: str = "Semantic (vector)",
 ) -> dict:
     """
     Main entry point: process a user query end-to-end.
@@ -92,18 +122,22 @@ def query(
         tag_filter=tag_filter,
         os_filter=os_filter,
         limit=top_k,
+        threshold=threshold,
+        verified_only=verified_only,
+        min_confidence=min_confidence,
+        search_mode=search_mode,
     )
 
     # 3. Build context for Claude
     context = _build_context(user_query, results, tag_filter)
 
-    # 4. Call Claude for formatted response
+    # 4. Call Claude for formatted response (inject bin guardrails if tag known)
     try:
         client = _get_client()
         message = client.messages.create(
             model=CLAUDE_MODEL,
             max_tokens=2048,
-            system=_get_system_prompt(),
+            system=_get_system_prompt(tag=tag_filter),
             messages=[{"role": "user", "content": context}],
         )
         ai_response = message.content[0].text
