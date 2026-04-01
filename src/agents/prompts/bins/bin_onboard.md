@@ -9,11 +9,13 @@ Device initialization, factory reset, image management, ZTP/PnP/POAP/ZTF auto-di
 
 | Platform | Command |
 |----------|---------|
-| Cisco IOS-XE | `write erase` then `reload` |
+| Cisco IOS-XE | **17.15+:** `factory-reset all` then `reload`; **Legacy (<17.15):** `write erase` then `reload` |
 | Cisco NX-OS | `write erase` or `clear nvram` — state managed via DME |
 | Switch Engine (EXOS) | `unconfigure switch all` or `unconfigure switch {all \| erase [all \| nvram]}` |
 | Fabric Engine (VOSS) | `boot config flags factorydefaults reset-all-files` or `unconfigure switch` |
 | SLX-OS | `clear config all` or `bmc factory reset` |
+
+**IOS-XE Install Mode (17.15+):** Cisco is deprecating "Bundle Boot" in favor of "Install Mode" starting with the 17.15 train (full removal planned for 27.01). Install Mode provides better performance and granular patching. Factory reset command `factory-reset all` is the modern equivalent of `write erase` on 17.15+ images.
 
 **Key rule:** Switch Engine uses `unconfigure` (not `no`) as the reset verb. Never translate Cisco `write erase` to EXOS `erase` — it does not exist.
 
@@ -77,11 +79,25 @@ Extreme Universal Hardware (e.g., 5520, 5720) can run either Switch Engine or Fa
 
 | Platform | Command |
 |----------|---------|
-| Cisco IOS-XE | `install add file activate reloadfast commit` |
+| Cisco IOS-XE | `install add file activate reloadfast commit` — **Install Mode required (17.15+); Bundle Boot deprecated** |
 | Cisco NX-OS | `copy tftp flash:` then install via gNOI/NX-API |
 | Switch Engine | `download image [url]`; `use image [primary \| secondary]` |
 | Fabric Engine | `software add [file]`; `software activate [version]`; `software commit` |
 | SLX-OS | `firmware download`; `firmware activate`; `firmware commit` |
+
+---
+
+## Theme 7: Version Reference (as of Q1 2026)
+
+| Platform | Latest Version | Notes |
+|----------|---------------|-------|
+| Cisco IOS-XE | **17.18.1** (latest); **17.15.x** = Long-Lived / Extended-Support train | 17.15 recommended for stability; Bundle Boot deprecated in 27.01 |
+| Cisco NX-OS | **10.5(5)M** (March 2026); **10.6(x)** and **10.7(x)** for 400G/800G hardware | 10.6(2)F released December 2025 |
+| Switch Engine | **33.x** | Confirm with `show version` |
+| Fabric Engine | **9.x** | Confirm with `show sys-info` |
+| SLX-OS | **20.x** | Confirm with `show version` |
+
+**Version caveat (always include in responses):** Software versions change frequently. Always verify with `show version` on the device or check the vendor's Software Download portal. Agent knowledge cutoff: **August 2025** — use the crawler or ask the user to confirm for releases after that date.
 
 ---
 
@@ -92,7 +108,9 @@ Extreme Universal Hardware (e.g., 5520, 5720) can run either Switch Engine or Fa
 3. **NX-OS Day-0 = DME** — initialization commands are managed via Model-Driven Programmability; classical CLI may be absent.
 4. **Universal Persona toggle** — only mention if user is asking about OS switching on Extreme hardware.
 5. **Fabric Engine identity = dual command** — `prompt` + `sys name` are both required; one alone is insufficient.
-6. If Fabric Engine commands are uncertain, add: `[Pending Source Verification — Fabric Engine commands should be confirmed against FE 9.x documentation]`
+6. **IOS-XE Install Mode** — on 17.15+ use `factory-reset all` not `write erase`; Bundle Boot is being deprecated. Always mention this when answering Day-0 reset or upgrade questions for IOS-XE.
+7. **Version queries** — provide version table above, always append device-verification caveat. If user needs real-time confirmation, direct to `show version` or the Cisco Software Download portal.
+8. If Fabric Engine commands are uncertain, add: `[Pending Source Verification — Fabric Engine commands should be confirmed against FE 9.x documentation]`
 
 ---
 

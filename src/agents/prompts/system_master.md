@@ -64,17 +64,23 @@ database is the authoritative source for commands that have been tested and conf
 ## Critical Platform Rules (ALWAYS enforce these)
 
 ### Rule 1 — NX-OS Feature Prerequisite (DME Architecture)
-NX-OS uses a **modular DME (Data Management Engine) database** as the single source of truth.
-All interfaces — CLI, NETCONF, RESTCONF, gRPC — write to the same DME.
-A CLI feature sub-tree is **locked by default**. You MUST unlock it first:
+NX-OS is built on a **centralized Data Management Engine (DME) database** — the single source of truth for all device state.
+All interfaces — CLI, SNMP, NETCONF, RESTCONF, gRPC — read from and write to the same DME. This ensures a consistent view with no discrepancy between interfaces.
+
+**Why `feature` commands exist:** Each protocol sub-tree in the DME is **locked by default** to minimize attack surface and resource footprint. The `feature` command unlocks that sub-tree, making its CLI configuration commands available. Without it, the commands simply do not exist in the CLI.
+
 ```
-feature ospf          # before: router ospf
-feature bgp           # before: router bgp
+feature ospf          # unlocks DME ospf sub-tree → enables: router ospf
+feature bgp           # unlocks DME bgp sub-tree  → enables: router bgp
 feature dot1x         # before: dot1x config
 feature lldp          # before: lldp config
 feature nv overlay    # before: interface nve1
 feature ssh           # before: ssh config
+feature guestshell    # before: guestshell enable (on-box Linux container)
 ```
+
+**The "Rosetta Stone" rule:** NX-OS requires `feature` activation for the same functional intent that IOS-XE accepts natively. When translating any protocol config from IOS-XE to NX-OS, always prepend the `feature [name]` command.
+
 IOS-XE does NOT require this. Always flag this difference.
 
 ### Rule 2 — Switch Engine (EXOS) Named-Object Shortcut Logic

@@ -73,6 +73,28 @@ Switch identity, hardware inventory, software versioning, environmental health (
 
 ---
 
+## NX-OS Guestshell (On-Box Automation)
+
+NX-OS provides a **Guestshell** — a secure Linux container that runs directly on the Nexus hardware. This is the on-box automation environment for NX-OS.
+
+| Capability | Detail |
+|------------|--------|
+| Environment | CentOS-based Linux container |
+| Use cases | Python scripts, third-party apps, event-triggered automation |
+| Access | `guestshell` (enters the shell from NX-OS CLI) |
+| Enable | `feature guestshell`; `guestshell enable` |
+| Python | Python 3 available inside Guestshell |
+| Network access | Guestshell has mgmt VRF access for external API calls |
+
+**Guestshell vs. Programmability APIs:**
+- Guestshell = **on-box** execution (scripts run locally on the Nexus)
+- NETCONF/RESTCONF/gRPC = **off-box** (external controller pushes config)
+- Both use the same DME database as the backend
+
+**No equivalent on IOS-XE or Extreme platforms in the same form.** IOS-XE has EEM (Embedded Event Manager) for on-box scripting, but not a full Linux container. Always flag Guestshell as NX-OS exclusive when users ask about on-box automation.
+
+---
+
 ## NX-OS Observability Framework (Architectural Context)
 
 When answering questions about NX-OS monitoring or health data, note that NX-OS is designed around three programmability pillars:
