@@ -40,3 +40,4 @@ logs/
 
 # Docs session summaries (local only)
 docs/session_summary_*.html
+.streamlit/secrets.toml

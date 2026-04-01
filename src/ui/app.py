@@ -18,9 +18,14 @@ from src.ui.components.db_browser import render_db_browser
 from src.ui.components.e2e_wizard import render_e2e_wizard
 from src.ui.components.rag_settings import init_rag_settings, render_rag_settings_panel
 from src.ui.components.data_ingest import render_data_ingest
+from src.ui.components.auth import render_login_gate, render_user_badge
 
 # Initialise RAG session state defaults
 init_rag_settings()
+
+# Login gate — stops rendering if login required and user is not authenticated
+if not render_login_gate():
+    st.stop()
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -56,6 +61,7 @@ with st.sidebar:
     st.divider()
     render_rag_settings_panel()
     st.divider()
+    render_user_badge()
     st.caption("Powered by Claude claude-sonnet-4-6 + pgvector")
 
 # ── Main content ──────────────────────────────────────────────────────────────
