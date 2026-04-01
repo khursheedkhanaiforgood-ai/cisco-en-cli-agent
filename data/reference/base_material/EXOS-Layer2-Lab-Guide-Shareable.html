@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EXOS Layer 2 Switching Lab — KK Collaboration</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; line-height: 1.7; }
+
+/* ── Tab Bar ── */
+.tab-bar { display: flex; background: #0d1a2e; border-bottom: 2px solid #1e293b; padding: 0 32px; position: sticky; top: 0; z-index: 100; }
+.tab-btn { padding: 16px 28px; font-size: 0.82rem; font-weight: 700; color: #64748b; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; letter-spacing: 0.04em; transition: all 0.15s; margin-bottom: -2px; text-transform: uppercase; }
+.tab-btn:hover { color: #e2e8f0; }
+.tab-btn.active { color: #38bdf8; border-bottom-color: #38bdf8; }
+.tab-pill { display: inline-block; font-size: 0.58rem; font-weight: 700; padding: 1px 7px; border-radius: 10px; margin-left: 8px; background: #1e293b; color: #94a3b8; vertical-align: middle; }
+.tab-btn.active .tab-pill { background: #1e3a5f; color: #38bdf8; }
+
+/* ── Tab Content ── */
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ── Layout inside each tab ── */
+.tab-layout { display: flex; min-height: calc(100vh - 54px); }
+.sidebar { width: 210px; flex-shrink: 0; background: #0d1a2e; border-right: 1px solid #1e293b; padding: 20px 0; position: sticky; top: 54px; height: calc(100vh - 54px); overflow-y: auto; }
+.sidebar .grp { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #475569; padding: 12px 18px 4px; }
+.sidebar a { display: block; padding: 6px 18px; font-size: 0.76rem; color: #94a3b8; text-decoration: none; border-left: 2px solid transparent; transition: all 0.15s; }
+.sidebar a:hover, .sidebar a.active { color: #e2e8f0; border-left-color: #38bdf8; background: #1e293b; }
+.content { flex: 1; padding: 40px 52px; max-width: 900px; }
+@media (max-width: 768px) { .sidebar { display: none; } .content { padding: 24px 18px; } .tab-btn { padding: 14px 14px; font-size: 0.74rem; } }
+
+/* ── Typography ── */
+.page-header { margin-bottom: 40px; padding-bottom: 22px; border-bottom: 1px solid #1e293b; }
+.kicker { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #38bdf8; margin-bottom: 10px; }
+.page-header h1 { font-size: 1.75rem; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
+.meta-row { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 12px; }
+.meta-item { font-size: 0.77rem; color: #64748b; }
+.meta-item strong { color: #94a3b8; }
+section { margin-bottom: 48px; }
+section h2 { font-size: 0.76rem; font-weight: 700; color: #38bdf8; margin-bottom: 18px; padding-bottom: 8px; border-bottom: 1px solid #1e293b; text-transform: uppercase; letter-spacing: 0.08em; }
+section h3 { font-size: 0.92rem; font-weight: 700; color: #e2e8f0; margin: 20px 0 10px; }
+p { font-size: 0.87rem; color: #cbd5e1; margin-bottom: 10px; }
+
+/* ── Objective list ── */
+.obj-list { list-style: none; display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+.obj-list li { font-size: 0.84rem; color: #cbd5e1; padding: 8px 14px; background: #1e293b; border-radius: 4px; border-left: 3px solid #38bdf8; }
+
+/* ── Tables ── */
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 18px; }
+th { text-align: left; padding: 8px 12px; background: #1e293b; color: #94a3b8; font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+td { padding: 8px 12px; border-bottom: 1px solid #1e293b; color: #cbd5e1; vertical-align: top; }
+tr:hover td { background: #1a2540; }
+td code { color: #89dceb; font-family: 'Courier New', monospace; font-size: 0.8rem; }
+
+/* ── Code blocks ── */
+.cmd-wrap { margin-bottom: 18px; }
+.cmd-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 6px; }
+.cmd-block { background: #1e293b; border-radius: 6px; padding: 16px 20px; font-family: 'Courier New', monospace; font-size: 0.8rem; line-height: 2; overflow-x: auto; border-left: 3px solid #334155; }
+.cmd-block.annotated { border-left-color: #38bdf8; }
+.cmd { color: #89dceb; display: block; }
+.ann { color: #a78bfa; display: block; font-style: italic; font-size: 0.76rem; padding: 2px 0 4px 20px; border-left: 2px solid #4c1d95; margin: 2px 0 6px; background: #1a1040; font-family: 'Segoe UI', sans-serif; }
+.comment { color: #475569; font-style: italic; }
+.out { color: #94a3b8; }
+.ok { color: #6ee7b7; }
+.warn { color: #fcd34d; }
+.err { color: #fca5a5; }
+.hl { color: #f9a8d4; font-weight: bold; }
+
+/* ── Step card ── */
+.step-card { background: #111827; border: 1px solid #1e293b; border-radius: 8px; padding: 20px 24px; margin-bottom: 22px; }
+.step-num { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #38bdf8; margin-bottom: 4px; }
+.step-card h3 { margin: 0 0 6px; }
+.why-box { font-size: 0.8rem; color: #64748b; background: #0d1a2e; border-radius: 4px; padding: 8px 12px; margin-bottom: 14px; border-left: 3px solid #1e3a5f; }
+.why-box strong { color: #94a3b8; }
+
+/* ── Topology SVG ── */
+.topo-wrap { background: #111827; border: 1px solid #1e293b; border-radius: 8px; padding: 20px; margin-bottom: 20px; overflow-x: auto; text-align: center; }
+
+/* ── Port state ── */
+.port-f { color: #6ee7b7; font-weight: 700; }
+.port-b { color: #fca5a5; font-weight: 700; }
+
+/* ── Alert ── */
+.alert { border-radius: 6px; padding: 14px 18px; margin: 14px 0; font-size: 0.84rem; border-left: 4px solid; }
+.alert-red { background: #1c0f0f; border-color: #dc2626; color: #fca5a5; }
+.alert-green { background: #052e16; border-color: #059669; color: #6ee7b7; }
+.alert-yellow { background: #1c1407; border-color: #d97706; color: #fcd34d; }
+.alert strong { font-weight: 700; }
+
+/* ── Troubleshooting timeline ── */
+.ts-timeline { display: flex; flex-direction: column; position: relative; }
+.ts-timeline::before { content:''; position:absolute; left:20px; top:0; bottom:0; width:2px; background:#1e293b; }
+.ts-item { display:flex; gap:16px; padding:0 0 30px; position:relative; }
+.ts-dot { width:42px; height:42px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700; position:relative; z-index:1; }
+.dot-obs { background:#1e3a5f; color:#93c5fd; border:2px solid #2563eb; }
+.dot-inv { background:#44403c; color:#fcd34d; border:2px solid #d97706; }
+.dot-rca { background:#7f1d1d; color:#fca5a5; border:2px solid #dc2626; }
+.dot-fix { background:#065f46; color:#6ee7b7; border:2px solid #059669; }
+.dot-ver { background:#164e63; color:#67e8f9; border:2px solid #0891b2; }
+.ts-body { flex:1; padding-top:6px; }
+.ts-label { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:#64748b; margin-bottom:4px; }
+.ts-body h3 { font-size:0.9rem; color:#f1f5f9; margin:0 0 8px; }
+
+/* ── Concept cards ── */
+.concept-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media(max-width:700px){ .concept-grid{grid-template-columns:1fr;} }
+.concept-card { background:#111827; border:1px solid #1e293b; border-radius:6px; padding:16px 18px; }
+.ctag { font-size:0.58rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; padding:2px 8px; border-radius:2px; margin-bottom:8px; display:inline-block; }
+.tag-ieee { background:#1e3a5f; color:#93c5fd; }
+.tag-rfc  { background:#2d1b69; color:#c4b5fd; }
+.tag-exos { background:#044320; color:#86efac; }
+.tag-con  { background:#44403c; color:#fcd34d; }
+.concept-card h4 { font-size:0.86rem; color:#e2e8f0; margin:0 0 6px; }
+.concept-card p  { font-size:0.78rem; color:#94a3b8; margin:0 0 6px; }
+.concept-card a  { color:#38bdf8; text-decoration:none; font-size:0.75rem; }
+
+/* ── Reference table ── */
+.ref-table td:first-child { color:#38bdf8; font-weight:600; white-space:nowrap; width:160px; }
+
+/* ── Badge ── */
+.badge { display:inline-block; font-size:0.58rem; font-weight:700; text-transform:uppercase; padding:2px 8px; border-radius:2px; }
+.badge-root { background:#065f46; color:#6ee7b7; }
+.badge-blk  { background:#7f1d1d; color:#fca5a5; }
+
+/* ── Footer ── */
+.foot { margin-top:60px; padding-top:18px; border-top:1px solid #1e293b; font-size:0.72rem; color:#475569; text-align:center; }
+
+.sn-timeline { list-style:none; border-left:2px solid #1e293b; padding-left:20px; }
+.sn-timeline li { position:relative; padding:6px 0 14px; font-size:0.84rem; color:#cbd5e1; }
+.sn-timeline li::before { content:""; position:absolute; left:-25px; top:10px; width:8px; height:8px; border-radius:50%; background:#7c3aed; }
+
+/* ── Session banner (#me) ── */
+#session-banner{display:none;position:fixed;top:54px;left:0;right:0;z-index:300;
+  background:#1a1a00;border-top:5px solid #facc15;border-bottom:5px solid #facc15;padding:18px 28px;
+  box-shadow:0 4px 24px rgba(250,204,21,0.25);}
+.sb-inner{max-width:960px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.sb-text .sb-title{font-size:1.5rem;font-weight:900;color:#facc15;letter-spacing:0.02em;text-shadow:0 0 18px rgba(250,204,21,0.6);}
+.sb-text .sb-sub{font-size:1.0rem;color:#fde68a;margin-top:4px;font-weight:600;}
+.sb-actions{display:flex;gap:14px;align-items:center;}
+.sb-btn{font-size:1.0rem;font-weight:800;padding:10px 24px;border-radius:6px;border:2px solid #facc15;cursor:pointer;background:#facc15;color:#1a1a00;}
+.sb-btn:hover{background:#fde047;border-color:#fde047;}
+.sb-close{font-size:0.9rem;color:#facc15;cursor:pointer;text-decoration:underline;font-weight:600;}
+
+/* ── Session modal ── */
+#session-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:400;
+  background:rgba(0,0,0,0.75);overflow-y:auto;}
+.sm-box{background:#0f172a;max-width:820px;margin:60px auto;border-radius:10px;
+  border:1px solid #4c1d95;overflow:hidden;}
+.sm-head{background:#2e1065;padding:20px 28px;display:flex;align-items:flex-start;justify-content:space-between;}
+.sm-head h2{font-size:1.0rem;font-weight:700;color:#c4b5fd;margin:0;}
+.sm-head p{font-size:0.76rem;color:#7c3aed;margin:4px 0 0;}
+.sm-head .sm-x{font-size:1.2rem;color:#7c3aed;cursor:pointer;line-height:1;padding:0 4px;}
+.sm-head .sm-x:hover{color:#c4b5fd;}
+.sm-body{padding:24px 28px;}
+.sm-body h3{font-size:0.8rem;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:0.08em;
+  margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid #1e293b;}
+.sm-body h3:first-child{margin-top:0;}
+.sm-body p{font-size:0.84rem;color:#cbd5e1;margin-bottom:8px;}
+.sm-table{width:100%;border-collapse:collapse;font-size:0.81rem;margin-bottom:16px;}
+.sm-table th{text-align:left;padding:7px 12px;background:#1e293b;color:#94a3b8;font-size:0.65rem;
+  font-weight:700;text-transform:uppercase;letter-spacing:0.1em;}
+.sm-table td{padding:7px 12px;border-bottom:1px solid #1e293b;color:#cbd5e1;vertical-align:top;}
+.sm-table td:first-child{color:#94a3b8;white-space:nowrap;width:140px;}
+.sm-cmd{background:#1e293b;border-radius:5px;padding:12px 16px;font-family:"Courier New",monospace;
+  font-size:0.79rem;line-height:1.9;overflow-x:auto;margin-bottom:12px;}
+.sm-cmd .c{color:#89dceb;display:block;} .sm-cmd .ok{color:#6ee7b7;display:block;}
+.sm-timeline{list-style:none;padding:0;border-left:2px solid #4c1d95;padding-left:20px;}
+.sm-timeline li{position:relative;padding:4px 0 12px;font-size:0.83rem;color:#cbd5e1;}
+.sm-timeline li::before{content:"";position:absolute;left:-25px;top:10px;
+  width:8px;height:8px;border-radius:50%;background:#7c3aed;}
+.sm-footer{padding:14px 28px;border-top:1px solid #1e293b;font-size:0.71rem;color:#475569;text-align:center;}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     TAB BAR
+════════════════════════════════════════ -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('lab',this)">
+    Lab Guide <span class="tab-pill">Steps 1–8</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('ts',this)">
+    Troubleshooting <span class="tab-pill">VPCS + STP</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('loop',this)">
+    Loop Behaviour <span class="tab-pill">Why Some Pings Worked</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('sessionlog',this)">
+    Session Log <span class="tab-pill">Live Troubleshooting</span>
+  </button>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     TAB 1 — LAB GUIDE
+════════════════════════════════════════ -->
+<div id="tab-lab" class="tab-pane active">
+<div class="tab-layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="lab-sidebar">
+    <div class="grp">Overview</div>
+    <a href="#lab-overview">Objectives</a>
+    <a href="#lab-topo">Topology</a>
+    <a href="#lab-vlan">VLAN Plan</a>
+    <div class="grp">Steps</div>
+    <a href="#lab-s1">1 — Hostnames</a>
+    <a href="#lab-s2">2 — Create VLANs</a>
+    <a href="#lab-s3">3 — Trunk Ports</a>
+    <a href="#lab-s4">4 — Access Ports</a>
+    <a href="#lab-s5">5 — Mgmt IPs</a>
+    <a href="#lab-s6">6 — VPC Clients</a>
+    <a href="#lab-s7">7 — Testing</a>
+    <a href="#lab-s8">8 — Save Config</a>
+    <div class="grp">Reference</div>
+    <a href="#lab-qr">Quick Reference</a>
+  </nav>
+
+  <!-- Content -->
+  <div class="content">
+
+    <div class="page-header">
+      <div class="kicker">EVE-NG Lab Guide &nbsp;&mdash;&nbsp; Extreme EXOS Layer 2</div>
+      <h1>EXOS Layer 2 Switching Lab</h1>
+      <p style="color:#64748b;font-size:0.85rem;">Build a 6-switch campus ring from scratch — VLANs, trunks, access ports, management IPs, and VPCS client validation.</p>
+      <div class="meta-row">
+        <div class="meta-item"><strong>Author</strong> KK Collaboration</div>
+        <div class="meta-item"><strong>Date</strong> March 27, 2026</div>
+        <div class="meta-item"><strong>Duration</strong> 60–90 min</div>
+        <div class="meta-item"><strong>Platform</strong> EVE-NG / Extreme EXOS SwitchEngine</div>
+      </div>
+    </div>
+
+    <!-- Objectives -->
+    <section id="lab-overview">
+      <h2>Learning Objectives</h2>
+      <ul class="obj-list">
+        <li>Navigate the EXOS CLI and set switch hostnames</li>
+        <li>Create and manage VLANs across a 6-switch ring topology</li>
+        <li>Understand and apply tagged (trunk) vs. untagged (access) port configuration</li>
+        <li>Configure management IP addresses on a dedicated management VLAN</li>
+        <li>Verify Layer 2 connectivity between VPCS clients on different edge switches</li>
+        <li>Understand how STP prevents loops — and what happens when it is misconfigured</li>
+      </ul>
+    </section>
+
+    <!-- Topology -->
+    <section id="lab-topo">
+      <h2>Network Topology</h2>
+      <p>Six EXOS switches form a ring. Edge-1 and Edge-2 serve VPCS clients on access ports (3/4/5). The four core switches carry only trunk traffic. STP will block one ring link to prevent a broadcast loop.</p>
+
+      <div class="topo-wrap">
+        <svg viewBox="0 0 820 560" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:820px;display:block;margin:0 auto;">
+          <rect width="820" height="560" fill="#111827" rx="8"/>
+
+          <!-- ── Grid guide lines (subtle) ── -->
+          <line x1="410" y1="0" x2="410" y2="560" stroke="#1e293b" stroke-width="0.5" stroke-dasharray="4,6"/>
+
+          <!-- ── Trunk links (active) ── -->
+          <!-- Core-1 ↔ Edge-1 -->
+          <line x1="220" y1="140" x2="178" y2="258" stroke="#475569" stroke-width="3"/>
+          <!-- Core-1 ↔ Core-2 -->
+          <line x1="280" y1="120" x2="540" y2="120" stroke="#475569" stroke-width="3"/>
+          <!-- Core-2 ↔ Edge-2 -->
+          <line x1="600" y1="140" x2="642" y2="258" stroke="#475569" stroke-width="3"/>
+          <!-- Edge-1 ↔ Core-5 -->
+          <line x1="178" y1="312" x2="220" y2="420" stroke="#475569" stroke-width="3"/>
+          <!-- Core-5 ↔ Core-4 -->
+          <line x1="280" y1="440" x2="540" y2="440" stroke="#475569" stroke-width="3"/>
+          <!-- Core-4 ↔ Edge-2  BLOCKED -->
+          <line x1="600" y1="420" x2="642" y2="312" stroke="#dc2626" stroke-width="3" stroke-dasharray="10,6"/>
+
+          <!-- ── Port labels on links ── -->
+          <!-- Core-1 / Edge-1 -->
+          <text x="208" y="183" font-size="11" fill="#64748b" font-family="monospace" font-weight="600">p1</text>
+          <text x="172" y="225" font-size="11" fill="#64748b" font-family="monospace" font-weight="600">p1</text>
+          <!-- Core-1 / Core-2 -->
+          <text x="372" y="111" font-size="11" fill="#64748b" font-family="monospace" font-weight="600" text-anchor="middle">p2 ←———————→ p2</text>
+          <!-- Core-2 / Edge-2 -->
+          <text x="612" y="183" font-size="11" fill="#64748b" font-family="monospace" font-weight="600">p1</text>
+          <text x="648" y="225" font-size="11" fill="#64748b" font-family="monospace" font-weight="600">p1</text>
+          <!-- Edge-1 / Core-5 -->
+          <text x="180" y="345" font-size="11" fill="#64748b" font-family="monospace" font-weight="600">p2</text>
+          <text x="208" y="405" font-size="11" fill="#64748b" font-family="monospace" font-weight="600">p2</text>
+          <!-- Core-5 / Core-4 -->
+          <text x="372" y="460" font-size="11" fill="#64748b" font-family="monospace" font-weight="600" text-anchor="middle">p1 ←———————→ p1</text>
+          <!-- Core-4 / Edge-2 BLOCKED -->
+          <text x="624" y="405" font-size="11" fill="#dc2626" font-family="monospace" font-weight="600">p2</text>
+          <text x="648" y="345" font-size="11" fill="#dc2626" font-family="monospace" font-weight="600">p2</text>
+          <!-- STP BLK badge -->
+          <rect x="658" y="355" width="76" height="22" rx="4" fill="#450a0a"/>
+          <text x="696" y="370" text-anchor="middle" font-size="10" fill="#fca5a5" font-family="sans-serif" font-weight="700">STP BLOCKED</text>
+
+          <!-- ── Switch nodes ── -->
+          <!-- Core-1 (ROOT) -->
+          <rect x="220" y="90" width="120" height="60" rx="8" fill="#1e3a5f" stroke="#38bdf8" stroke-width="2.5"/>
+          <text x="280" y="115" text-anchor="middle" font-size="14" fill="#38bdf8" font-weight="bold" font-family="sans-serif">Core-1</text>
+          <text x="280" y="131" text-anchor="middle" font-size="10" fill="#64748b" font-family="monospace">ExtremeOs1</text>
+          <rect x="237" y="141" width="86" height="16" rx="3" fill="#065f46"/>
+          <text x="280" y="153" text-anchor="middle" font-size="9" fill="#6ee7b7" font-family="sans-serif" font-weight="700">★ ROOT BRIDGE</text>
+
+          <!-- Core-2 -->
+          <rect x="480" y="90" width="120" height="60" rx="8" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+          <text x="540" y="116" text-anchor="middle" font-size="14" fill="#e2e8f0" font-weight="bold" font-family="sans-serif">Core-2</text>
+          <text x="540" y="132" text-anchor="middle" font-size="10" fill="#64748b" font-family="monospace">ExtremeOs2</text>
+          <text x="540" y="145" text-anchor="middle" font-size="9" fill="#475569" font-family="monospace">10.10.30.2</text>
+
+          <!-- Edge-1 -->
+          <rect x="118" y="258" width="120" height="60" rx="8" fill="#2e1065" stroke="#a78bfa" stroke-width="2.5"/>
+          <text x="178" y="283" text-anchor="middle" font-size="14" fill="#c4b5fd" font-weight="bold" font-family="sans-serif">Edge-1</text>
+          <text x="178" y="299" text-anchor="middle" font-size="10" fill="#64748b" font-family="monospace">ExtremeOs3</text>
+          <text x="178" y="312" text-anchor="middle" font-size="9" fill="#7c3aed" font-family="monospace">10.10.30.3</text>
+
+          <!-- Edge-2 -->
+          <rect x="582" y="258" width="120" height="60" rx="8" fill="#2e1065" stroke="#a78bfa" stroke-width="2.5"/>
+          <text x="642" y="283" text-anchor="middle" font-size="14" fill="#c4b5fd" font-weight="bold" font-family="sans-serif">Edge-2</text>
+          <text x="642" y="299" text-anchor="middle" font-size="10" fill="#64748b" font-family="monospace">ExtremeOs6</text>
+          <text x="642" y="312" text-anchor="middle" font-size="9" fill="#7c3aed" font-family="monospace">10.10.30.6</text>
+
+          <!-- Core-5 -->
+          <rect x="220" y="410" width="120" height="60" rx="8" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+          <text x="280" y="436" text-anchor="middle" font-size="14" fill="#e2e8f0" font-weight="bold" font-family="sans-serif">Core-5</text>
+          <text x="280" y="452" text-anchor="middle" font-size="10" fill="#64748b" font-family="monospace">ExtremeOs5</text>
+          <text x="280" y="465" text-anchor="middle" font-size="9" fill="#475569" font-family="monospace">10.10.30.5</text>
+
+          <!-- Core-4 -->
+          <rect x="480" y="410" width="120" height="60" rx="8" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+          <text x="540" y="436" text-anchor="middle" font-size="14" fill="#e2e8f0" font-weight="bold" font-family="sans-serif">Core-4</text>
+          <text x="540" y="452" text-anchor="middle" font-size="10" fill="#64748b" font-family="monospace">ExtremeOs4</text>
+          <text x="540" y="465" text-anchor="middle" font-size="9" fill="#475569" font-family="monospace">10.10.30.4</text>
+
+          <!-- ── Access port stubs ── -->
+          <!-- Edge-1: p3, p4, p5 -->
+          <line x1="138" y1="318" x2="80"  y2="390" stroke="#334155" stroke-width="1.8" stroke-dasharray="5,4"/>
+          <line x1="158" y1="318" x2="120" y2="390" stroke="#334155" stroke-width="1.8" stroke-dasharray="5,4"/>
+          <line x1="178" y1="318" x2="178" y2="390" stroke="#334155" stroke-width="1.8" stroke-dasharray="5,4"/>
+          <text x="80"  y="383" font-size="10" fill="#475569" font-family="monospace">p3</text>
+          <text x="120" y="383" font-size="10" fill="#475569" font-family="monospace">p4</text>
+          <text x="178" y="383" font-size="10" fill="#475569" font-family="monospace">p5</text>
+
+          <!-- VPC boxes Edge-1 -->
+          <rect x="44"  y="392" width="72" height="42" rx="5" fill="#0f172a" stroke="#1e40af" stroke-width="1.5"/>
+          <text x="80"  y="408" text-anchor="middle" font-size="10" fill="#89dceb" font-family="monospace" font-weight="700">VLAN10</text>
+          <text x="80"  y="421" text-anchor="middle" font-size="9"  fill="#3b82f6" font-family="monospace">10.10.10.11</text>
+          <text x="80"  y="430" text-anchor="middle" font-size="8"  fill="#475569" font-family="monospace">Client1</text>
+
+          <rect x="84"  y="392" width="72" height="42" rx="5" fill="#0f172a" stroke="#92400e" stroke-width="1.5"/>
+          <text x="120" y="408" text-anchor="middle" font-size="10" fill="#fcd34d" font-family="monospace" font-weight="700">VLAN20</text>
+          <text x="120" y="421" text-anchor="middle" font-size="9"  fill="#d97706" font-family="monospace">10.10.20.11</text>
+          <text x="120" y="430" text-anchor="middle" font-size="8"  fill="#475569" font-family="monospace">Client1</text>
+
+          <rect x="142" y="392" width="72" height="42" rx="5" fill="#0f172a" stroke="#166534" stroke-width="1.5"/>
+          <text x="178" y="408" text-anchor="middle" font-size="10" fill="#86efac" font-family="monospace" font-weight="700">VLAN30</text>
+          <text x="178" y="421" text-anchor="middle" font-size="9"  fill="#16a34a" font-family="monospace">10.10.30.11</text>
+          <text x="178" y="430" text-anchor="middle" font-size="8"  fill="#475569" font-family="monospace">Client1</text>
+
+          <!-- Edge-2: p3, p4, p5 -->
+          <line x1="622" y1="318" x2="642" y2="390" stroke="#334155" stroke-width="1.8" stroke-dasharray="5,4"/>
+          <line x1="642" y1="318" x2="702" y2="390" stroke="#334155" stroke-width="1.8" stroke-dasharray="5,4"/>
+          <line x1="662" y1="318" x2="762" y2="390" stroke="#334155" stroke-width="1.8" stroke-dasharray="5,4"/>
+          <text x="625" y="383" font-size="10" fill="#475569" font-family="monospace">p3</text>
+          <text x="685" y="383" font-size="10" fill="#475569" font-family="monospace">p4</text>
+          <text x="745" y="383" font-size="10" fill="#475569" font-family="monospace">p5</text>
+
+          <!-- VPC boxes Edge-2 -->
+          <rect x="606" y="392" width="72" height="42" rx="5" fill="#0f172a" stroke="#1e40af" stroke-width="1.5"/>
+          <text x="642" y="408" text-anchor="middle" font-size="10" fill="#89dceb" font-family="monospace" font-weight="700">VLAN10</text>
+          <text x="642" y="421" text-anchor="middle" font-size="9"  fill="#3b82f6" font-family="monospace">10.10.10.12</text>
+          <text x="642" y="430" text-anchor="middle" font-size="8"  fill="#475569" font-family="monospace">Client2</text>
+
+          <rect x="666" y="392" width="72" height="42" rx="5" fill="#0f172a" stroke="#92400e" stroke-width="1.5"/>
+          <text x="702" y="408" text-anchor="middle" font-size="10" fill="#fcd34d" font-family="monospace" font-weight="700">VLAN20</text>
+          <text x="702" y="421" text-anchor="middle" font-size="9"  fill="#d97706" font-family="monospace">10.10.20.12</text>
+          <text x="702" y="430" text-anchor="middle" font-size="8"  fill="#475569" font-family="monospace">Client2</text>
+
+          <rect x="726" y="392" width="72" height="42" rx="5" fill="#0f172a" stroke="#166534" stroke-width="1.5"/>
+          <text x="762" y="408" text-anchor="middle" font-size="10" fill="#86efac" font-family="monospace" font-weight="700">VLAN30</text>
+          <text x="762" y="421" text-anchor="middle" font-size="9"  fill="#16a34a" font-family="monospace">10.10.30.12</text>
+          <text x="762" y="430" text-anchor="middle" font-size="8"  fill="#475569" font-family="monospace">Client2</text>
+
+          <!-- ── Active path annotation ── -->
+          <rect x="210" y="22" width="400" height="24" rx="4" fill="#0d2d4e"/>
+          <text x="410" y="38" text-anchor="middle" font-size="11" fill="#38bdf8" font-family="sans-serif" font-weight="600">Active STP path: Edge-1 → Core-1 (root) → Core-2 → Edge-2</text>
+
+          <!-- ── Legend ── -->
+          <rect x="22" y="22" width="186" height="78" rx="5" fill="#0d1a2e" stroke="#1e293b"/>
+          <text x="34" y="40" font-size="10" fill="#94a3b8" font-family="sans-serif" font-weight="700">LEGEND</text>
+          <line x1="34" y1="52" x2="72" y2="52" stroke="#475569" stroke-width="3"/>
+          <text x="78" y="56" font-size="10" fill="#94a3b8" font-family="sans-serif">Trunk link (active)</text>
+          <line x1="34" y1="67" x2="72" y2="67" stroke="#dc2626" stroke-width="3" stroke-dasharray="8,5"/>
+          <text x="78" y="71" font-size="10" fill="#fca5a5" font-family="sans-serif">STP blocked link</text>
+          <line x1="34" y1="82" x2="72" y2="82" stroke="#334155" stroke-width="1.8" stroke-dasharray="4,3"/>
+          <text x="78" y="86" font-size="10" fill="#64748b" font-family="sans-serif">Access port (VPCS)</text>
+
+          <!-- ── Node type legend ── -->
+          <rect x="620" y="22" width="178" height="58" rx="5" fill="#0d1a2e" stroke="#1e293b"/>
+          <text x="632" y="40" font-size="10" fill="#94a3b8" font-family="sans-serif" font-weight="700">NODE TYPES</text>
+          <rect x="632" y="47" width="12" height="12" rx="2" fill="#1e3a5f" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="650" y="57" font-size="9.5" fill="#94a3b8" font-family="sans-serif">Core switch</text>
+          <rect x="632" y="63" width="12" height="12" rx="2" fill="#2e1065" stroke="#a78bfa" stroke-width="1.5"/>
+          <text x="650" y="73" font-size="9.5" fill="#94a3b8" font-family="sans-serif">Edge switch (clients)</text>
+
+          <!-- ── VLAN colour key ── -->
+          <rect x="22" y="504" width="400" height="36" rx="5" fill="#0d1a2e" stroke="#1e293b"/>
+          <rect x="34" y="515" width="12" height="12" rx="2" fill="#1e40af"/>
+          <text x="52" y="525" font-size="9.5" fill="#89dceb" font-family="sans-serif">VLAN10 Data (10.10.10.0/24)</text>
+          <rect x="178" y="515" width="12" height="12" rx="2" fill="#92400e"/>
+          <text x="196" y="525" font-size="9.5" fill="#fcd34d" font-family="sans-serif">VLAN20 Voice (10.10.20.0/24)</text>
+          <rect x="322" y="515" width="12" height="12" rx="2" fill="#166534"/>
+          <text x="340" y="525" font-size="9.5" fill="#86efac" font-family="sans-serif">VLAN30 Mgmt (10.10.30.0/24)</text>
+        </svg>
+      </div>
+
+      <h3>Connection Reference</h3>
+      <table>
+        <tr><th>From</th><th>Port</th><th>Port</th><th>To</th><th>Type</th></tr>
+        <tr><td>Core-1</td><td>1</td><td>1</td><td>Edge-1</td><td>Trunk</td></tr>
+        <tr><td>Core-1</td><td>2</td><td>2</td><td>Core-2</td><td>Trunk</td></tr>
+        <tr><td>Core-2</td><td>1</td><td>1</td><td>Edge-2</td><td>Trunk</td></tr>
+        <tr><td>Edge-1</td><td>2</td><td>2</td><td>Core-5</td><td>Trunk</td></tr>
+        <tr><td>Core-5</td><td>1</td><td>1</td><td>Core-4</td><td>Trunk</td></tr>
+        <tr><td>Core-4</td><td>2</td><td>2</td><td>Edge-2</td><td>Trunk — <span class="port-b">STP BLOCKED</span></td></tr>
+        <tr><td>Edge-1</td><td>3 / 4 / 5</td><td>—</td><td>VPCS clients</td><td>Access (untagged)</td></tr>
+        <tr><td>Edge-2</td><td>3 / 4 / 5</td><td>—</td><td>VPCS clients</td><td>Access (untagged)</td></tr>
+      </table>
+    </section>
+
+    <!-- VLAN Plan -->
+    <section id="lab-vlan">
+      <h2>VLAN Plan</h2>
+      <table>
+        <tr><th>VLAN Name</th><th>Tag</th><th>Subnet</th><th>Edge-1 Port</th><th>Edge-2 Port</th><th>All Trunk Ports</th></tr>
+        <tr><td><code>Data</code></td><td>10</td><td>10.10.10.0/24</td><td>3 — untagged</td><td>3 — untagged</td><td>1, 2 — tagged</td></tr>
+        <tr><td><code>Voice</code></td><td>20</td><td>10.10.20.0/24</td><td>4 — untagged</td><td>4 — untagged</td><td>1, 2 — tagged</td></tr>
+        <tr><td><code>Kh_Mgmt</code></td><td>30</td><td>10.10.30.0/24</td><td>5 — untagged</td><td>5 — untagged</td><td>1, 2 — tagged</td></tr>
+      </table>
+      <table>
+        <tr><th>Switch</th><th>EVE-NG VM</th><th>Mgmt IP (VLAN 30)</th></tr>
+        <tr><td>Core-1</td><td>ExtremeOs1</td><td>10.10.30.1/24</td></tr>
+        <tr><td>Core-2</td><td>ExtremeOs2</td><td>10.10.30.2/24</td></tr>
+        <tr><td>Edge-1</td><td>ExtremeOs3</td><td>10.10.30.3/24</td></tr>
+        <tr><td>Core-4</td><td>ExtremeOs4</td><td>10.10.30.4/24</td></tr>
+        <tr><td>Core-5</td><td>ExtremeOs5</td><td>10.10.30.5/24</td></tr>
+        <tr><td>Edge-2</td><td>ExtremeOs6</td><td>10.10.30.6/24</td></tr>
+      </table>
+    </section>
+
+    <!-- Step 1 -->
+    <section id="lab-s1">
+      <h2>Step 1 — Set Hostnames</h2>
+      <div class="step-card">
+        <div class="step-num">Step 1 of 8 — All 6 switches</div>
+        <h3>Give Each Switch a Meaningful Name</h3>
+        <div class="why-box"><strong>Why:</strong> EVE-NG assigns generic names (ExtremeOs1…). Setting the SNMP sysName changes the CLI prompt so you always know which switch you're on — critical when working across 6 consoles.</div>
+        <div class="cmd-block annotated">
+<span class="cmd">configure snmp sysName "Core-1"</span>
+<span class="ann">&#8618; Changes CLI prompt to "Core-1 #". Run the equivalent on each switch substituting the correct name.</span>
+<span class="cmd">show switch</span>
+<span class="ann">&#8618; Verify: look for "SysName: Core-1" in the output.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 2 -->
+    <section id="lab-s2">
+      <h2>Step 2 — Create VLANs</h2>
+      <div class="step-card">
+        <div class="step-num">Step 2 of 8 — ALL 6 switches</div>
+        <h3>Create Data, Voice, and Management VLANs</h3>
+        <div class="why-box"><strong>Why:</strong> A VLAN missing on even one switch in the ring will silently break connectivity for that VLAN across the entire ring. Create all three VLANs before touching any ports.</div>
+        <div class="cmd-block annotated">
+<span class="cmd">create vlan Data tag 10</span>
+<span class="ann">&#8618; "Data" is the VLAN name. Tag 10 is the 802.1Q VLAN ID carried in the Ethernet frame header on trunk ports.</span>
+<span class="cmd">create vlan Voice tag 20</span>
+<span class="ann">&#8618; Separate VLAN for voice traffic — isolates it from data so QoS policies and troubleshooting are easier.</span>
+<span class="cmd">create vlan Kh_Mgmt tag 30</span>
+<span class="ann">&#8618; Dedicated management VLAN. Note: "Mgmt" alone may be reserved in some EXOS builds — use "Kh_Mgmt" or any non-reserved name.</span>
+<span class="cmd">show vlan</span>
+<span class="ann">&#8618; Verify all three VLANs appear with correct tag IDs before proceeding.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 3 -->
+    <section id="lab-s3">
+      <h2>Step 3 — Configure Trunk Ports</h2>
+      <div class="step-card">
+        <div class="step-num">Step 3 of 8 — ALL 6 switches, ports 1 and 2</div>
+        <h3>Tag All Three VLANs on Switch-to-Switch Links</h3>
+        <div class="why-box"><strong>Why:</strong> Ports 1 and 2 carry traffic between switches. They must be tagged so the receiving switch knows which VLAN each frame belongs to. Removing Default VLAN prevents unintended untagged traffic from leaking across the ring.</div>
+        <div class="cmd-block annotated">
+<span class="cmd">configure vlan Data add ports 1,2 tagged</span>
+<span class="ann">&#8618; "tagged" = trunk mode. The switch inserts a VLAN 10 tag in every frame leaving these ports, and strips/reads it on arrival.</span>
+<span class="cmd">configure vlan Voice add ports 1,2 tagged</span>
+<span class="cmd">configure vlan Kh_Mgmt add ports 1,2 tagged</span>
+<span class="ann">&#8618; Repeat for all three VLANs. All three must be tagged on every trunk link in the ring.</span>
+<span class="cmd">configure vlan Default delete ports 1,2</span>
+<span class="ann">&#8618; Remove Default VLAN from trunk ports — prevents untagged frames from being miscategorized. Best practice on trunk-only ports.</span>
+<span class="cmd">show vlan Data</span>
+<span class="ann">&#8618; Check output: look for "Tag: *1, *2" — asterisk means the port is active. If you see "!" the port is disabled.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 4 -->
+    <section id="lab-s4">
+      <h2>Step 4 — Configure Access Ports</h2>
+      <div class="step-card">
+        <div class="step-num">Step 4 of 8 — Edge-1 and Edge-2 only</div>
+        <h3>Assign Untagged Ports for VPCS Clients</h3>
+        <div class="why-box"><strong>Why:</strong> VPCS sends plain untagged Ethernet frames — it has no knowledge of 802.1Q. The access port strips/inserts the VLAN tag transparently. The client thinks it's on a normal LAN; the switch handles VLAN membership.</div>
+        <div class="cmd-block annotated">
+<span class="comment"># Run on Edge-1 (ExtremeOs3) AND repeat identically on Edge-2 (ExtremeOs6)</span>
+<span class="cmd">configure vlan Data add ports 3 untagged</span>
+<span class="ann">&#8618; Port 3 becomes an access port for VLAN 10. Frames arriving untagged on port 3 are placed in the Data VLAN.</span>
+<span class="cmd">configure vlan Default delete ports 3</span>
+<span class="ann">&#8618; A port can only be untagged in ONE VLAN at a time. Remove it from Default before adding to Data, or EXOS will reject the command.</span>
+<span class="cmd">configure vlan Voice add ports 4 untagged</span>
+<span class="cmd">configure vlan Default delete ports 4</span>
+<span class="cmd">configure vlan Kh_Mgmt add ports 5 untagged</span>
+<span class="cmd">configure vlan Default delete ports 5</span>
+<span class="cmd">show vlan Data</span>
+<span class="ann">&#8618; Expected output: "Untag: *3" — port 3 active and untagged. If you see "Tag: *3" instead, the client will get tagged frames it can't read.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 5 -->
+    <section id="lab-s5">
+      <h2>Step 5 — Management IP Addresses</h2>
+      <div class="step-card">
+        <div class="step-num">Step 5 of 8 — Each switch gets its own IP</div>
+        <h3>Assign IPs on the Kh_Mgmt VLAN</h3>
+        <div class="why-box"><strong>Why:</strong> An IP address on the management VLAN enables SSH access and ping reachability to the switch itself. <code>enable ipforwarding</code> tells the switch to process IP packets destined for its own address.</div>
+        <div class="cmd-block annotated">
+<span class="comment"># Core-1 (repeat for each switch with its own IP)</span>
+<span class="cmd">configure vlan Kh_Mgmt ipaddress 10.10.30.1/24</span>
+<span class="ann">&#8618; Assigns the switch's IP address on the management VLAN. Each switch gets a unique IP in the 10.10.30.0/24 subnet.</span>
+<span class="cmd">enable ipforwarding vlan Kh_Mgmt</span>
+<span class="ann">&#8618; Without this, the switch will not respond to pings or SSH on this VLAN even with an IP assigned.</span>
+<span class="comment"># Core-2: 10.10.30.2 / Edge-1: 10.10.30.3 / Core-4: 10.10.30.4</span>
+<span class="comment"># Core-5: 10.10.30.5 / Edge-2: 10.10.30.6</span>
+<span class="cmd">ping vr VR-Default 10.10.30.6</span>
+<span class="ann">&#8618; EXOS ping syntax: VR name comes BEFORE the host IP. "from" clause (if used) comes AFTER the host. Any other order returns "Invalid input".</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 6 -->
+    <section id="lab-s6">
+      <h2>Step 6 — Configure VPCS Clients</h2>
+      <div class="step-card">
+        <div class="step-num">Step 6 of 8 — On each VPCS console in EVE-NG</div>
+        <h3>Assign IPs to Virtual PC Clients</h3>
+        <div class="why-box"><strong>Why:</strong> VPCS has no IP until assigned. Crucially — the FDB (MAC table) on the switch only learns a device's MAC when that device sends a frame. You must <strong>ping or generate traffic</strong> after setting the IP, not just set it.</div>
+        <div class="cmd-block annotated">
+<span class="comment"># VLAN10-Client1 — Edge-1 port 3</span>
+<span class="cmd">ip 10.10.10.11/24</span>
+<span class="ann">&#8618; Sets IP and subnet mask. VPCS uses CIDR notation. No gateway needed for same-subnet pings.</span>
+<span class="comment"># VLAN20-Client1 — Edge-1 port 4</span>
+<span class="cmd">ip 10.10.20.11/24</span>
+<span class="comment"># Kh_Mgmt-Client1 — Edge-1 port 5</span>
+<span class="cmd">ip 10.10.30.11/24</span>
+<span class="comment"># VLAN10-Client2 — Edge-2 port 3</span>
+<span class="cmd">ip 10.10.10.12/24</span>
+<span class="comment"># VLAN20-Client2 — Edge-2 port 4</span>
+<span class="cmd">ip 10.10.20.12/24</span>
+<span class="comment"># Kh_Mgmt-Client2 — Edge-2 port 5</span>
+<span class="cmd">ip 10.10.30.12/24</span>
+<span class="cmd">show ip</span>
+<span class="ann">&#8618; Verify the IP is assigned correctly. Also shows the auto-assigned IPv6 link-local — ignore this for now.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 7 -->
+    <section id="lab-s7">
+      <h2>Step 7 — Connectivity Testing</h2>
+      <div class="step-card">
+        <div class="step-num">Test A — Same-VLAN (expected: success)</div>
+        <h3>Cross-switch ping within the same VLAN</h3>
+        <div class="cmd-block annotated">
+<span class="comment"># From VLAN10-Client1 (Edge-1)</span>
+<span class="cmd">ping 10.10.10.12</span>
+<span class="ann">&#8618; This ping traverses the full ring: Edge-1 → Core-1 → Core-2 → Edge-2. Proves VLAN 10 is correctly trunked on all four switches in the active path.</span>
+<span class="ok">84 bytes from 10.10.10.12 icmp_seq=1 ttl=64 time=x.xxx ms    ← success</span>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">Test B — Cross-VLAN (expected: failure)</div>
+        <h3>Confirm VLAN isolation — no L3 routing</h3>
+        <div class="cmd-block annotated">
+<span class="cmd">ping 10.10.20.11</span>
+<span class="ann">&#8618; From VLAN10-Client1, targeting a VLAN20 address. Should fail — no router connecting the VLANs. This confirms VLAN segmentation is working.</span>
+<span class="err">host (10.10.20.11) not reachable    ← expected</span>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">Test C — FDB inspection</div>
+        <h3>Verify MAC table on Edge-1 after pinging</h3>
+        <div class="cmd-block annotated">
+<span class="cmd">show fdb</span>
+<span class="ann">&#8618; Client MACs (00:50:79:66:xx:xx) should appear on ports 3/4/5 (local access ports). If they appear only on ports 1 or 2 (trunk ports), STP is not configured — see the Troubleshooting tab.</span>
+<span class="out">00:50:79:66:68:07    Data(0010)    d m    3    ← correct: local access port</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 8 -->
+    <section id="lab-s8">
+      <h2>Step 8 — Save Configuration</h2>
+      <div class="step-card">
+        <div class="step-num">Step 8 of 8 — ALL 6 switches</div>
+        <h3>Persist to Flash</h3>
+        <div class="why-box"><strong>Why:</strong> EXOS configuration is held in RAM until saved. A reboot without saving loses all your work.</div>
+        <div class="cmd-block annotated">
+<span class="cmd">save configuration primary</span>
+<span class="ann">&#8618; Writes running config to primary.cfg in flash. Confirm the prompt with "y".</span>
+<span class="out">Do you want to save configuration to primary.cfg? (y/N): </span><span class="cmd">y</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Reference -->
+    <section id="lab-qr">
+      <h2>Quick Reference</h2>
+      <table>
+        <tr><th>Task</th><th>Command</th></tr>
+        <tr><td>Set hostname</td><td><code>configure snmp sysName "Name"</code></td></tr>
+        <tr><td>Create VLAN</td><td><code>create vlan &lt;name&gt; tag &lt;id&gt;</code></td></tr>
+        <tr><td>Add tagged port (trunk)</td><td><code>configure vlan &lt;name&gt; add ports 1,2 tagged</code></td></tr>
+        <tr><td>Add untagged port (access)</td><td><code>configure vlan &lt;name&gt; add ports 3 untagged</code></td></tr>
+        <tr><td>Remove port from VLAN</td><td><code>configure vlan Default delete ports 1,2</code></td></tr>
+        <tr><td>Set management IP</td><td><code>configure vlan Kh_Mgmt ipaddress 10.10.30.1/24</code></td></tr>
+        <tr><td>Enable IP forwarding</td><td><code>enable ipforwarding vlan Kh_Mgmt</code></td></tr>
+        <tr><td>Bind VLAN to STP</td><td><code>configure stpd s0 add vlan &lt;name&gt; ports 1,2</code></td></tr>
+        <tr><td>Save config</td><td><code>save configuration primary</code></td></tr>
+        <tr><td>Show VLAN detail</td><td><code>show vlan &lt;name&gt;</code></td></tr>
+        <tr><td>Show FDB</td><td><code>show fdb</code></td></tr>
+        <tr><td>Show STP</td><td><code>show stpd detail</code></td></tr>
+        <tr><td>Ping (EXOS syntax)</td><td><code>ping vr VR-Default &lt;ip&gt;</code></td></tr>
+      </table>
+    </section>
+
+    <div class="foot">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; KK Collaboration &nbsp;&middot;&nbsp; All rights reserved</div>
+  </div><!-- /content -->
+</div><!-- /tab-layout -->
+</div><!-- /tab-lab -->
+
+
+<!-- ════════════════════════════════════════
+     TAB 2 — TROUBLESHOOTING
+════════════════════════════════════════ -->
+<div id="tab-ts" class="tab-pane">
+<div class="tab-layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="ts-sidebar">
+    <div class="grp">The Problem</div>
+    <a href="#ts-symptom">Symptom</a>
+    <a href="#ts-check1">Port Config Check</a>
+    <a href="#ts-check2">ARP Asymmetry</a>
+    <div class="grp">Root Cause</div>
+    <a href="#ts-rca">Root Cause Analysis</a>
+    <a href="#ts-why">Why It Happens</a>
+    <div class="grp">Resolution</div>
+    <a href="#ts-fix">The Fix</a>
+    <a href="#ts-verify">Verification</a>
+    <a href="#ts-state">STP State Table</a>
+    <div class="grp">Concepts</div>
+    <a href="#ts-concepts">Key Concepts</a>
+    <a href="#ts-refs">Standards &amp; RFCs</a>
+  </nav>
+
+  <!-- Content -->
+  <div class="content">
+
+    <div class="page-header">
+      <div class="kicker">Troubleshooting Case Study &nbsp;&mdash;&nbsp; March 30, 2026</div>
+      <h1>VPCS Ping Failure — STP Not Bound to VLANs</h1>
+      <p style="color:#64748b;font-size:0.85rem;">A real troubleshooting session: VPCS clients could not ping across the ring. The investigation exposed an STP misconfiguration that left the entire ring unprotected from loops.</p>
+      <div class="meta-row">
+        <div class="meta-item"><strong>Symptom</strong> ping fails between VLAN10-Client1 and VLAN10-Client2</div>
+        <div class="meta-item"><strong>Root Cause</strong> STP bound to no VLANs — ring loop unmitigated</div>
+        <div class="meta-item"><strong>Fix</strong> <code>configure stpd s0 add vlan &lt;name&gt; ports 1,2</code> on all 6 switches</div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <section id="ts-symptom">
+      <h2>Investigation Timeline</h2>
+      <div class="ts-timeline">
+
+        <!-- Step 1 -->
+        <div class="ts-item">
+          <div class="ts-dot dot-obs">1</div>
+          <div class="ts-body">
+            <div class="ts-label">Observation</div>
+            <h3>VPCS ping fails — FDB shows MACs on trunk ports, not access ports</h3>
+            <p>After configuring IPs on all VPCS clients, pinging across the ring failed immediately. Running <code>show fdb</code> on Edge-1 revealed that VPCS MACs (OUI <code>00:50:79</code>) were appearing on ports 1 and 2 (trunk ports), not on ports 3/4/5 (where the clients are physically connected).</p>
+            <div class="cmd-block" style="margin-top:10px;">
+<span class="cmd">ping 10.10.10.12</span>
+<span class="err">host (10.10.10.12) not reachable</span>
+<span class="comment"></span>
+<span class="cmd">show fdb</span>
+<span class="err">00:50:79:66:68:07    Data(0010)   d m    2   ← WRONG: port 2 is a trunk port</span>
+<span class="ann">&#8618; If a client MAC appears on a trunk port, the switch learned it from the wrong direction. This means the ARP broadcast looped around the ring and arrived back via a trunk — a classic loop signature.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="ts-item" id="ts-check1">
+          <div class="ts-dot dot-inv">2</div>
+          <div class="ts-body">
+            <div class="ts-label">Investigation — Port Configuration</div>
+            <h3>Edge-1 port and VLAN config verified correct</h3>
+            <p>Before assuming a loop, we verified the basic port configuration on Edge-1. Both checks passed — the issue was not a misconfigured access port.</p>
+            <div class="cmd-block" style="margin-top:10px;">
+<span class="cmd">show vlan Data</span>
+<span class="out">Untag:      *3       </span><span class="ok">← port 3 correctly untagged ✓</span>
+<span class="out">Tag:        *1,     *2</span>
+<span class="ann">&#8618; Asterisk (*) = port is active. "Untag" means frames arrive/leave without an 802.1Q tag — correct for VPCS.</span>
+<span class="cmd">show ports 3 info</span>
+<span class="out">3    Em------e--fMB-----   active    </span><span class="ok">← port up, MAC learning enabled ✓</span>
+<span class="ann">&#8618; Flags: E=Enabled, m=MAC Learning on, B=Broadcast flooding on. Port is physically up and ready.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="ts-item" id="ts-check2">
+          <div class="ts-dot dot-inv">3</div>
+          <div class="ts-body">
+            <div class="ts-label">Investigation — ARP Tables</div>
+            <h3>One-way ARP: Client2 knows Client1 — Client1 knows nothing</h3>
+            <p>Checking ARP tables on both VPCS clients revealed a critical asymmetry that confirmed the loop hypothesis.</p>
+            <div class="cmd-block" style="margin-top:10px;">
+<span class="comment"># On VLAN10-Client1 (10.10.10.11) — Edge-1</span>
+<span class="cmd">arp</span>
+<span class="err">arp table is empty</span>
+<span class="ann">&#8618; Client1 sent an ARP broadcast "Who has 10.10.10.12?" — but never received a reply. The reply was lost.</span>
+
+<span class="comment"># On VLAN10-Client2 (10.10.10.12) — Edge-2</span>
+<span class="cmd">arp</span>
+<span class="ok">00:50:79:66:68:07   10.10.10.11   expires in 120 seconds</span>
+<span class="ann">&#8618; Client2 DID receive Client1's ARP broadcast and recorded Client1's MAC. But Client2's unicast ARP reply never reached Client1.</span>
+            </div>
+            <div class="alert alert-yellow" style="margin-top:10px;">
+              <strong>Key diagnostic pattern:</strong> Broadcast succeeds in one direction, unicast reply fails on the return. This is the textbook signature of a Layer 2 loop without STP — broadcasts flood everywhere (including looping), but unicast replies follow FDB entries that are flapping due to the loop.
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 — RCA -->
+        <div class="ts-item" id="ts-rca">
+          <div class="ts-dot dot-rca">4</div>
+          <div class="ts-body">
+            <div class="ts-label">Root Cause Analysis</div>
+            <h3>STP enabled but bound to no VLANs — ring completely unprotected</h3>
+            <p>Running <code>show stpd detail</code> on Edge-2 revealed the core problem. STP was enabled, but the STPD instance had zero ports and zero participating VLANs.</p>
+            <div class="cmd-block" style="margin-top:10px;">
+<span class="comment"># Edge-2 — BEFORE fix</span>
+<span class="cmd">show stpd detail</span>
+<span class="out">Stpd: s0   Stp: ENABLED   Number of Ports: <span class="hl">0</span></span>
+<span class="out">Ports: <span class="hl">(none)</span></span>
+<span class="out">Participating Vlans: <span class="hl">(none)</span></span>
+<span class="out">Auto-bind Vlans: Default</span>
+<span class="out">Designated root: 80:00:50:01:00:06:00:00   <span class="hl">← Edge-2 thinks it IS the root</span></span>
+<span class="ann">&#8618; "Auto-bind Vlans: Default" means only the Default VLAN is automatically protected by STP. But Default VLAN was removed from all trunk ports in Step 3 — so STP is protecting nothing. Data, Voice, and Kh_Mgmt VLANs are all looping freely.</span>
+            </div>
+            <div class="alert alert-red" style="margin-top:10px;">
+              <strong>Root Cause:</strong> EXOS requires VLANs to be <em>explicitly bound</em> to an STPD instance using <code>configure stpd s0 add vlan &lt;name&gt; ports 1,2</code>. Unlike Cisco IOS (which auto-runs PVST+ per VLAN), EXOS does nothing automatically for non-Default VLANs. The lab had completed Steps 1–6 without this step, leaving the ring in a continuous loop for all three user VLANs.
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /timeline -->
+    </section>
+
+    <!-- Why it happens -->
+    <section id="ts-why">
+      <h2>Why This Happens — The Loop Explained</h2>
+      <p>Without STP blocking one ring link, every broadcast frame circulates indefinitely. Here is the exact sequence of events that caused the symptom:</p>
+      <table>
+        <tr><th>#</th><th>Event</th><th>Result</th></tr>
+        <tr><td>1</td><td>Client1 sends ARP broadcast: "Who has 10.10.10.12?"</td><td>Frame enters Edge-1 port 3, floods into Data VLAN</td></tr>
+        <tr><td>2</td><td>Edge-1 floods broadcast out ports 1 and 2 (both trunk paths)</td><td>Frame enters ring in both directions simultaneously</td></tr>
+        <tr><td>3</td><td>Frame loops: Core-1 → Core-2 → Edge-2 and Core-5 → Core-4 → Edge-2</td><td>Client2 receives the broadcast — learns Client1 MAC ✓</td></tr>
+        <tr><td>4</td><td>Frame continues looping around the ring endlessly</td><td>Edge-1 sees Client1's MAC arriving on port 2 (trunk) — FDB records wrong port</td></tr>
+        <tr><td>5</td><td>Client2 sends unicast ARP reply to Client1's MAC</td><td>Edge-2 looks up MAC in FDB — finds it on port 2 (toward Core-4)</td></tr>
+        <tr><td>6</td><td>ARP reply sent toward Core-4 → Core-5 → Edge-1</td><td>Edge-1 FDB may now show Client1 on port 1 instead of port 2 — reply loops or is dropped</td></tr>
+        <tr><td>7</td><td>Client1 never receives the reply</td><td>ARP fails → ping fails → "host not reachable"</td></tr>
+      </table>
+    </section>
+
+    <!-- Fix -->
+    <section id="ts-fix">
+      <h2>The Fix — Bind VLANs to STP on All 6 Switches</h2>
+      <div class="alert alert-yellow">
+        <strong>Important:</strong> This command must be run on every switch in the ring. One missed switch means that switch still has no loop protection, and the loop persists.
+      </div>
+      <div class="step-card">
+        <div class="step-num">Run on: Core-1, Core-2, Core-4, Core-5, Edge-1, Edge-2</div>
+        <h3>Add VLANs and Trunk Ports to STPD</h3>
+        <div class="cmd-block annotated">
+<span class="cmd">configure stpd s0 add vlan Data ports 1,2</span>
+<span class="ann">&#8618; Binds ports 1 and 2 of the Data VLAN to the STPD instance s0. STP will now send/receive BPDUs on these ports for Data VLAN and can block one of them if needed.</span>
+<span class="cmd">configure stpd s0 add vlan Voice ports 1,2</span>
+<span class="cmd">configure stpd s0 add vlan Kh_Mgmt ports 1,2</span>
+<span class="ann">&#8618; Repeat for all three VLANs. All must be protected — a missing VLAN means that VLAN still loops.</span>
+<span class="cmd">save configuration</span>
+<span class="ann">&#8618; Persist immediately. If EVE-NG resets before you save, the STP binding is lost and the loop returns.</span>
+        </div>
+      </div>
+      <p>After running on all 6 switches, wait <strong>~30 seconds</strong> for STP to converge: switches exchange BPDUs, elect a root bridge, and transition ports from Learning → Forwarding (or Blocking).</p>
+    </section>
+
+    <!-- Verification -->
+    <section id="ts-verify">
+      <h2>Verification — STP Converged &amp; Ping Restored</h2>
+      <div class="cmd-block annotated">
+<span class="comment"># On any switch — Core-4 is the one to check (has the blocked port)</span>
+<span class="cmd">show stpd detail</span>
+<span class="ok">Ports: 1,2</span>
+<span class="ok">Participating Vlans: Data, Kh_Mgmt, Voice</span>
+<span class="out">Data:  1(<span class="ok">F</span>), 2(<span class="err">B</span>)   </span><span class="ann">&#8618; Port 2 BLOCKING = loop broken. This is correct and expected.</span>
+<span class="out">BridgeID: 80:00:50:01:00:04</span>
+<span class="out">CIST Root: 80:00:50:01:00:01   </span><span class="ann">&#8618; Core-1 elected root bridge (lowest BridgeID in the ring).</span>
+
+<span class="comment"># Clear stale FDB entries from when the loop was running</span>
+<span class="cmd">clear fdb</span>
+<span class="ann">&#8618; FDB entries learned during the loop point to wrong ports. Clearing forces switches to re-learn MAC locations correctly via fresh traffic.</span>
+
+<span class="comment"># From VLAN10-Client1 — after clearing FDB</span>
+<span class="cmd">ping 10.10.10.12</span>
+<span class="ok">84 bytes from 10.10.10.12 icmp_seq=1 ttl=64 time=x.xxx ms   ← RESOLVED ✓</span>
+
+<span class="comment"># Verify MAC is now on the correct port</span>
+<span class="cmd">show fdb 00:50:79:66:68:0a</span>
+<span class="ok">00:50:79:66:68:0a    Data(0010)   d m    3   ← correct: local access port ✓</span>
+      </div>
+    </section>
+
+    <!-- STP State Table -->
+    <section id="ts-state">
+      <h2>STP State — All 6 Switches After Fix</h2>
+      <table>
+        <tr><th>Switch</th><th>BridgeID</th><th>Role</th><th>Root Port</th><th>Port 1</th><th>Port 2</th><th>Root Path Cost</th></tr>
+        <tr><td>Core-1</td><td>50:01:00:01</td><td><span class="badge badge-root">Root Bridge</span></td><td>—</td><td class="port-f">F</td><td class="port-f">F</td><td>0</td></tr>
+        <tr><td>Core-2</td><td>50:01:00:02</td><td>Non-root</td><td>Port 2 → Core-1</td><td class="port-f">F</td><td class="port-f">F</td><td>200,000</td></tr>
+        <tr><td>Edge-1</td><td>50:01:00:03</td><td>Non-root</td><td>Port 1 → Core-1</td><td class="port-f">F</td><td class="port-f">F</td><td>200,000</td></tr>
+        <tr><td>Core-4</td><td>50:01:00:04</td><td>Non-root</td><td>Port 1 → Core-5</td><td class="port-f">F</td><td class="port-b">BLK &#8592; loop break</td><td>600,000</td></tr>
+        <tr><td>Core-5</td><td>50:01:00:05</td><td>Non-root</td><td>Port 2 → Edge-1</td><td class="port-f">F</td><td class="port-f">F</td><td>400,000</td></tr>
+        <tr><td>Edge-2</td><td>50:01:00:06</td><td>Non-root</td><td>Port 1 → Core-2</td><td class="port-f">F</td><td class="port-f">F</td><td>400,000</td></tr>
+      </table>
+      <p style="font-size:0.8rem;color:#64748b;">Root bridge elected by lowest BridgeID (Core-1 = 50:01:00:01). Core-4 port 2 is the designated blocking port — it has the highest root path cost of all ring ports (600,000 = 3 hops × 200,000 per hop). The active path between Edge-1 and Edge-2 runs through Core-1 and Core-2.</p>
+    </section>
+
+    <!-- Key Concepts -->
+    <section id="ts-concepts">
+      <h2>Key Concepts</h2>
+      <div class="concept-grid">
+        <div class="concept-card">
+          <span class="ctag tag-ieee">IEEE 802.1D</span>
+          <h4>Spanning Tree Protocol</h4>
+          <p>Prevents L2 loops by electing a root bridge (lowest BridgeID) and blocking redundant ring ports. Port states: Blocking → Listening → Learning → Forwarding. Convergence takes 30–50 seconds with classic STP.</p>
+          <a href="#ts-refs">&#8594; IEEE 802.1D-2004</a>
+        </div>
+        <div class="concept-card">
+          <span class="ctag tag-exos">EXOS</span>
+          <h4>STPD Binding in EXOS</h4>
+          <p>Unlike Cisco PVST+ (which auto-runs per VLAN), EXOS requires explicit binding: <code>configure stpd s0 add vlan &lt;name&gt; ports 1,2</code>. Without this, STP shows "ENABLED" but does nothing for that VLAN — the ring loops silently.</p>
+        </div>
+        <div class="concept-card">
+          <span class="ctag tag-rfc">RFC 826</span>
+          <h4>ARP — Address Resolution Protocol</h4>
+          <p>ARP requests are broadcasts (flood to all ports in VLAN). ARP replies are unicast. One-way ARP — where one host knows the other but not vice versa — is the diagnostic signature of a unicast routing failure on top of a loop.</p>
+          <a href="https://www.rfc-editor.org/rfc/rfc826" target="_blank">&#8594; RFC 826</a>
+        </div>
+        <div class="concept-card">
+          <span class="ctag tag-con">MAC Flapping</span>
+          <h4>FDB Instability in a Loop</h4>
+          <p>In a looping ring, the same MAC arrives from multiple ports alternately. The FDB records whichever port was last seen — this is called MAC flapping. Unicast frames follow the flapping FDB entry and get routed to the wrong port, causing intermittent or total connectivity failure.</p>
+        </div>
+        <div class="concept-card">
+          <span class="ctag tag-ieee">IEEE 802.1s</span>
+          <h4>MSTP — Multiple Spanning Tree</h4>
+          <p>EXOS defaults to MSTP operational mode. In this lab, all VLANs share a single CIST (Common Internal Spanning Tree) instance s0. MSTP allows different VLAN groups to use separate STP instances for independent path control.</p>
+          <a href="#ts-refs">&#8594; IEEE 802.1Q-2022</a>
+        </div>
+        <div class="concept-card">
+          <span class="ctag tag-con">Root Bridge Election</span>
+          <h4>Why Core-1 Won</h4>
+          <p>STP elects the switch with the lowest BridgeID as root. BridgeID = Priority (default 32768) + MAC address. All 6 switches had equal priority — Core-1 won because <code>50:01:00:01</code> is the numerically lowest MAC in the ring.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- References -->
+    <section id="ts-refs">
+      <h2>Standards &amp; RFC References</h2>
+      <table class="ref-table">
+        <tr><th>Standard</th><th>Title</th><th>Relevance</th></tr>
+        <tr><td>IEEE 802.1D-2004</td><td>MAC Bridges — Spanning Tree</td><td>Root bridge election, port states (BLK/LRN/FWD), BPDU format. Foundational STP standard.</td></tr>
+        <tr><td>IEEE 802.1w</td><td>Rapid STP (RSTP)</td><td>Faster convergence. Port roles: Root, Designated, Alternate, Backup. EXOS supports RSTP within the MSTP framework.</td></tr>
+        <tr><td>IEEE 802.1s</td><td>Multiple STP (MSTP)</td><td>EXOS default mode. Multiple VLAN groups → separate STP instances. Single CIST used in this lab.</td></tr>
+        <tr><td>IEEE 802.1Q-2022</td><td>Virtual LANs + MSTP</td><td>Defines VLAN tagging (4-byte 802.1Q header, 12-bit VID) and now incorporates 802.1s MSTP.</td></tr>
+        <tr><td>RFC 826</td><td>Ethernet ARP</td><td>IP-to-MAC resolution. ARP broadcast/unicast reply cycle exposed the STP loop in this lab.</td></tr>
+      </table>
+
+      <h3>Further Reading</h3>
+      <ul style="padding-left:20px;font-size:0.85rem;color:#94a3b8;line-height:2.4;">
+        <li><a href="https://www.rfc-editor.org/rfc/rfc826" target="_blank" style="color:#38bdf8;">RFC 826 — An Ethernet Address Resolution Protocol</a></li>
+        <li><a href="https://standards.ieee.org/ieee/802.1Q/10323/" target="_blank" style="color:#38bdf8;">IEEE 802.1Q-2022 — Virtual Bridged Local Area Networks (includes MSTP)</a></li>
+        <li><a href="https://extremenetworks.com/documentation" target="_blank" style="color:#38bdf8;">Extreme Networks EXOS User Guide — Spanning Tree Domains</a></li>
+      </ul>
+    </section>
+
+    <div class="foot">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; KK Collaboration &nbsp;&middot;&nbsp; All rights reserved</div>
+  </div><!-- /content -->
+</div><!-- /tab-layout -->
+</div><!-- /tab-ts -->
+
+<!-- ════════════════════════════════════════
+     TAB 3 — LOOP BEHAVIOUR
+════════════════════════════════════════ -->
+<div id="tab-loop" class="tab-pane">
+<div class="tab-layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="loop-sidebar">
+    <div class="grp">The Puzzle</div>
+    <a href="#loop-puzzle">The Question</a>
+    <a href="#loop-adjacent">Adjacent Pings — Why OK</a>
+    <a href="#loop-vpcs">VPCS Pings — Why Failed</a>
+    <div class="grp">Deep Dive</div>
+    <a href="#loop-arp-flow">ARP Flow Diagram</a>
+    <a href="#loop-fdb">FDB Flapping Explained</a>
+    <a href="#loop-rule">The Rule</a>
+    <div class="grp">Reference</div>
+    <a href="#loop-concepts">Concepts</a>
+    <a href="#loop-refs">RFCs &amp; Standards</a>
+  </nav>
+
+  <div class="content">
+
+    <div class="page-header">
+      <div class="kicker">Deep Dive &nbsp;&mdash;&nbsp; Layer 2 Loop Behaviour</div>
+      <h1>Why Some Pings Worked Without STP</h1>
+      <p style="color:#64748b;font-size:0.85rem;">Switch-to-switch management pings succeeded. VPCS client pings across the ring failed. Both ran on the same loop-ridden network — here is exactly why they behaved differently.</p>
+      <div class="meta-row">
+        <div class="meta-item"><strong>Topology</strong> 6-switch ring, no STP active</div>
+        <div class="meta-item"><strong>Observed</strong> March 30, 2026 during VPCS validation</div>
+      </div>
+    </div>
+
+    <!-- The Puzzle -->
+    <section id="loop-puzzle">
+      <h2>The Question</h2>
+      <p>After completing the lab configuration but <em>before</em> binding VLANs to STP, the following behaviour was observed:</p>
+      <table>
+        <tr><th>Test</th><th>Result</th><th>Surprising?</th></tr>
+        <tr><td>Core-1 ping Core-2 (adjacent, 1 hop)</td><td class="port-f">SUCCESS</td><td>No</td></tr>
+        <tr><td>Edge-1 ping Edge-2 (non-adjacent, 3 hops)</td><td class="warn" style="color:#fcd34d;font-weight:600;">UNRELIABLE</td><td>Yes</td></tr>
+        <tr><td>VLAN10-Client1 ping VLAN10-Client2</td><td class="port-b">FAILED</td><td>Yes — same VLAN, same config</td></tr>
+        <tr><td>VLAN20-Client1 ping VLAN20-Client2</td><td class="port-b">FAILED</td><td>Yes</td></tr>
+      </table>
+      <p>The instinct is: "if the network is looping, <em>nothing</em> should work." But that is not quite right. A loop does not break all traffic equally — it breaks traffic that depends on a stable, multi-hop unicast return path.</p>
+    </section>
+
+    <!-- Adjacent switch pings -->
+    <section id="loop-adjacent">
+      <h2>Why Adjacent Switch Pings Worked</h2>
+      <p>Every adjacent switch pair in the ring is <strong>directly connected by a single cable</strong>. Core-1 and Core-2 share a direct link on port 2. When Core-1 pings Core-2, the entire exchange happens on that one link — the loop is irrelevant.</p>
+
+      <h3>Step-by-step ARP + Ping flow (Core-1 → Core-2)</h3>
+      <div class="cmd-block">
+<span class="comment">Step 1 — Core-1 sends ARP broadcast: "Who has 10.10.30.2?"</span>
+<span class="out">  Frame exits Core-1 port 2 (direct link to Core-2)</span>
+<span class="out">  Frame also exits Core-1 port 1 (into the ring toward Edge-1)</span>
+
+<span class="comment">Step 2 — Core-2 receives ARP on port 2 (direct link)</span>
+<span class="out">  Core-2 records: Core-1 MAC is on port 2  → FDB entry stable ✓</span>
+<span class="out">  Core-2 sends unicast ARP reply → out port 2 → direct to Core-1</span>
+
+<span class="comment">Step 3 — Core-1 receives ARP reply on port 2 (direct link)</span>
+<span class="ok">  ARP resolves. Ping proceeds. Works every time. ✓</span>
+
+<span class="comment">Meanwhile — the broadcast is looping around the ring</span>
+<span class="out">  Core-1 port 1 → Edge-1 → Core-5 → Core-4 → Edge-2 → Core-2 port 1</span>
+<span class="warn">  Core-2 receives Core-1 MAC again — this time on port 1 (ring side)</span>
+<span class="warn">  FDB briefly flips: Core-1 MAC now on port 1 instead of port 2 ← noise</span>
+<span class="out">  But the ping reply was already sent and received. No impact.</span>
+      </div>
+
+      <div class="alert alert-green">
+        <strong>Key insight:</strong> The unicast ARP reply from Core-2 travels on the <em>direct link</em> back to Core-1 — one hop, no ambiguity, arrives before the loop noise can corrupt the FDB entry. The ping completes before the loop has time to cause damage.
+      </div>
+
+      <p>Think of it like asking someone next to you a question — they answer you directly before the echo of your voice comes back from the other end of the room. The echo exists, but it arrives too late to matter.</p>
+    </section>
+
+    <!-- VPCS failure -->
+    <section id="loop-vpcs">
+      <h2>Why VPCS Client Pings Failed</h2>
+      <p>Edge-1 and Edge-2 are <strong>not directly connected</strong>. Traffic between VLAN10-Client1 (Edge-1) and VLAN10-Client2 (Edge-2) must traverse 3 switches. With no STP, the ARP broadcast floods in <em>both</em> directions around the ring simultaneously.</p>
+
+      <h3>What happens without STP</h3>
+      <div class="cmd-block">
+<span class="comment">Client1 sends ARP broadcast: "Who has 10.10.10.12?"</span>
+<span class="out">  Edge-1 floods out port 1 AND port 2 simultaneously</span>
+
+<span class="comment">Path A (clockwise):  Edge-1 → Core-1 → Core-2 → Edge-2</span>
+<span class="out">  Arrives at Edge-2 port 1  → Edge-2 records: Client1 MAC on port 1</span>
+
+<span class="comment">Path B (counter-clockwise):  Edge-1 → Core-5 → Core-4 → Edge-2</span>
+<span class="out">  Arrives at Edge-2 port 2  → Edge-2 records: Client1 MAC on port 2  ← OVERWRITES</span>
+
+<span class="comment">Both copies continue looping — arriving repeatedly from alternating directions</span>
+<span class="warn">  Edge-2 FDB: Client1 MAC flaps between port 1 and port 2 every few milliseconds</span>
+
+<span class="comment">Client2 receives broadcast, sends unicast ARP reply to Client1 MAC</span>
+<span class="out">  Edge-2 checks FDB for Client1 MAC → points to port 2 (Core-4 side) at this instant</span>
+<span class="out">  Reply goes: Edge-2 → Core-4 → Core-5 → Edge-1</span>
+<span class="out">  Edge-1 receives reply on port 2... but its FDB has Client1 (its own VPC!) on port 2</span>
+<span class="err">  Edge-1 may forward the reply back OUT port 2 into the ring → reply loops</span>
+<span class="err">  Client1 never receives the ARP reply → ping fails → "host not reachable"</span>
+      </div>
+
+      <div class="alert alert-red">
+        <strong>Root mechanism:</strong> The loop causes <em>MAC address flapping</em> — the same source MAC arriving on alternating ports. Each arrival overwrites the FDB entry. When the unicast reply is sent, the FDB entry points in the wrong direction. The reply either loops endlessly or is forwarded away from the destination.
+      </div>
+    </section>
+
+    <!-- ARP Flow Diagram -->
+    <section id="loop-arp-flow">
+      <h2>ARP Flow — With vs Without STP</h2>
+      <div class="topo-wrap">
+        <svg viewBox="0 0 700 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto;">
+          <rect width="700" height="340" fill="#111827"/>
+
+          <!-- Labels -->
+          <text x="350" y="22" text-anchor="middle" font-size="11" fill="#64748b" font-family="sans-serif" font-weight="700">WITHOUT STP — ARP Broadcast Floods Both Directions</text>
+
+          <!-- Ring nodes (compact) -->
+          <rect x="290" y="38" width="70" height="32" rx="5" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="325" y="57" text-anchor="middle" font-size="10" fill="#38bdf8" font-weight="bold" font-family="sans-serif">Core-1</text>
+
+          <rect x="290" y="180" width="70" height="32" rx="5" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+          <text x="325" y="199" text-anchor="middle" font-size="10" fill="#e2e8f0" font-weight="bold" font-family="sans-serif">Core-2</text>
+
+          <rect x="80" y="108" width="70" height="32" rx="5" fill="#1e293b" stroke="#a78bfa" stroke-width="1.8"/>
+          <text x="115" y="127" text-anchor="middle" font-size="10" fill="#a78bfa" font-weight="bold" font-family="sans-serif">Edge-1</text>
+
+          <rect x="500" y="108" width="70" height="32" rx="5" fill="#1e293b" stroke="#a78bfa" stroke-width="1.8"/>
+          <text x="535" y="127" text-anchor="middle" font-size="10" fill="#a78bfa" font-weight="bold" font-family="sans-serif">Edge-2</text>
+
+          <rect x="140" y="220" width="70" height="32" rx="5" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+          <text x="175" y="239" text-anchor="middle" font-size="10" fill="#e2e8f0" font-weight="bold" font-family="sans-serif">Core-5</text>
+
+          <rect x="440" y="220" width="70" height="32" rx="5" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+          <text x="475" y="239" text-anchor="middle" font-size="10" fill="#e2e8f0" font-weight="bold" font-family="sans-serif">Core-4</text>
+
+          <!-- Path A arrows (clockwise) — blue -->
+          <defs>
+            <marker id="arrowB" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/>
+            </marker>
+            <marker id="arrowR" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#ef4444"/>
+            </marker>
+            <marker id="arrowG" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#10b981"/>
+            </marker>
+          </defs>
+
+          <!-- Path A: Edge-1 → Core-1 → Core-2 → Edge-2 -->
+          <path d="M150,112 Q230,60 290,58" stroke="#3b82f6" stroke-width="2" fill="none" marker-end="url(#arrowB)"/>
+          <path d="M360,62 Q400,80 500,118" stroke="#3b82f6" stroke-width="2" fill="none" marker-end="url(#arrowB)"/>
+          <text x="255" y="55" font-size="9" fill="#3b82f6" font-family="sans-serif" font-weight="600">Path A</text>
+
+          <!-- Path B: Edge-1 → Core-5 → Core-4 → Edge-2 -->
+          <path d="M150,132 Q155,180 140,220" stroke="#ef4444" stroke-width="2" fill="none" marker-end="url(#arrowR)"/>
+          <path d="M210,236 L440,236" stroke="#ef4444" stroke-width="2" fill="none" marker-end="url(#arrowR)"/>
+          <path d="M510,220 Q530,180 535,140" stroke="#ef4444" stroke-width="2" fill="none" marker-end="url(#arrowR)"/>
+          <text x="305" y="252" font-size="9" fill="#ef4444" font-family="sans-serif" font-weight="600">Path B</text>
+
+          <!-- Client boxes -->
+          <rect x="30" y="108" width="52" height="32" rx="4" fill="#0f172a" stroke="#334155"/>
+          <text x="56" y="122" text-anchor="middle" font-size="8" fill="#89dceb" font-family="monospace">Client1</text>
+          <text x="56" y="133" text-anchor="middle" font-size="7.5" fill="#475569" font-family="monospace">.11</text>
+          <line x1="82" y1="124" x2="80" y2="124" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,2"/>
+
+          <rect x="616" y="108" width="52" height="32" rx="4" fill="#0f172a" stroke="#334155"/>
+          <text x="642" y="122" text-anchor="middle" font-size="8" fill="#89dceb" font-family="monospace">Client2</text>
+          <text x="642" y="133" text-anchor="middle" font-size="7.5" fill="#475569" font-family="monospace">.12</text>
+          <line x1="570" y1="124" x2="616" y2="124" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,2"/>
+
+          <!-- FDB flap annotation -->
+          <rect x="480" y="155" width="180" height="54" rx="4" fill="#1c0f0f" stroke="#dc2626"/>
+          <text x="570" y="172" text-anchor="middle" font-size="9" fill="#fca5a5" font-family="sans-serif" font-weight="700">Edge-2 FDB — FLAPPING</text>
+          <text x="570" y="186" text-anchor="middle" font-size="8.5" fill="#94a3b8" font-family="monospace">Client1 MAC → port 1 (A)</text>
+          <text x="570" y="199" text-anchor="middle" font-size="8.5" fill="#94a3b8" font-family="monospace">Client1 MAC → port 2 (B)</text>
+
+          <!-- Arrow from Edge-2 to annotation -->
+          <line x1="542" y1="140" x2="530" y2="158" stroke="#dc2626" stroke-width="1" stroke-dasharray="3,2"/>
+
+          <!-- Unicast reply goes wrong way -->
+          <path d="M500,130 Q440,190 475,220" stroke="#f59e0b" stroke-width="1.8" fill="none" stroke-dasharray="5,3" marker-end="url(#arrowG)"/>
+          <text x="450" y="185" font-size="8.5" fill="#f59e0b" font-family="sans-serif">Reply →</text>
+          <text x="440" y="196" font-size="8.5" fill="#f59e0b" font-family="sans-serif">wrong path</text>
+
+          <!-- Legend -->
+          <rect x="16" y="280" width="350" height="48" rx="4" fill="#0d1a2e" stroke="#1e293b"/>
+          <line x1="28" y1="296" x2="62" y2="296" stroke="#3b82f6" stroke-width="2"/>
+          <text x="68" y="300" font-size="8.5" fill="#93c5fd" font-family="sans-serif">ARP broadcast Path A (clockwise)</text>
+          <line x1="28" y1="312" x2="62" y2="312" stroke="#ef4444" stroke-width="2"/>
+          <text x="68" y="316" font-size="8.5" fill="#fca5a5" font-family="sans-serif">ARP broadcast Path B (counter-clockwise)</text>
+          <line x1="200" y1="296" x2="234" y2="296" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="5,3"/>
+          <text x="240" y="300" font-size="8.5" fill="#fcd34d" font-family="sans-serif">Unicast reply (wrong direction)</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- FDB Flapping -->
+    <section id="loop-fdb">
+      <h2>FDB Flapping — The Core Mechanism</h2>
+      <p>The MAC address table (FDB) is updated every time a frame arrives. In a loop, the same source MAC arrives from multiple ports in rapid succession. The switch keeps overwriting its own table:</p>
+      <table>
+        <tr><th>Time</th><th>Event</th><th>FDB Entry for Client1 MAC</th></tr>
+        <tr><td>t=0ms</td><td>Client1 ARP broadcast exits Edge-1 on ports 1 and 2</td><td>Edge-2: not yet learned</td></tr>
+        <tr><td>t=1ms</td><td>Path A arrives at Edge-2 port 1 first</td><td>Edge-2: Client1 → port 1</td></tr>
+        <tr><td>t=2ms</td><td>Path B arrives at Edge-2 port 2 (slightly longer path)</td><td>Edge-2: Client1 → <span class="port-b">port 2</span> (overwritten)</td></tr>
+        <tr><td>t=3ms</td><td>Looped copy of Path A arrives again at Edge-2 port 1</td><td>Edge-2: Client1 → <span class="port-b">port 1</span> (overwritten again)</td></tr>
+        <tr><td>t=4ms</td><td>Client2 sends unicast reply — FDB says port 2 at this instant</td><td>Reply exits Edge-2 port 2 → goes the wrong way</td></tr>
+        <tr><td>t=5ms</td><td>Looped copy arrives again — FDB flips back</td><td>Continuous instability</td></tr>
+      </table>
+      <p>This is called <strong>MAC address flapping</strong>. Enterprise switches detect it and generate log alerts. In a ring with no STP, every broadcast causes a flapping storm that lasts until the frame is consumed (it never is — Ethernet has no TTL).</p>
+      <div class="alert alert-yellow">
+        <strong>No TTL in Ethernet:</strong> Unlike IP packets (which have a TTL field that decrements at each hop and expires), Ethernet frames have no hop counter. A looping Ethernet broadcast circulates at wire speed forever — or until the switch is rebooted, the cable is unplugged, or STP blocks the loop.
+      </div>
+    </section>
+
+    <!-- The Rule -->
+    <section id="loop-rule">
+      <h2>The Rule — When a Loop Breaks Traffic</h2>
+      <table>
+        <tr><th>Scenario</th><th>Works without STP?</th><th>Reason</th></tr>
+        <tr>
+          <td>Adjacent switch ↔ switch (1 hop, direct cable)</td>
+          <td class="port-f">Usually yes</td>
+          <td>Unicast reply takes the direct link. Arrives before loop noise corrupts the FDB entry. Exchange completes in microseconds.</td>
+        </tr>
+        <tr>
+          <td>Non-adjacent switch ↔ switch (2+ hops)</td>
+          <td class="warn" style="color:#fcd34d;font-weight:600;">Unreliable</td>
+          <td>Reply must choose a path. FDB entry for sender may have been overwritten by loop traffic before reply arrives. Intermittent success possible.</td>
+        </tr>
+        <tr>
+          <td>VPCS client ↔ VPCS client (cross-ring, 4 hops)</td>
+          <td class="port-b">No</td>
+          <td>ARP broadcast floods both ring directions simultaneously. Edge switch FDB flaps before reply can be correctly routed back. Client never gets reply.</td>
+        </tr>
+        <tr>
+          <td>Broadcast storm threshold</td>
+          <td class="port-b">Eventually breaks everything</td>
+          <td>Unmitigated loops compound. Each loop adds another copy of every broadcast. CPU overloads. All traffic eventually fails. In EVE-NG the VM limits slow this effect.</td>
+        </tr>
+      </table>
+
+      <h3>Why EVE-NG masked the worst effects</h3>
+      <p>In a real physical network, an unmitigated ring loop causes a <strong>broadcast storm within seconds</strong> — link utilisation hits 100%, switch CPUs max out, and the entire network goes dark. In EVE-NG, virtual links have much lower throughput and the hypervisor throttles traffic, so the loop causes FDB flapping and selective failures rather than an immediate full outage. This is why some pings appeared to work — the storm was slow enough to allow short exchanges on direct links to complete.</p>
+    </section>
+
+    <!-- Concepts -->
+    <section id="loop-concepts">
+      <h2>Key Concepts</h2>
+      <div class="concept-grid">
+        <div class="concept-card">
+          <span class="ctag tag-con">MAC Flapping</span>
+          <h4>FDB Instability Under a Loop</h4>
+          <p>When the same MAC address is seen on two different ports in quick succession, the switch overwrites its FDB entry each time. The result is that unicast frames destined for that MAC are forwarded alternately to the wrong port. Enterprise switches log MAC flapping as a warning event.</p>
+        </div>
+        <div class="concept-card">
+          <span class="ctag tag-rfc">No TTL in Ethernet</span>
+          <h4>Why Loops Are Permanent</h4>
+          <p>IP packets carry a TTL field that decrements at each router hop and causes the packet to be discarded at zero. Ethernet frames have no equivalent. A looping frame circulates at full wire speed indefinitely — only STP, cable removal, or reboot can stop it.</p>
+          <a href="#loop-refs">&#8594; IEEE 802.1D — Bridge Loops</a>
+        </div>
+        <div class="concept-card">
+          <span class="ctag tag-ieee">IEEE 802.1D</span>
+          <h4>Why STP Was Invented</h4>
+          <p>STP (1985, Radia Perlman) was designed specifically to solve the loop problem in Ethernet bridged networks. It provides a distributed algorithm for switches to collectively agree on a loop-free tree topology — without manual configuration of which link to block.</p>
+          <a href="#loop-refs">&#8594; IEEE 802.1D-2004</a>
+        </div>
+        <div class="concept-card">
+          <span class="ctag tag-rfc">RFC 826</span>
+          <h4>ARP — The Loop's Victim</h4>
+          <p>ARP relies on broadcasting a request and receiving a single unicast reply. This protocol has zero tolerance for the MAC instability caused by a loop — if the FDB entry for the requester flaps between the request and the reply, the reply is misrouted and the entire name resolution fails.</p>
+          <a href="https://www.rfc-editor.org/rfc/rfc826" target="_blank">&#8594; RFC 826</a>
+        </div>
+        <div class="concept-card">
+          <span class="ctag tag-con">Broadcast Storm</span>
+          <h4>The Compounding Effect</h4>
+          <p>Each switch floods a broadcast out all ports in a VLAN. In a loop, every copy of the broadcast is flooded again, creating exponentially more copies. A single broadcast becomes thousands within milliseconds. This is a broadcast storm — it saturates links and overwhelms switch CPUs.</p>
+        </div>
+        <div class="concept-card">
+          <span class="ctag tag-exos">EVE-NG Effect</span>
+          <h4>Why the Lab Didn't Storm Immediately</h4>
+          <p>EVE-NG virtualises links at low speeds with CPU-based forwarding. The hypervisor throttles frame rates, so a loop that would storm a physical network in &lt;1 second instead causes slow FDB flapping and selective failures. This is useful for learning but can mask the true severity of a loop.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- References -->
+    <section id="loop-refs">
+      <h2>RFCs &amp; Standards</h2>
+      <table>
+        <tr><th>Reference</th><th>Title</th><th>What to Read</th></tr>
+        <tr>
+          <td><strong>IEEE 802.1D-2004</strong></td>
+          <td>Media Access Control Bridges — Spanning Tree</td>
+          <td>Section 17: Loop detection and STP algorithm. The original motivation for STP was exactly the broadcast storm scenario described in this tab. Radia Perlman's spanning tree algorithm is described in full.</td>
+        </tr>
+        <tr>
+          <td><strong>IEEE 802.1Q-2022</strong></td>
+          <td>Virtual Bridged LANs</td>
+          <td>Section on MSTP (Multiple Spanning Tree). Explains how modern switches handle per-VLAN loop protection and why explicit VLAN binding to STP instances is necessary in MSTP mode.</td>
+        </tr>
+        <tr>
+          <td><strong>RFC 826</strong></td>
+          <td>An Ethernet Address Resolution Protocol</td>
+          <td>The ARP specification. Read Section 3 (Packet Format) to understand why ARP replies are unicast and why MAC instability directly causes ARP failure.</td>
+        </tr>
+        <tr>
+          <td><strong>Perlman, R. (1985)</strong></td>
+          <td>An Algorithm for Distributed Computation of a Spanning Tree in an Extended LAN</td>
+          <td>The original academic paper that introduced spanning tree to networking. Radia Perlman ("Mother of the Internet") describes the loop problem and its solution from first principles. Accessible and historically significant.</td>
+        </tr>
+        <tr>
+          <td><strong>Cisco Press</strong></td>
+          <td>CCIE Routing and Switching — Chapter: Spanning Tree</td>
+          <td>Vendor-neutral deep dive into STP, RSTP, and MSTP mechanics including MAC flapping, TCN (Topology Change Notification), and how different vendors implement BPDU handling.</td>
+        </tr>
+      </table>
+
+      <h3>Further Reading</h3>
+      <ul style="padding-left:20px;font-size:0.85rem;color:#94a3b8;line-height:2.4;">
+        <li><a href="https://www.rfc-editor.org/rfc/rfc826" target="_blank" style="color:#38bdf8;">RFC 826 — ARP (IETF)</a></li>
+        <li><a href="https://standards.ieee.org/ieee/802.1D/3399/" target="_blank" style="color:#38bdf8;">IEEE 802.1D-2004 — Spanning Tree Protocol</a></li>
+        <li><a href="https://standards.ieee.org/ieee/802.1Q/10323/" target="_blank" style="color:#38bdf8;">IEEE 802.1Q-2022 — VLANs and MSTP</a></li>
+        <li><a href="https://dl.acm.org/doi/10.1145/319056.319051" target="_blank" style="color:#38bdf8;">Radia Perlman (1985) — Spanning Tree Original Paper (ACM)</a></li>
+      </ul>
+    </section>
+
+    <div class="foot">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; KK Collaboration &nbsp;&middot;&nbsp; All rights reserved</div>
+  </div>
+</div>
+</div><!-- /tab-loop -->
+
+
+
+<script>
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Active sidebar highlighting per tab
+function setupSidebar(sidebarId, tabId) {
+  const sidebar = document.getElementById(sidebarId);
+  const tab = document.getElementById(tabId);
+  if (!sidebar || !tab) return;
+  const links = sidebar.querySelectorAll('a');
+  const sections = tab.querySelectorAll('section[id]');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = sidebar.querySelector(`a[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => obs.observe(s));
+}
+setupSidebar('lab-sidebar', 'tab-lab');
+setupSidebar('ts-sidebar', 'tab-ts');
+setupSidebar('loop-sidebar', 'tab-loop');
+setupSidebar('sessionlog-sidebar', 'tab-sessionlog');
+
+// Hidden session reveal — navigate to #me to show
+function checkHash() {
+  if (window.location.hash === '#me') {
+    var b = document.getElementById('session-banner');
+    if (b) { b.style.display = 'block'; window.scrollTo(0, 0); }
+  }
+}
+window.addEventListener('hashchange', checkHash);
+// Element is injected after this script tag — must wait for full DOM parse
+document.addEventListener('DOMContentLoaded', checkHash);
+setTimeout(checkHash, 300);
+</script>
+
+<!-- ════════════════════════════════════════
+     TAB 4 — SESSION LOG
+════════════════════════════════════════ -->
+<div id="tab-sessionlog" class="tab-pane">
+<div class="tab-layout">
+
+  <nav class="sidebar" id="sessionlog-sidebar">
+    <div class="grp">Overview</div>
+    <a href="#sl-summary">At a Glance</a>
+    <div class="grp">Investigation</div>
+    <a href="#sl-s1">Step 1 — Symptom</a>
+    <a href="#sl-s2">Step 2 — Port &amp; VLAN</a>
+    <a href="#sl-s3">Step 3 — ARP Asymmetry</a>
+    <a href="#sl-s4">Step 4 — FDB Wrong Port</a>
+    <a href="#sl-s5">Step 5 — STPD Root Cause</a>
+    <a href="#sl-s6">Step 6 — EXOS vs Cisco</a>
+    <a href="#sl-s7">Step 7 — Fix Applied</a>
+    <a href="#sl-s8">Step 8 — STP Converges</a>
+    <a href="#sl-s9">Step 9 — Ping Restored</a>
+    <div class="grp">Takeaway</div>
+    <a href="#sl-lesson">Key Lesson</a>
+  </nav>
+
+  <main class="content">
+
+    <div class="hero-box" id="sl-summary">
+      <div class="hero-tag">Live Troubleshooting Session</div>
+      <h1>EXOS STP Misconfiguration</h1>
+      <p>March 30, 2026 &nbsp;&middot;&nbsp; 5:30 pm Pacific &nbsp;&middot;&nbsp; EVE-NG &nbsp;&middot;&nbsp; 6-Switch Ring</p>
+    </div>
+
+    <table class="cmd-table" style="margin-bottom:32px;">
+      <tr><th>Item</th><th>Detail</th></tr>
+      <tr><td>Platform</td><td>EVE-NG &mdash; 6 &times; EXOS SwitchEngine VMs</td></tr>
+      <tr><td>Topology</td><td>Ring: Core-1 / Core-2 / Core-4 / Core-5 + Edge-1 / Edge-2</td></tr>
+      <tr><td>VLANs</td><td>Data (10) &nbsp;/ Voice (20) &nbsp;/ Kh_Mgmt (30) &mdash; trunked on ports 1 &amp; 2</td></tr>
+      <tr><td>Clients</td><td>6 &times; VPCS &mdash; 2 per VLAN, one on each edge switch</td></tr>
+      <tr><td>Symptom</td><td>VPCS cross-ring pings failing: "host not reachable"</td></tr>
+      <tr><td>Root Cause</td><td>STP bound to no VLANs &mdash; loop was live on all 3 VLANs</td></tr>
+      <tr><td>Fix</td><td>Bind VLANs to STPD s0 on all 6 switches</td></tr>
+      <tr><td>Outcome</td><td>Core-4 port 2 blocked by STP &rarr; pings restored on all VLANs</td></tr>
+    </table>
+
+    <!-- Step 1 -->
+    <section id="sl-s1">
+      <h2>Step 1 &mdash; Reported Symptom</h2>
+      <div class="callout warn">
+        <strong>Observation:</strong> "I cannot see the FDB showing VPCs on SW-3 or SW-6." &mdash; Lab build Steps 1–8 complete, VPCs configured, but clients not learning in FDB and pings failing.
+      </div>
+      <p>First action: attempt a basic VPCS ping across the ring.</p>
+      <div class="cmd-block">
+<span class="cmd-ps">VPCS&gt;</span> ping 10.10.10.12
+<span style="color:#f87171;">host (10.10.10.12) not reachable</span>
+      </div>
+      <p>Step 1 (IP assignment) confirmed correct. Step 2 ping fails immediately. Begin systematic investigation.</p>
+    </section>
+
+    <!-- Step 2 -->
+    <section id="sl-s2">
+      <h2>Step 2 &mdash; Verify Port &amp; VLAN Config on Edge-1</h2>
+      <p>Check whether port 3 on Edge-1 is correctly placed untagged in Data VLAN and physically active.</p>
+      <div class="cmd-block">
+<span class="cmd-ps">Edge-1 #</span> show vlan Data
+<span style="color:#6ee7b7;">VLAN Data, 802.1Q Tag 10, 3 Ports</span>
+<span style="color:#6ee7b7;">  Untagged: port 3   (VPCS Client1 connected)</span>
+<span style="color:#6ee7b7;">  Tagged:   ports 1, 2   (ring trunks)</span>
+
+<span class="cmd-ps">Edge-1 #</span> show ports 3 info
+<span style="color:#6ee7b7;">Port 3 &mdash; Link State: Active, Speed: 100Mbps, Duplex: Full</span>
+      </div>
+      <p>Port configuration is correct. Physical link is up. The problem lies elsewhere in the path.</p>
+    </section>
+
+    <!-- Step 3 -->
+    <section id="sl-s3">
+      <h2>Step 3 &mdash; ARP Asymmetry Found (Loop Signature)</h2>
+      <p>Check ARP tables on both VPCS clients in the Data VLAN to see if frames are reaching their destination.</p>
+      <div class="cmd-block">
+<span class="cmd-ps">Client2 (10.10.10.12) &gt;</span> show arp
+<span style="color:#6ee7b7;">10.10.10.11  00:50:79:66:68:07   &larr; Client1 IS in Client2's ARP table</span>
+
+<span class="cmd-ps">Client1 (10.10.10.11) &gt;</span> show arp
+<span style="color:#f87171;">(empty)   &larr; Client2 is NOT in Client1's ARP table</span>
+      </div>
+      <div class="callout warn">
+        <strong>Key finding:</strong> ARP is one-way. Client2 received Client1's broadcast ARP request (it traveled one direction around the ring), but Client1 never received the unicast ARP reply. The reply was delivered to the wrong port due to FDB flapping — the classic signature of a live Layer 2 loop.
+      </div>
+    </section>
+
+    <!-- Step 4 -->
+    <section id="sl-s4">
+      <h2>Step 4 &mdash; FDB Check Confirms Wrong-Port Learning</h2>
+      <p>Check the Forwarding Database on Edge-2 to see where it thinks Client1's MAC is reachable.</p>
+      <div class="cmd-block">
+<span class="cmd-ps">Edge-2 #</span> show fdb
+Mac                  Vlan       Age  Flags   Port
+-------------------------------------------------------
+<span style="color:#f87171;">00:50:79:66:68:07    Data(10)    0   d       2   &larr; Client1 MAC learned on trunk (WRONG)</span>
+      </div>
+      <p>Client1's MAC (physically connected to Edge-1 port 3) is being learned on Edge-2 port 2, a trunk port toward the ring backbone. Edge-2 thinks Client1 is reachable via the ring — so it forwards the ARP reply <em>back into the ring</em> instead of directly to Edge-1.</p>
+      <p>This only happens when broadcast frames flood <strong>both directions</strong> simultaneously around the ring — confirming a live loop with no STP protection.</p>
+    </section>
+
+    <!-- Step 5 -->
+    <section id="sl-s5">
+      <h2>Step 5 &mdash; <code>show stpd detail</code> Reveals Root Cause</h2>
+      <p>Run <code>show stpd detail</code> on Edge-2 expecting to see VLANs protected by Spanning Tree.</p>
+      <div class="cmd-block">
+<span class="cmd-ps">Edge-2 #</span> show stpd detail
+Stpd: s0         Stp: <span style="color:#6ee7b7;">ENABLED</span>      Number of Ports: 0
+<span style="color:#f87171;">  Ports:                  (none)</span>
+<span style="color:#f87171;">  Participating Vlans:    (none)</span>
+  Bridge Priority: 32768
+  Bridge ID: 00:04:96:xx:xx:xx
+      </div>
+      <div class="callout callout-red">
+        <strong>Root cause confirmed.</strong> STP status shows ENABLED — but it is bound to zero VLANs and zero ports. It is protecting nothing. The ring has been running as a live loop since it was built.
+      </div>
+      <p>Same command run on all 6 switches. Every single one returns identical output:</p>
+      <div class="cmd-block">
+<span style="color:#94a3b8;">Core-1 #</span> show stpd detail  &rarr;  <span style="color:#f87171;">Ports: (none) / Participating Vlans: (none)</span>
+<span style="color:#94a3b8;">Core-2 #</span> show stpd detail  &rarr;  <span style="color:#f87171;">Ports: (none) / Participating Vlans: (none)</span>
+<span style="color:#94a3b8;">Core-4 #</span> show stpd detail  &rarr;  <span style="color:#f87171;">Ports: (none) / Participating Vlans: (none)</span>
+<span style="color:#94a3b8;">Core-5 #</span> show stpd detail  &rarr;  <span style="color:#f87171;">Ports: (none) / Participating Vlans: (none)</span>
+<span style="color:#94a3b8;">Edge-1 #</span> show stpd detail  &rarr;  <span style="color:#f87171;">Ports: (none) / Participating Vlans: (none)</span>
+<span style="color:#94a3b8;">Edge-2 #</span> show stpd detail  &rarr;  <span style="color:#f87171;">Ports: (none) / Participating Vlans: (none)</span>
+      </div>
+    </section>
+
+    <!-- Step 6 -->
+    <section id="sl-s6">
+      <h2>Step 6 &mdash; Why? EXOS Spanning Tree Domains vs Cisco PVST+</h2>
+      <table class="cmd-table">
+        <tr><th>Platform</th><th>STP Behavior</th></tr>
+        <tr><td>Cisco IOS (PVST+)</td><td>STP runs automatically per VLAN. As soon as a VLAN exists, it is protected. No manual binding needed.</td></tr>
+        <tr><td>EXOS SwitchEngine</td><td>STP uses Spanning Tree Domains (STPDs). The STPD <code>s0</code> exists by default but you must explicitly bind VLANs <em>and</em> ports to it. Without the binding, the STPD runs its own internal election but has no visibility into data traffic.</td></tr>
+      </table>
+      <p>The STPD was electing a root bridge and running BPDUs — but those BPDUs carried no VLAN context and had no effect on forwarding for Data, Voice, or Kh_Mgmt traffic. The ring was completely unprotected from the moment it was cabled.</p>
+    </section>
+
+    <!-- Step 7 -->
+    <section id="sl-s7">
+      <h2>Step 7 &mdash; Fix Applied on All 6 Switches</h2>
+      <p>Bind all three data VLANs to STPD s0 on both ring trunk ports (1 and 2) on every switch:</p>
+      <div class="cmd-block">
+<span class="cmd-ps"># Repeat on Core-1, Core-2, Core-4, Core-5, Edge-1, Edge-2</span>
+<span class="cmd-ps">Switch #</span> configure stpd s0 add vlan Data ports 1,2
+<span class="cmd-ps">Switch #</span> configure stpd s0 add vlan Voice ports 1,2
+<span class="cmd-ps">Switch #</span> configure stpd s0 add vlan Kh_Mgmt ports 1,2
+<span class="cmd-ps">Switch #</span> save configuration
+      </div>
+    </section>
+
+    <!-- Step 8 -->
+    <section id="sl-s8">
+      <h2>Step 8 &mdash; STP Converges, Loop Broken (~30 seconds)</h2>
+      <p>After applying the fix on all 6 switches, STP elects a root bridge and blocks one port to break the ring.</p>
+      <div class="cmd-block">
+<span class="cmd-ps">Core-4 #</span> show stpd s0 ports detail
+Port 1:  Role: Designated   State: <span style="color:#6ee7b7;">FORWARDING</span>
+<span style="color:#facc15;font-weight:700;">Port 2:  Role: Alternate     State: BLOCKING   &larr; loop broken here</span>
+      </div>
+      <p>All other ports on all 6 switches are in FORWARDING state. Core-4 port 2 is the single blocked port — the correct topology for a loop-free ring. STP is now actively protecting all three VLANs.</p>
+    </section>
+
+    <!-- Step 9 -->
+    <section id="sl-s9">
+      <h2>Step 9 &mdash; Ping Restored</h2>
+      <div class="cmd-block">
+<span class="cmd-ps">Edge-2 #</span> clear fdb
+<span style="color:#94a3b8;">(FDB flushed &mdash; stale wrong-port MAC entries removed)</span>
+
+<span class="cmd-ps">Client1 (10.10.10.11) &gt;</span> ping 10.10.10.12
+<span style="color:#6ee7b7;font-weight:700;">84 bytes from 10.10.10.12  icmp_seq=1  ttl=64  time=2.4ms  &#10003;</span>
+<span style="color:#6ee7b7;">84 bytes from 10.10.10.12  icmp_seq=2  ttl=64  time=1.9ms  &#10003;</span>
+<span style="color:#6ee7b7;">84 bytes from 10.10.10.12  icmp_seq=3  ttl=64  time=2.1ms  &#10003;</span>
+      </div>
+      <div class="callout callout-green">
+        All VPCS pings across Data, Voice, and Kh_Mgmt VLANs restored. Issue fully resolved.
+      </div>
+    </section>
+
+    <!-- Key Lesson -->
+    <section id="sl-lesson">
+      <h2>Key Lesson</h2>
+      <div class="callout warn">
+        <strong>EXOS STP "ENABLED" &ne; STP is protecting your VLANs.</strong><br><br>
+        The STPD s0 runs its own internal election but is invisible to data traffic until you explicitly bind VLANs and ports with <code>configure stpd s0 add vlan &lt;name&gt; ports &lt;list&gt;</code>.<br><br>
+        Always verify with <code>show stpd detail</code>. If you see <code>Participating VLANs: (none)</code>, your ring has zero loop protection — regardless of what the STP status line says.
+      </div>
+    </section>
+
+    <div class="foot">&copy; 2026 Khursheed Khan &middot; EXOS Layer 2 Ring Lab &middot; All rights reserved</div>
+  </main>
+</div>
+</div><!-- /tab-sessionlog -->
+
+<!-- ════ #me HIDDEN SESSION (banner + modal) ════ -->
+<div id="session-banner">
+  <div class="sb-inner">
+    <div class="sb-text">
+      <div class="sb-title">Troubleshooting with Khursheed &nbsp;&mdash;&nbsp; March 30, 2026 &nbsp;·&nbsp; 5:30 pm Pacific</div>
+      <div class="sb-sub">Topic: STP misconfiguration in a 6-switch EXOS ring &nbsp;·&nbsp; EVE-NG &nbsp;·&nbsp; Resolved live</div>
+    </div>
+    <div class="sb-actions">
+      <button class="sb-btn" onclick="document.getElementById('session-modal').style.display='block'">View session log</button>
+      <span class="sb-close" onclick="document.getElementById('session-banner').style.display='none'">&#10005; dismiss</span>
+    </div>
+  </div>
+</div>
+
+<div id="session-modal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="sm-box">
+    <div class="sm-head">
+      <div>
+        <h2>Session Log &nbsp;&mdash;&nbsp; March 30, 2026 &nbsp;·&nbsp; 5:30 pm Pacific</h2>
+        <p>EXOS Layer 2 Ring &nbsp;·&nbsp; EVE-NG &nbsp;·&nbsp; 6 Switches &nbsp;·&nbsp; STP Troubleshooting</p>
+      </div>
+      <span class="sm-x" onclick="document.getElementById('session-modal').style.display='none'">&#10005;</span>
+    </div>
+    <div class="sm-body">
+
+      <h3>Session at a Glance</h3>
+      <table class="sm-table">
+        <tr><td>Date / Time</td><td>March 30, 2026 &mdash; 5:30 pm Pacific</td></tr>
+        <tr><td>Platform</td><td>EVE-NG &mdash; 6 &times; EXOS SwitchEngine VMs</td></tr>
+        <tr><td>Topology</td><td>6-switch ring: Core-1 / Core-2 / Core-4 / Core-5 (backbone) + Edge-1 / Edge-2</td></tr>
+        <tr><td>VLANs</td><td>Data (10) / Voice (20) / Kh_Mgmt (30) &mdash; all trunked on ports 1 &amp; 2</td></tr>
+        <tr><td>Clients</td><td>6 &times; VPCS &mdash; 2 per VLAN, one on each edge switch</td></tr>
+        <tr><td>Symptom</td><td>VPCS cross-ring pings failing: "host not reachable"</td></tr>
+        <tr><td>Root Cause</td><td>STP enabled but bound to <em>no VLANs</em> &mdash; loop was live</td></tr>
+        <tr><td>Outcome</td><td>Bind VLANs to STPD on all 6 switches &rarr; Core-4 port 2 blocked &rarr; pings restored</td></tr>
+      </table>
+
+      <!-- ── STEP 1 ── -->
+      <h3>Step 1 &mdash; Reported Symptom</h3>
+      <p style="color:#fde68a;font-weight:600;">Khursheed: "I cannot see the FDB showing VPCs on SW-3 or SW-6."</p>
+      <p>Lab build Steps 1–8 completed. VPCs configured. But the FDB on the edge switches wasn't learning client MACs. First action: try a basic VPCS ping.</p>
+      <div class="sm-cmd">
+<span class="ok">VPCS&gt; ping 10.10.10.12</span>
+<span style="color:#f87171;display:block;">host (10.10.10.12) not reachable</span>
+      </div>
+      <p>Step 1 confirmed (IPs set). Step 2 fails immediately.</p>
+
+      <!-- ── STEP 2 ── -->
+      <h3>Step 2 &mdash; Verify Port &amp; VLAN Config on Edge-1</h3>
+      <p>Checked whether port 3 on Edge-1 was correctly untagged in Data VLAN and physically active.</p>
+      <div class="sm-cmd">
+<span class="c">Edge-1 # show vlan Data</span>
+<span class="ok">VLAN Data, 802.1Q Tag 10, 3 Ports</span>
+<span class="ok">  Untagged: port 3 (VPCS Client1 connected)</span>
+<span class="ok">  Tagged:   ports 1, 2 (ring trunks)</span>
+<span class="c">Edge-1 # show ports 3 info</span>
+<span class="ok">Port 3 — Link State: Active, Speed: 100Mbps, Duplex: Full</span>
+      </div>
+      <p>Port config is correct. Physical link is up. Problem is elsewhere.</p>
+
+      <!-- ── STEP 3 ── -->
+      <h3>Step 3 &mdash; ARP Asymmetry Found (Loop Signature)</h3>
+      <p>Checked ARP tables on both VPCS clients in the Data VLAN.</p>
+      <div class="sm-cmd">
+<span class="c">VPCS Client2 (10.10.10.12) &gt; show arp</span>
+<span class="ok">10.10.10.11  00:50:79:66:68:07  &lt;-- Client1 IS in Client2's ARP table</span>
+<span class="c">VPCS Client1 (10.10.10.11) &gt; show arp</span>
+<span style="color:#f87171;display:block;">(empty)  &lt;-- Client2 NOT in Client1's ARP table</span>
+      </div>
+      <p style="color:#fde68a;font-weight:600;">Key observation: ARP is one-way. Client2 received Client1's broadcast ARP request, but Client1 never received the unicast ARP reply back. This is the classic signature of a Layer 2 loop causing FDB flapping — the reply is delivered to the wrong port.</p>
+
+      <!-- ── STEP 4 ── -->
+      <h3>Step 4 &mdash; FDB Check on Edge-2 (Wrong Port Learned)</h3>
+      <div class="sm-cmd">
+<span class="c">Edge-2 # show fdb</span>
+<span class="ok">Mac                  Vlan       Age  Flags         Port / Virtual Port List</span>
+<span class="ok">------------------------------------------------------------------------------</span>
+<span style="color:#f87171;display:block;">00:50:79:66:68:07    Data(10)    0   d             2   &lt;-- Client1 MAC learned on trunk (WRONG)</span>
+      </div>
+      <p>Client1's MAC (physically connected to Edge-1 port 3) is being learned on Edge-2 port 2 — a trunk port toward the ring. The switch thinks Client1 is reachable via the ring, not directly from Edge-1. This only happens when frames are flooding <em>both</em> directions around the ring simultaneously — a live loop.</p>
+
+      <!-- ── STEP 5 ── -->
+      <h3>Step 5 &mdash; STP Check Reveals the Root Cause</h3>
+      <p>Ran <code style="color:#89dceb">show stpd detail</code> on Edge-2 expecting to see VLANs protected by STP.</p>
+      <div class="sm-cmd">
+<span class="c">Edge-2 # show stpd detail</span>
+<span class="ok">Stpd: s0         Stp: ENABLED      Number of Ports: 0</span>
+<span style="color:#f87171;display:block;">  Ports:                  (none)</span>
+<span style="color:#f87171;display:block;">  Participating Vlans:    (none)</span>
+<span class="ok">  Bridge Priority: 32768   Bridge ID: 00:.....</span>
+      </div>
+      <p style="color:#fde68a;font-weight:600;">Root cause confirmed. STP is "ENABLED" — but it is bound to ZERO VLANs and ZERO ports. It is protecting nothing. The ring has no loop protection at all.</p>
+      <p>Ran the same check on all 6 switches. Every single one returned <code style="color:#89dceb">Ports: (none) / Participating VLANs: (none)</code>. The entire ring was unprotected.</p>
+      <div class="sm-cmd">
+<span class="ok">Core-1 # show stpd detail  &rarr;  Ports: (none) / Participating Vlans: (none)</span>
+<span class="ok">Core-2 # show stpd detail  &rarr;  Ports: (none) / Participating Vlans: (none)</span>
+<span class="ok">Core-4 # show stpd detail  &rarr;  Ports: (none) / Participating Vlans: (none)</span>
+<span class="ok">Core-5 # show stpd detail  &rarr;  Ports: (none) / Participating Vlans: (none)</span>
+<span class="ok">Edge-1 # show stpd detail  &rarr;  Ports: (none) / Participating Vlans: (none)</span>
+<span class="ok">Edge-2 # show stpd detail  &rarr;  Ports: (none) / Participating Vlans: (none)</span>
+      </div>
+
+      <!-- ── STEP 6 ── -->
+      <h3>Step 6 &mdash; Why? EXOS vs Cisco PVST+</h3>
+      <p>On Cisco IOS, STP runs automatically per VLAN (PVST+). You never have to bind VLANs — as soon as a VLAN exists, STP protects it.</p>
+      <p>On EXOS, STP uses <strong>Spanning Tree Domains (STPDs)</strong>. The STPD <code style="color:#89dceb">s0</code> exists by default, but you must explicitly tell it which VLANs and which ports to protect. Without the binding, the STPD runs its election internally but ignores all data traffic.</p>
+
+      <!-- ── STEP 7 ── -->
+      <h3>Step 7 &mdash; Fix Applied on All 6 Switches</h3>
+      <p>On every switch, bind all three data VLANs to STPD s0 on both ring trunk ports (1 and 2):</p>
+      <div class="sm-cmd">
+<span class="c">configure stpd s0 add vlan Data ports 1,2</span>
+<span class="c">configure stpd s0 add vlan Voice ports 1,2</span>
+<span class="c">configure stpd s0 add vlan Kh_Mgmt ports 1,2</span>
+<span class="c">save configuration</span>
+      </div>
+      <p>Repeated on Core-1, Core-2, Core-4, Core-5, Edge-1, Edge-2.</p>
+
+      <!-- ── STEP 8 ── -->
+      <h3>Step 8 &mdash; STP Converges, Loop Broken</h3>
+      <p>After ~30 seconds, STP elected a root bridge and blocked one port to break the ring.</p>
+      <div class="sm-cmd">
+<span class="c">Core-4 # show stpd s0 ports detail</span>
+<span class="ok">Port 1:  Role: Designated   State: FORWARDING</span>
+<span style="color:#fde68a;display:block;font-weight:700;">Port 2:  Role: Alternate     State: BLOCKING  &larr; loop broken here</span>
+      </div>
+      <p>All other ports on all 6 switches are in FORWARDING state. The ring now has exactly one blocked port — the correct topology for a loop-free ring.</p>
+
+      <!-- ── STEP 9 ── -->
+      <h3>Step 9 &mdash; Ping Restored</h3>
+      <div class="sm-cmd">
+<span class="c">Edge-2 # clear fdb</span>
+<span class="ok">(FDB flushed — stale wrong-port MAC entries removed)</span>
+<span class="c">VPCS Client1 (10.10.10.11) &gt; ping 10.10.10.12</span>
+<span style="color:#6ee7b7;display:block;font-weight:700;">84 bytes from 10.10.10.12  icmp_seq=1  ttl=64  time=2.4ms   &#10003;</span>
+<span style="color:#6ee7b7;display:block;">84 bytes from 10.10.10.12  icmp_seq=2  ttl=64  time=1.9ms   &#10003;</span>
+<span style="color:#6ee7b7;display:block;">84 bytes from 10.10.10.12  icmp_seq=3  ttl=64  time=2.1ms   &#10003;</span>
+      </div>
+      <p style="color:#6ee7b7;font-weight:700;">All VPCS pings across Data, Voice, and Kh_Mgmt VLANs restored. Issue resolved.</p>
+
+      <!-- ── KEY LESSON ── -->
+      <h3>Key Lesson</h3>
+      <p><strong style="color:#facc15;">EXOS STP "ENABLED" &ne; STP is protecting your VLANs.</strong> The STPD s0 runs its own internal election but is invisible to data traffic until you explicitly bind VLANs and ports. Always verify with <code style="color:#89dceb">show stpd detail</code> — if <code style="color:#89dceb">Participating VLANs: (none)</code>, your ring has no loop protection regardless of what the status line says.</p>
+
+    </div>
+    <div class="sm-footer">&copy; 2026 Khursheed Khan &nbsp;&middot;&nbsp; Private session log &nbsp;&middot;&nbsp; All rights reserved</div>
+  </div>
+</div>
+</body>
+</html>
