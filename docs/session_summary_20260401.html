@@ -3,540 +3,989 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CISCO-EN CLI Agent — Progress Log | March 31 + April 1, 2026</title>
+<title>CISCO-EN CLI Agent — Session Summary April 1, 2026</title>
 <style>
-  :root{--bg:#0d1117;--sur:#161b22;--brd:#30363d;--acc:#58a6ff;--grn:#3fb950;--yel:#d29922;--red:#f85149;--pur:#bc8cff;--txt:#e6edf3;--mut:#8b949e;--cod:#1f2937;}
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;flex-direction:column;min-height:100vh;}
-
-  /* ── Tab bar ── */
-  .tabbar{background:var(--sur);border-bottom:1px solid var(--brd);display:flex;align-items:center;padding:0 24px;gap:4px;position:sticky;top:0;z-index:100;}
-  .tabbar-title{color:var(--acc);font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:14px 0;margin-right:20px;white-space:nowrap;}
-  .tab-btn{padding:14px 18px;font-size:13px;font-weight:500;color:var(--mut);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;white-space:nowrap;}
-  .tab-btn:hover{color:var(--txt);}
-  .tab-btn.active{color:var(--acc);border-bottom-color:var(--acc);}
-
-  /* ── Layout ── */
-  .body-wrap{display:flex;flex:1;}
-  nav{width:240px;min-width:240px;background:var(--sur);border-right:1px solid var(--brd);padding:20px 0;position:sticky;top:48px;height:calc(100vh - 48px);overflow-y:auto;}
-  nav h2{color:var(--acc);font-size:10px;text-transform:uppercase;letter-spacing:1.2px;padding:0 16px 8px;border-bottom:1px solid var(--brd);margin-bottom:8px;}
-  nav a{display:block;padding:5px 16px;color:var(--mut);text-decoration:none;font-size:12px;border-left:3px solid transparent;transition:all .15s;}
-  nav a:hover,nav a.active{color:var(--acc);border-left-color:var(--acc);background:rgba(88,166,255,.06);}
-  nav .section-label{padding:10px 16px 3px;color:var(--mut);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-top:4px;}
-  main{flex:1;padding:32px 44px;max-width:960px;}
-
-  /* ── Typography ── */
-  h1{font-size:22px;font-weight:700;color:var(--acc);margin-bottom:4px;}
-  .sub{color:var(--mut);font-size:12.5px;margin-bottom:28px;}
-  h2{font-size:17px;font-weight:600;color:var(--txt);margin:34px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--brd);scroll-margin-top:60px;}
-  h3{font-size:13.5px;font-weight:600;color:var(--acc);margin:18px 0 7px;}
-  p{font-size:13px;line-height:1.75;color:#c9d1d9;margin-bottom:9px;}
-  ul,ol{padding-left:20px;margin-bottom:12px;}
-  li{font-size:13px;line-height:1.75;color:#c9d1d9;margin-bottom:2px;}
-  code{background:var(--cod);color:#79c0ff;padding:2px 5px;border-radius:4px;font-family:'SF Mono',Consolas,monospace;font-size:11.5px;}
-  pre{background:var(--cod);border:1px solid var(--brd);border-radius:8px;padding:12px;overflow-x:auto;margin:8px 0 12px;}
-  pre code{background:none;padding:0;color:#e6edf3;font-size:12px;line-height:1.6;}
-  table{width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:12.5px;}
-  th{background:var(--sur);color:var(--acc);text-align:left;padding:7px 10px;border:1px solid var(--brd);}
-  td{padding:6px 10px;border:1px solid var(--brd);color:#c9d1d9;vertical-align:top;}
-  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
-  .badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;margin:1px;}
-  .g{background:rgba(63,185,80,.15);color:var(--grn);}
-  .y{background:rgba(210,153,34,.15);color:var(--yel);}
-  .r{background:rgba(248,81,73,.15);color:var(--red);}
-  .b{background:rgba(88,166,255,.15);color:var(--acc);}
-  .p{background:rgba(188,140,255,.15);color:var(--pur);}
-  .box{border-left:3px solid var(--acc);background:rgba(88,166,255,.07);padding:10px 14px;margin:12px 0;border-radius:0 6px 6px 0;}
-  .box.warn{border-left-color:var(--yel);background:rgba(210,153,34,.07);}
-  .box.ok{border-left-color:var(--grn);background:rgba(63,185,80,.07);}
-  .box.red{border-left-color:var(--red);background:rgba(248,81,73,.07);}
-  .box p{margin:0;font-size:12.5px;}
-  .jcard{border:1px solid var(--brd);border-radius:8px;padding:12px;margin-bottom:9px;}
-  .jcard h4{color:var(--acc);font-size:13px;margin-bottom:4px;}
-  hr{border:none;border-top:1px solid var(--brd);margin:24px 0;}
-  a{color:#e6edf3;text-decoration:underline;text-decoration-color:#58a6ff;}
-  a:hover{color:#58a6ff;}
-
-  /* ── Tab content visibility ── */
-  .tab-panel{display:none;}
-  .tab-panel.active{display:block;}
+:root{--bg:#0d1117;--sur:#161b22;--brd:#30363d;--acc:#58a6ff;--grn:#3fb950;--yel:#d29922;--red:#f85149;--pur:#bc8cff;--txt:#e6edf3;--mut:#8b949e;--cod:#1f2937;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;flex-direction:column;min-height:100vh;}
+.tabbar{background:var(--sur);border-bottom:1px solid var(--brd);display:flex;align-items:center;padding:0 24px;gap:4px;position:sticky;top:0;z-index:100;}
+.tabbar-title{color:var(--acc);font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:14px 0;margin-right:20px;white-space:nowrap;}
+.tab-btn{padding:14px 18px;font-size:13px;font-weight:500;color:var(--mut);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.tab-btn:hover{color:var(--txt);}
+.tab-btn.active{color:var(--acc);border-bottom-color:var(--acc);}
+.body-wrap{display:flex;flex:1;}
+nav{width:250px;min-width:250px;background:var(--sur);border-right:1px solid var(--brd);padding:20px 0;position:sticky;top:48px;height:calc(100vh - 48px);overflow-y:auto;}
+nav h2{color:var(--acc);font-size:11px;text-transform:uppercase;letter-spacing:1.2px;padding:0 18px 10px;border-bottom:1px solid var(--brd);margin-bottom:10px;}
+nav a{display:block;padding:6px 18px;color:var(--mut);text-decoration:none;font-size:12.5px;border-left:3px solid transparent;transition:all .15s;}
+nav a:hover,nav a.active{color:var(--acc);border-left-color:var(--acc);background:rgba(88,166,255,.06);}
+nav .section-label{padding:10px 18px 4px;color:var(--mut);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-top:6px;}
+main{flex:1;padding:36px 48px;max-width:980px;}
+h1{font-size:24px;font-weight:700;color:var(--acc);margin-bottom:4px;}
+.sub{color:var(--mut);font-size:13px;margin-bottom:32px;}
+h2{font-size:18px;font-weight:600;color:var(--txt);margin:38px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--brd);scroll-margin-top:60px;}
+h3{font-size:14px;font-weight:600;color:var(--acc);margin:20px 0 8px;}
+p{font-size:13.5px;line-height:1.75;color:#c9d1d9;margin-bottom:10px;}
+ul,ol{padding-left:20px;margin-bottom:12px;}
+li{font-size:13.5px;line-height:1.75;color:#c9d1d9;margin-bottom:2px;}
+code{background:var(--cod);color:#79c0ff;padding:2px 6px;border-radius:4px;font-family:'SF Mono',Consolas,monospace;font-size:12px;}
+pre{background:var(--cod);border:1px solid var(--brd);border-radius:8px;padding:14px;overflow-x:auto;margin:10px 0 14px;}
+pre code{background:none;padding:0;color:#e6edf3;font-size:12.5px;line-height:1.6;}
+table{width:100%;border-collapse:collapse;margin:12px 0 18px;font-size:13px;}
+th{background:var(--sur);color:var(--acc);text-align:left;padding:8px 11px;border:1px solid var(--brd);}
+td{padding:7px 11px;border:1px solid var(--brd);color:#c9d1d9;vertical-align:top;}
+tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;margin:1px;}
+.g{background:rgba(63,185,80,.15);color:var(--grn);}
+.y{background:rgba(210,153,34,.15);color:var(--yel);}
+.r{background:rgba(248,81,73,.15);color:var(--red);}
+.b{background:rgba(88,166,255,.15);color:var(--acc);}
+.p{background:rgba(188,140,255,.15);color:var(--pur);}
+.box{border-left:3px solid var(--acc);background:rgba(88,166,255,.07);padding:11px 15px;margin:14px 0;border-radius:0 6px 6px 0;}
+.box.warn{border-left-color:var(--yel);background:rgba(210,153,34,.07);}
+.box.ok{border-left-color:var(--grn);background:rgba(63,185,80,.07);}
+.box.red{border-left-color:var(--red);background:rgba(248,81,73,.07);}
+.box p{margin:0;font-size:13px;}
+.step{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start;}
+.sn{width:26px;height:26px;min-width:26px;border-radius:50%;background:var(--acc);color:#000;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.sb{flex:1;}
+.jcard{border:1px solid var(--brd);border-radius:8px;padding:14px;margin-bottom:10px;}
+.jcard h4{color:var(--acc);font-size:13.5px;margin-bottom:5px;}
+hr{border:none;border-top:1px solid var(--brd);margin:28px 0;}
+.topo{background:var(--cod);border:1px solid var(--brd);border-radius:8px;padding:16px;font-family:'SF Mono',Consolas,monospace;font-size:12px;color:#e6edf3;line-height:1.7;margin:12px 0;}
+a{color:#e6edf3;text-decoration:underline;text-decoration-color:#58a6ff;}
+a:hover{color:#58a6ff;}
+h3 a,li a,td a{color:#e6edf3;}
+h3 a:hover,li a:hover,td a:hover{color:#58a6ff;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
 </style>
 </head>
 <body>
 
-<!-- Tab bar -->
 <div class="tabbar">
-  <div class="tabbar-title">🔀 CISCO-EN CLI Agent</div>
-  <button class="tab-btn active" onclick="switchTab('day1',this)">📅 Day 1 — March 31, 2026</button>
-  <button class="tab-btn" onclick="switchTab('day2',this)">📅 Day 2 — April 1, 2026</button>
+  <span class="tabbar-title">CISCO-EN CLI Agent</span>
+  <button class="tab-btn active" onclick="switchTab('day1',this)">&#128197; Day 1 &mdash; March 31, 2026</button>
+  <button class="tab-btn" onclick="switchTab('day2',this)">&#128197; Day 2 &mdash; April 1, 2026</button>
 </div>
 
 <div class="body-wrap">
 
-<!-- ══════════════════════════════════════════════════════════════════════
-     SHARED SIDEBAR (updated by JS on tab switch)
-══════════════════════════════════════════════════════════════════════ -->
-<nav id="nav">
-  <!-- Day 1 nav -->
-  <div id="nav-day1">
-    <h2>March 31, 2026</h2>
+  <!-- NAV DAY 1 -->
+  <nav id="nav-day1">
+    <h2>Navigation</h2>
     <div class="section-label">Session</div>
-    <a href="#d1-overview">Overview</a>
-    <a href="#d1-journey">Research Journey</a>
-    <a href="#d1-architecture">Architecture</a>
+    <a href="#overview">Overview</a>
+    <a href="#journey">Research Journey</a>
+    <a href="#architecture">Architecture</a>
     <div class="section-label">Guardrails</div>
-    <a href="#d1-guardrails">Guardrail System</a>
-    <a href="#d1-hallucination">Zero-Hallucination Policy</a>
+    <a href="#guardrails">Guardrail System</a>
+    <a href="#hallucination">Zero-Hallucination Policy</a>
+    <a href="#validation">Validating RAG Tuning</a>
+    <div class="section-label">New Features</div>
+    <a href="#topology">Topology Generator (Planned)</a>
+    <a href="#reference">Reference Library</a>
     <div class="section-label">Deployment</div>
-    <a href="#d1-github">GitHub</a>
-    <a href="#d1-railway">Railway Steps</a>
-    <a href="#d1-sandbox">Sandbox Test Plan</a>
+    <a href="#github">GitHub</a>
+    <a href="#railway">Railway Step by Step</a>
+    <a href="#sandbox">Sandbox Test Plan</a>
     <div class="section-label">Roadmap</div>
-    <a href="#d1-files">Files Built</a>
-    <a href="#d1-pending">Pending Day 1</a>
-  </div>
-  <!-- Day 2 nav -->
-  <div id="nav-day2" style="display:none">
-    <h2>April 1, 2026</h2>
+    <a href="#remaining">Remaining Steps</a>
+    <a href="#pipeline">Research Pipeline &amp; Files</a>
+    <a href="#files">All Files Built</a>
+    <a href="#pending">Pending Items</a>
+  </nav>
+
+  <!-- NAV DAY 2 -->
+  <nav id="nav-day2" style="display:none;">
+    <h2>Navigation</h2>
     <div class="section-label">Morning</div>
     <a href="#d2-research">NX-OS/IOS-XE Research</a>
     <a href="#d2-guardrails">Guardrail Updates</a>
     <a href="#d2-search">3-Tier Search</a>
     <div class="section-label">Afternoon</div>
-    <a href="#d2-railway">Railway Deploy — Blockers</a>
+    <a href="#d2-railway">Railway Deploy Blockers</a>
     <a href="#d2-dashboard">Completeness Dashboard</a>
     <a href="#d2-e2e">E2E Wizard Test</a>
     <a href="#d2-multiuser">Multi-User + Logging</a>
     <div class="section-label">Pending</div>
     <a href="#d2-tests">T1-T8 Acceptance Tests</a>
     <a href="#d2-pgdump">pg_dump Backup</a>
-    <a href="#d2-sprints">Sprint Roadmap</a>
+    <a href="#d2-sprints">Sprint Roadmap (0-9)</a>
     <a href="#d2-security">Security Notes</a>
-  </div>
-</nav>
+  </nav>
 
-<!-- ══════════════════════════════════════════════════════════════════════
-     DAY 1 — MARCH 31, 2026
-══════════════════════════════════════════════════════════════════════ -->
-<main>
-<div id="day1" class="tab-panel active">
-  <h1>CISCO ↔ Extreme Networks CLI Mapping Agent</h1>
-  <div class="sub">Day 1 — March 31, 2026 &nbsp;|&nbsp; Khursheed Khan, Extreme Networks SA Team &nbsp;|&nbsp; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent" target="_blank">GitHub Repo</a></div>
+  <!-- TAB PANEL: DAY 1 -->
+  <div id="tab-day1" class="tab-panel active">
+    <main>
+      <h1>CISCO &#x2194; Extreme Networks CLI Mapping Agent</h1>
+      <div class="sub">Session Summary &mdash; March 31, 2026 &nbsp;|&nbsp; Khursheed Khan, Extreme Networks SA Team &nbsp;|&nbsp; Shared with team via GitHub</div>
 
-  <section id="d1-overview">
-    <h2>Overview</h2>
-    <p>The CISCO-EN CLI Mapping Agent is a RAG-powered web application that translates CLI commands across 6 network operating systems organized into 9 functional bins. Day 1 covered the full journey from initial research through architecture, development, and the path to Railway deployment.</p>
-    <table>
-      <tr><th>Item</th><th>Detail</th></tr>
-      <tr><td>GitHub</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent" target="_blank">khursheedkhanaiforgood-ai/cisco-en-cli-agent</a></td></tr>
-      <tr><td>Railway URL</td><td><a href="https://cisco-en-cli-agent-production-fbf7.up.railway.app" target="_blank">cisco-en-cli-agent-production-fbf7.up.railway.app</a></td></tr>
-      <tr><td>AI model</td><td>claude-sonnet-4-6</td></tr>
-      <tr><td>Embeddings</td><td>all-MiniLM-L6-v2 (384-dim, normalized)</td></tr>
-      <tr><td>DB rows (seed)</td><td>~528 rows | Target: 12,000</td></tr>
-      <tr><td>UI tabs</td><td>13 (AI Query, E2E Wizard, 9 bins, DB Browser, Add Data)</td></tr>
-      <tr><td>Status at end of Day 1</td><td><span class="badge y">Locally complete — Railway deploy pending</span></td></tr>
-    </table>
-  </section>
+      <!-- OVERVIEW -->
+      <section id="overview">
+        <h2>Overview</h2>
+        <p>The CISCO-EN CLI Mapping Agent is a RAG-powered web application that translates CLI commands across 6 network operating systems organized into 9 functional bins. This document covers the full journey from initial research through architecture, development, and the path to Railway deployment.</p>
+        <table>
+          <tr><th>Item</th><th>Detail</th></tr>
+          <tr><td>GitHub repo</td><td>github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent</td></tr>
+          <tr><td>Deploy target</td><td>Railway (PostgreSQL + pgvector + Streamlit)</td></tr>
+          <tr><td>AI model</td><td>claude-sonnet-4-6</td></tr>
+          <tr><td>Embeddings</td><td>all-MiniLM-L6-v2 (384-dim, normalized)</td></tr>
+          <tr><td>DB rows (seed)</td><td>~528 rows | Target: 12,000</td></tr>
+          <tr><td>Tabs in UI</td><td>13 (AI Query, E2E Wizard, 9 bins, DB Browser, Add Data)</td></tr>
+          <tr><td>Local commits</td><td>5 commits &mdash; ready to push</td></tr>
+          <tr><td>Status</td><td><span class="badge y">Locally Complete &mdash; GitHub + Railway Pending</span></td></tr>
+        </table>
+      </section>
 
-  <section id="d1-journey">
-    <h2>Research Journey: Google → NotebookLM → Claude</h2>
-    <div class="jcard">
-      <h4>Stage 1 — Google Research</h4>
-      <p>Compiled CLI cross-reference guides, cheat sheets, and comparison docs. Output: CLI_X-Ref_Guide, Network_CLI_Cheat_Sheet, CISCO_EN_Commands, Google_Search_EN-CISCO.</p>
-    </div>
-    <div class="jcard">
-      <h4>Stage 2 — Google NotebookLM Deep Analysis</h4>
-      <p>Uploaded Cisco and Extreme vendor documentation (EXOS 22.7, VOSS 9.0) into NotebookLM. Generated 9 per-bin command mapping tables and 27 cross-bin thematic rows. Key discovery: NotebookLM can't handle 60K+ command cells — a vector database was needed.</p>
-    </div>
-    <div class="jcard">
-      <h4>Stage 3 — Claude Code: Architecture + Development</h4>
-      <p>Built full application: RAG pipeline, 13-tab Streamlit UI, SBA E2E lead agent, per-bin guardrails, zero-hallucination policy, data ingest pipeline.</p>
-    </div>
-    <div class="box ok"><p><strong>Key principle:</strong> NotebookLM docs → prompt layer only (reasoning rules). CLI data → database only. Separation ensures Claude is data-driven AND architecturally aware.</p></div>
-  </section>
+      <!-- JOURNEY -->
+      <section id="journey">
+        <h2>Research Journey: Google &rarr; NotebookLM &rarr; Claude</h2>
+        <div class="jcard">
+          <h4>Stage 1 &mdash; Google Research</h4>
+          <p>Researched the problem space: bridging Cisco CLI knowledge for an Extreme Networks SA team. Compiled CLI cross-reference guides, cheat sheets, and command comparison docs. Output: <em>CLI_X-Ref_Guide_1.0-3.pdf</em>, <em>Network_CLI_Cheat_Sheet 1.docx</em>, <em>CISCO_EN_Commands_Mar 31 2026.docx</em>, <em>Google_Search_EN-CISCO_Config_March 31 2026_10am.docx</em>.</p>
+        </div>
+        <div class="jcard">
+          <h4>Stage 2 &mdash; Google NotebookLM Deep Analysis</h4>
+          <p>Uploaded Cisco and Extreme vendor documentation (EXOS User Guide 22.7, VOSS User Guide 9.0) into Google NotebookLM. Generated 9 per-bin command mapping tables, a deep-level cross-bin thematic analysis (27 themes across all platforms), and a full Q&amp;A chat session that surfaced key architectural insights.</p>
+          <p><strong>Key discovery:</strong> NotebookLM cannot handle 60,000+ individual command cells in a spreadsheet &mdash; a proper vector database was needed. This drove the PostgreSQL + pgvector architecture decision.</p>
+        </div>
+        <div class="jcard">
+          <h4>Stage 3 &mdash; Claude Code: Joint Architecture and Development</h4>
+          <p>Brought all NotebookLM outputs to Claude Code. Together built the full application: RAG pipeline, 13-tab Streamlit UI, SBA E2E lead agent, per-bin AI guardrails, zero-hallucination policy, data ingest pipeline, and this reference library.</p>
+        </div>
+        <div class="box ok"><p><strong>Key architectural principle confirmed:</strong> NotebookLM documents do NOT go into the database. Database = CLI command data (what commands exist). Prompt layer = platform reasoning rules (how to think about those commands). This separation ensures Claude is both data-driven AND architecturally aware.</p></div>
+      </section>
 
-  <section id="d1-architecture">
-    <h2>Application Architecture</h2>
-    <pre><code>cisco-en-cli-agent/
-├── src/
-│   ├── agents/orchestrator.py       — classify → RAG → Claude API
-│   ├── agents/e2e_deploy_agent.py   — SBA E2E lead agent
-│   ├── agents/prompts/
-│   │   ├── system_master.md         — master prompt (always active)
-│   │   └── bins/ (×9)               — per-bin guardrail files
-│   ├── database/ connection.py  models.py  seed.py  seed_themes.py
-│   ├── embeddings/encoder.py        — all-MiniLM-L6-v2
-│   ├── rag/search.py                — semantic + keyword + hybrid
-│   └── ui/ app.py + components/
-│       query_box  bin_tabs  db_browser  e2e_wizard  rag_settings
-├── data/seed/*.csv                  — 9 CSVs (~500 rows)
-└── data/reference/notebooklm/       — 14 NotebookLM output docs</code></pre>
-    <h3>RAG Pipeline</h3>
-    <ol>
-      <li>Query → <code>classify_tag()</code> detects functional bin via keyword scoring</li>
-      <li>Query encoded to 384-dim vector by all-MiniLM-L6-v2</li>
-      <li>pgvector cosine similarity search → top-K rows (threshold ≥ 0.35)</li>
-      <li>Rows + system prompt → Claude → formatted response (never invents commands)</li>
-    </ol>
-    <h3>SBA E2E Deployment Order</h3>
-    <p><code>[ONBOARD] → [IF-PHYS] → [L2-SEG] → [FAB-SDN] → [L3-VIRT] → [SEC-ID] → [MGMT-OPS] → [DIAG-LOG]</code></p>
-  </section>
+      <!-- ARCHITECTURE -->
+      <section id="architecture">
+        <h2>Application Architecture</h2>
+        <pre><code>cisco-en-cli-agent/
+&#x251C;&#x2500;&#x2500; src/
+&#x2502;   &#x251C;&#x2500;&#x2500; config.py
+&#x2502;   &#x251C;&#x2500;&#x2500; agents/
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; orchestrator.py          &mdash; classify &rarr; RAG &rarr; Claude API
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; e2e_deploy_agent.py      &mdash; SBA E2E lead agent
+&#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; prompts/
+&#x2502;   &#x2502;       &#x251C;&#x2500;&#x2500; system_master.md     &mdash; master prompt (always active)
+&#x2502;   &#x2502;       &#x2514;&#x2500;&#x2500; bins/                &mdash; 9 bin guardrail files (injected per query)
+&#x2502;   &#x2502;           bin_onboard  bin_sec_id   bin_sys_info  bin_if_phys  bin_l2_seg
+&#x2502;   &#x2502;           bin_fab_sdn  bin_l3_virt  bin_diag_log  bin_mgmt_ops
+&#x2502;   &#x251C;&#x2500;&#x2500; database/
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; connection.py  models.py  seed.py  seed_themes.py
+&#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; migrations/001_initial.sql
+&#x2502;   &#x251C;&#x2500;&#x2500; embeddings/encoder.py        &mdash; all-MiniLM-L6-v2
+&#x2502;   &#x251C;&#x2500;&#x2500; rag/search.py                &mdash; semantic + keyword + hybrid search
+&#x2502;   &#x251C;&#x2500;&#x2500; extractors/csv_loader.py  pdf_extractor.py
+&#x2502;   &#x2514;&#x2500;&#x2500; ui/app.py + components/
+&#x2502;       query_box  bin_tabs  db_browser  e2e_wizard  rag_settings  data_ingest
+&#x251C;&#x2500;&#x2500; data/
+&#x2502;   &#x251C;&#x2500;&#x2500; seed/*.csv                   &mdash; 9 seed files (~500 rows)
+&#x2502;   &#x2514;&#x2500;&#x2500; reference/
+&#x2502;       &#x251C;&#x2500;&#x2500; notebooklm/              &mdash; 14 NotebookLM output docx files
+&#x2502;       &#x2514;&#x2500;&#x2500; base_material/           &mdash; 9 source/input files (PDF + docx + HTML)
+&#x2514;&#x2500;&#x2500; docs/session_summary_20260331.html</code></pre>
 
-  <section id="d1-guardrails">
-    <h2>Guardrail System</h2>
-    <table>
-      <tr><th>Rule</th><th>What it prevents</th></tr>
-      <tr><td>NX-OS Feature Prerequisite</td><td>Generating NX-OS config without <code>feature ospf/bgp/dot1x</code> first</td></tr>
-      <tr><td>EXOS Dual-Step L3</td><td>Omitting <code>enable ipforwarding vlan [name]</code> — #1 routing failure</td></tr>
-      <tr><td>EXOS Negation</td><td>Using <code>no</code> — must use <code>unconfigure/disable/delete</code></td></tr>
-      <tr><td>EXOS OSPF is VLAN-based</td><td>Treating EXOS OSPF as interface-based like Cisco</td></tr>
-      <tr><td>Fabric Engine I-SID Model</td><td>Conflating VNI (Cisco) with I-SID (FE)</td></tr>
-      <tr><td>Zero-Hallucination Policy</td><td>Outputting unverified commands as facts</td></tr>
-    </table>
-  </section>
+        <h3>RAG Pipeline (how a query flows)</h3>
+        <ol>
+          <li>User types a question &rarr; <code>classify_tag()</code> detects functional bin via keyword scoring</li>
+          <li>Query encoded to 384-dim vector by <code>all-MiniLM-L6-v2</code></li>
+          <li>pgvector cosine similarity search &rarr; top-K rows (threshold &ge; 0.35, tunable in sidebar)</li>
+          <li>Rows formatted as context &rarr; sent to Claude with system prompt</li>
+          <li>System prompt = <code>system_master.md</code> + matching <code>bin_*.md</code> guardrail file</li>
+          <li>Claude formats and returns response &mdash; never invents commands</li>
+        </ol>
 
-  <section id="d1-hallucination">
-    <h2>Zero-Hallucination Policy</h2>
-    <div class="box"><p>By default, Claude only returns commands verified in the database. If asked for a "best guess" the agent responds with a ⚠️ labelled answer and explicitly states it is not lab-verified. The <code>verified_only</code> filter ensures production users never see unverified rows.</p></div>
-  </section>
+        <h3>SBA E2E Design Wizard &mdash; Deployment Order</h3>
+        <p><code>[ONBOARD] &rarr; [IF-PHYS] &rarr; [L2-SEG] &rarr; [FAB-SDN] &rarr; [L3-VIRT] &rarr; [SEC-ID] &rarr; [MGMT-OPS] &rarr; [DIAG-LOG]</code></p>
+      </section>
 
-  <section id="d1-github">
-    <h2>GitHub — Repository</h2>
-    <p>Repo: <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent" target="_blank">khursheedkhanaiforgood-ai/cisco-en-cli-agent</a></p>
-    <p>GitHub Pages: <a href="https://khursheedkhanaiforgood-ai.github.io/cisco-en-cli-agent/session_summary_20260401.html" target="_blank">GitHub Pages — this document</a></p>
-  </section>
+      <!-- GUARDRAILS -->
+      <section id="guardrails">
+        <h2>Guardrail System</h2>
+        <h3>Layer 1 &mdash; system_master.md (active on every query)</h3>
+        <table>
+          <tr><th>Rule</th><th>What it prevents</th></tr>
+          <tr><td>NX-OS Feature Prerequisite</td><td>Generating NX-OS config without <code>feature ospf/bgp/dot1x</code> first</td></tr>
+          <tr><td>EXOS Dual-Step L3</td><td>Omitting <code>enable ipforwarding vlan [name]</code> &mdash; #1 cause of routing failures</td></tr>
+          <tr><td>EXOS Named-Object Shortcut</td><td>Rejecting valid EXOS commands that omit the object-type keyword</td></tr>
+          <tr><td>EXOS Negation</td><td>Using <code>no</code> on Switch Engine &mdash; must be <code>unconfigure/disable/delete</code></td></tr>
+          <tr><td>EXOS OSPF is VLAN-based</td><td>Treating EXOS OSPF as interface-based like Cisco</td></tr>
+          <tr><td>EXOS Object Naming Rules</td><td>Suggesting names starting with numbers or containing hyphens</td></tr>
+          <tr><td>EXOS Port Notation</td><td>Wrong slot:port notation for stacked/channelized configs</td></tr>
+          <tr><td>Fabric Engine I-SID Model</td><td>Conflating VNI (Cisco) with I-SID (FE) as if they're the same</td></tr>
+          <tr><td>Zero-Hallucination Policy</td><td>Outputting unverified commands as facts</td></tr>
+        </table>
+        <h3>Layer 2 &mdash; Per-Bin Files (injected when bin is detected)</h3>
+        <table>
+          <tr><th>Bin</th><th>Critical Extra Rule</th></tr>
+          <tr><td>[ONBOARD]</td><td>ZTF = Fabric Engine only; Universal Hardware persona toggle explained</td></tr>
+          <tr><td>[SEC-ID]</td><td><code>netlogin dot1x</code> &ne; <code>dot1x</code>; TrustSec SGT &ne; ONEPolicy role (different architectures)</td></tr>
+          <tr><td>[SYS-INFO]</td><td>NX-OS monitoring = gRPC telemetry, not SNMP polling in production</td></tr>
+          <tr><td>[IF-PHYS]</td><td>No <code>shutdown/no shutdown</code> on EXOS &rarr; <code>enable/disable ports</code>; jumbo = global setting</td></tr>
+          <tr><td>[L2-SEG]</td><td>No <code>switchport mode trunk</code> on EXOS; STP uses STPDs not per-VLAN spanning tree</td></tr>
+          <tr><td>[FAB-SDN]</td><td>ZTF exclusive to FE; VNI &ne; I-SID &ne; NSI are separate namespaces; <code>enable stacking-support</code> prereq</td></tr>
+          <tr><td>[L3-VIRT]</td><td><strong>Dual-step ipforwarding rule</strong> &mdash; most common missed step on Switch Engine</td></tr>
+          <tr><td>[DIAG-LOG]</td><td><code>l2tracetree</code> = FE only; <code>ethanalyzer</code> = NX-OS only; no embedded packet capture on EXOS</td></tr>
+          <tr><td>[MGMT-OPS]</td><td><code>save</code> not <code>copy run start</code>; <code>ssh2</code> not <code>ssh</code>; FE needs BOTH <code>prompt</code> + <code>sys name</code></td></tr>
+        </table>
+      </section>
 
-  <section id="d1-railway">
-    <h2>Railway Deployment</h2>
-    <p>Platform: Railway (Nixpacks builder, PostgreSQL + pgvector, Streamlit frontend)</p>
-    <p>Start command: <code>streamlit run src/ui/app.py --server.port $PORT --server.address 0.0.0.0</code></p>
-  </section>
+      <!-- HALLUCINATION -->
+      <section id="hallucination">
+        <h2>Zero-Hallucination Policy + Best-Guess Option</h2>
+        <div class="box"><p><strong>Default:</strong> Claude only outputs commands from the retrieved database rows. Absent commands &rarr; <code>[Not in current database]</code> or <code>[Pending Source Verification]</code>. VOSS/Fabric Engine is especially high-risk for hallucination &mdash; always flag unverified FE commands.</p></div>
+        <h3>When You Want a Best Guess</h3>
+        <p>Say phrases like: <em>"best guess"</em>, <em>"what would you try"</em>, <em>"your best estimate"</em>, or <em>"I understand it's unverified"</em>. Claude responds with a clearly labelled block:</p>
+        <pre><code>### Best-Guess Response (Unverified)
+&#x26A0;&#xFE0F; The following is my best inference based on syntax patterns and vendor
+documentation I was trained on. OS versions vary &mdash; always verify against
+your platform's CLI reference before applying in production.
+This is NOT sourced from the verified database.
 
-  <section id="d1-sandbox">
-    <h2>Sandbox Test Plan (T1-T8)</h2>
-    <table>
-      <tr><th>#</th><th>Query</th><th>Expected</th></tr>
-      <tr><td>T1</td><td>Login admin</td><td>App loads, badge shows</td></tr>
-      <tr><td>T2</td><td>"save config Switch Engine"</td><td><code>save</code> not <code>copy run start</code></td></tr>
-      <tr><td>T3</td><td>"enable OSPF NX-OS"</td><td><code>feature ospf</code> prominent</td></tr>
-      <tr><td>T4</td><td>"configure OSPF Switch Engine VLAN Corp"</td><td><code>enable ipforwarding vlan Corp</code></td></tr>
-      <tr><td>T5</td><td>"what version is IOS-XE"</td><td>17.18.1 + verify caveat</td></tr>
-      <tr><td>T6</td><td>"enable SSH Switch Engine"</td><td><code>enable ssh2</code></td></tr>
-      <tr><td>T7</td><td>FE command → "best guess"</td><td>⚠️ label appears</td></tr>
-      <tr><td>T8</td><td>DB Browser → [L2-SEG]</td><td>Rows + 2D heatmap</td></tr>
-    </table>
-    <div class="box warn"><p><strong>Status as of April 1:</strong> T1-T8 not yet run. Railway now live. Tests pending — see Day 2.</p></div>
-  </section>
+[speculative command here]</code></pre>
+        <p><strong>The user always decides whether to test it.</strong> OS versions change. CLI syntax evolves between releases. The database is the authoritative source.</p>
+      </section>
 
-  <section id="d1-files">
-    <h2>Files Built — Day 1</h2>
-    <table>
-      <tr><th>File</th><th>Purpose</th><th>Status</th></tr>
-      <tr><td><code>src/agents/orchestrator.py</code></td><td>Classify → RAG → Claude; bin prompt injection</td><td><span class="badge g">Done</span></td></tr>
-      <tr><td><code>src/agents/e2e_deploy_agent.py</code></td><td>SBA E2E lead agent; ordered bin queries</td><td><span class="badge g">Done</span></td></tr>
-      <tr><td><code>src/rag/search.py</code></td><td>Semantic + keyword + hybrid search</td><td><span class="badge g">Done</span></td></tr>
-      <tr><td><code>src/ui/app.py</code></td><td>13-tab Streamlit entry point</td><td><span class="badge g">Done</span></td></tr>
-      <tr><td><code>src/agents/prompts/system_master.md</code></td><td>Master prompt: 8 rules + zero-hallucination</td><td><span class="badge g">Done</span></td></tr>
-      <tr><td><code>src/agents/prompts/bins/bin_*.md</code> (×9)</td><td>Per-bin guardrail files</td><td><span class="badge g">Done</span></td></tr>
-      <tr><td><code>data/seed/*.csv</code> (×9)</td><td>~500 rows across 9 bins</td><td><span class="badge g">Done</span></td></tr>
-      <tr><td><code>src/database/seed_themes.py</code></td><td>27 NotebookLM thematic rows</td><td><span class="badge g">Done</span></td></tr>
-      <tr><td><code>src/ui/components/auth.py</code></td><td>Login gate, session-based, ENV-only credentials</td><td><span class="badge g">Done</span></td></tr>
-    </table>
-  </section>
+      <!-- VALIDATION -->
+      <section id="validation">
+        <h2>How to Validate the Application Is Properly Tuned</h2>
+        <p>How do you know Claude is actually using the RAG database and the guardrail documents &mdash; not just making things up?</p>
+        <h3>Method 1 &mdash; Raw RAG Results Expander</h3>
+        <p>Every AI Query response includes a <strong>&#x1F4CA; Raw RAG results</strong> expander. Open it to see the exact database rows retrieved, similarity scores, and all 6 OS columns. Claude's response should match those rows. If Claude says something not in those rows &mdash; check if it came from a guardrail (acceptable) or was invented (investigate).</p>
+        <h3>Method 2 &mdash; Guardrail Injection Tests</h3>
+        <pre><code>"Configure OSPF on VLAN 10 on Switch Engine"
+&rarr; Must include: enable ipforwarding vlan [name]   (L3-VIRT guardrail)
 
-  <section id="d1-pending">
-    <h2>Pending at End of Day 1</h2>
-    <ul>
-      <li>Railway deploy + seed (DATABASE_URL not yet configured)</li>
-      <li>T1-T8 sandbox tests</li>
-      <li>Topology Generator — Mermaid diagrams in E2E Wizard</li>
-      <li>Grow database: 528 → 12,000 rows</li>
-      <li>AI gap-fill agent — fill blank OS columns</li>
-      <li>RAG eval harness — 50 golden queries → recall@5</li>
-    </ul>
-    <hr>
-    <p style="color:var(--mut);font-size:11px;text-align:center;margin-top:16px;">Generated by Claude Sonnet 4.6 &nbsp;|&nbsp; CISCO-EN CLI Mapping Agent &nbsp;|&nbsp; March 31, 2026</p>
-  </section>
-</div>
+"How do I enable a port on ExtremeXOS?"
+&rarr; Must say: enable ports X   (NOT 'no shutdown')   (IF-PHYS guardrail)
 
-<!-- ══════════════════════════════════════════════════════════════════════
-     DAY 2 — APRIL 1, 2026
-══════════════════════════════════════════════════════════════════════ -->
-<div id="day2" class="tab-panel">
-  <h1>CISCO ↔ Extreme Networks CLI Mapping Agent</h1>
-  <div class="sub">Day 2 — April 1, 2026 &nbsp;|&nbsp; Khursheed Khan, Extreme Networks SA Team &nbsp;|&nbsp; <a href="https://cisco-en-cli-agent-production-fbf7.up.railway.app" target="_blank">Live on Railway</a></div>
+"Set up BGP on Cisco NX-OS"
+&rarr; Must start with: feature bgp                     (system_master rule)
 
-  <div class="box ok"><p><strong>Status:</strong> Railway deployed and live. 515 rows seeded. Completeness dashboard active. Multi-user enabled. SA_Team onboarded for beta testing.</p></div>
+"What is zero-touch provisioning on Extreme?"
+&rarr; Must distinguish ZTF (FE) from ZTP (EXOS); state ZTF has no Cisco equivalent</code></pre>
+        <h3>Method 3 &mdash; Hallucination Probe</h3>
+        <pre><code>"Configure multicast on Fabric Engine"
+&rarr; Must return: [Pending Source Verification]
+&rarr; Confident FE commands without this label = possible hallucination</code></pre>
+        <h3>Method 4 &mdash; RAG Settings Calibration</h3>
+        <table>
+          <tr><th>Change</th><th>Expected result</th></tr>
+          <tr><td>Raise threshold 0.35 &rarr; 0.6</td><td>Fewer but more precise results</td></tr>
+          <tr><td>Lower top-K 8 &rarr; 3</td><td>AI should acknowledge limited data when appropriate</td></tr>
+          <tr><td>Verified Only = ON</td><td>Only is_verified=true rows returned</td></tr>
+          <tr><td>Switch to Keyword mode</td><td>Different (string-match) result set vs semantic</td></tr>
+        </table>
+        <h3>Method 5 &mdash; DB Browser Audit</h3>
+        <p>DB Browser tab &rarr; search any command &rarr; verify it's in the DB with the correct tag and OS columns. This shows you exactly what ground truth Claude is drawing from.</p>
+      </section>
 
-  <table>
-    <tr><th>Item</th><th>Detail</th></tr>
-    <tr><td>Railway URL</td><td><a href="https://cisco-en-cli-agent-production-fbf7.up.railway.app" target="_blank">cisco-en-cli-agent-production-fbf7.up.railway.app</a></td></tr>
-    <tr><td>DB rows live</td><td>515 (500 CSV + 27 NotebookLM themes, some overlap deduped)</td></tr>
-    <tr><td>Users</td><td>admin (team), babla (superadmin/owner), SA_Team (beta testers)</td></tr>
-    <tr><td>Commits today</td><td>8 commits pushed (b0680e6 → 0ed5ada)</td></tr>
-    <tr><td>Status</td><td><span class="badge g">Live — Beta Testing Phase</span></td></tr>
-  </table>
+      <!-- TOPOLOGY -->
+      <section id="topology">
+        <h2>Topology Generator &mdash; Planned Feature</h2>
+        <div class="box warn"><p><strong>Planned &mdash; not yet built.</strong> When the user asks to "deploy a campus network" or describes a design scenario, the E2E Wizard should show an architecture diagram in addition to generating CLI commands.</p></div>
+        <h3>The Idea</h3>
+        <p>When a user describes a network design intent (e.g., "campus network with 802.1X, OSPF uplinks, and SNMP management"), the E2E Design Wizard should:</p>
+        <ol>
+          <li><strong>Ask clarifying questions</strong> (how many access switches? distribution layer? routed or L2 uplinks? fabric or standalone?)</li>
+          <li><strong>Generate a topology diagram</strong> showing the network layers and connections</li>
+          <li><strong>Generate the CLI script</strong> for the chosen platform across all detected bins</li>
+        </ol>
+        <h3>Campus Network Topology Example (ASCII &mdash; simplest approach)</h3>
+        <div class="topo">
+                    [INTERNET / WAN]
+                          |
+                    [CORE SWITCH]
+                    /            \
+          [DIST-SW-1]          [DIST-SW-2]        &larr; L3 OSPF / BGP uplinks
+          /    |    \          /    |    \
+       [ACC1][ACC2][ACC3]  [ACC4][ACC5][ACC6]      &larr; L2 VLANs, 802.1X
+         |                    |
+      [Users/Voice/IoT]    [Users/Voice/IoT]       &larr; End devices
 
-  <!-- MORNING -->
-  <section id="d2-research">
-    <h2>Morning — NX-OS / IOS-XE Research</h2>
-    <p>NotebookLM research on NX-OS and IOS-XE architecture. New PDF added to repo: <code>data/reference/notebooklm/Cisco NX-OS and IOS-XE Versions for AI-Architecture (CLI Mapping).pdf</code></p>
+    Cisco Path:       IOS-XE on access, NX-OS on core/dist
+    Extreme Path:     Switch Engine on access, Fabric Engine for campus fabric
+    Fabric Engine:    auto-sense enable &rarr; ZTF builds IS-IS/SPBM automatically</div>
+        <h3>Implementation Plan (future sprint)</h3>
+        <table>
+          <tr><th>Option</th><th>Library</th><th>Output</th><th>Complexity</th></tr>
+          <tr><td>ASCII diagram</td><td>None &mdash; pure Python string</td><td>Text in Streamlit markdown</td><td>Low &mdash; buildable in 1 hour</td></tr>
+          <tr><td>Mermaid diagram</td><td><code>streamlit-mermaid</code> pip package</td><td>Rendered graph in browser</td><td>Medium &mdash; 2&ndash;3 hours</td></tr>
+          <tr><td>Interactive graph</td><td><code>networkx</code> + <code>matplotlib</code> or <code>pyvis</code></td><td>PNG or interactive HTML</td><td>High &mdash; half day</td></tr>
+        </table>
+        <p><strong>Recommendation:</strong> Start with Mermaid. The E2E Design Wizard detects which bins are needed &rarr; maps them to standard campus/DC/branch topology layers &rarr; renders a Mermaid flowchart showing which platform handles which layer. Add <code>streamlit-mermaid</code> to requirements.txt and call it from <code>e2e_wizard.py</code> after the CLI script is generated.</p>
+        <h3>Example Mermaid Output (target)</h3>
+        <pre><code>graph TD
+  WAN[WAN / Internet] --&gt; CORE[Core Switch&lt;br/&gt;Cisco NX-OS / FE Fabric]
+  CORE --&gt; DIST1[Distribution 1&lt;br/&gt;IOS-XE / Switch Engine]
+  CORE --&gt; DIST2[Distribution 2&lt;br/&gt;IOS-XE / Switch Engine]
+  DIST1 --&gt; ACC1[Access 1&lt;br/&gt;802.1X + VLANs]
+  DIST1 --&gt; ACC2[Access 2&lt;br/&gt;802.1X + VLANs]
+  DIST2 --&gt; ACC3[Access 3&lt;br/&gt;802.1X + VLANs]
+  ACC1 --&gt; EP1[Users / Voice / IoT]
+  ACC2 --&gt; EP2[Users / Voice / IoT]
+  ACC3 --&gt; EP3[Users / Voice / IoT]</code></pre>
+      </section>
 
-    <h3>Version Reference Table (web-verified April 1, 2026)</h3>
-    <table>
-      <tr><th>OS</th><th>Latest Version</th><th>Notes</th></tr>
-      <tr><td>Cisco IOS-XE</td><td>17.18.1</td><td>17.15.x = Long-Lived/Extended-Support. Bundle Boot deprecated in 27.01. Install Mode (factory-reset all) replaces write erase from 17.15+</td></tr>
-      <tr><td>Cisco NX-OS</td><td>10.5(5)M / 10.6(2)F</td><td>10.6(2)F = Dec 2025. 10.6.x/10.7.x for 400G/800G hardware</td></tr>
-      <tr><td>Extreme EXOS</td><td>33.x</td><td>Confirm with <code>show version</code></td></tr>
-      <tr><td>Extreme VOSS/FE</td><td>9.x</td><td>Confirm with <code>show sys-info</code></td></tr>
-      <tr><td>Extreme SLX-OS</td><td>20.x</td><td>Confirm with <code>show version</code></td></tr>
-      <tr><td>Cisco IOS</td><td>15.x</td><td>Classic — no new hardware platforms</td></tr>
-    </table>
+      <!-- REFERENCE LIBRARY -->
+      <section id="reference">
+        <h2>Reference Library &mdash; Files in the Repo</h2>
+        <p>All source documents are now backed up in the repo under <code>data/reference/</code>. Safe once pushed to GitHub &mdash; no longer dependent on your MacBook.</p>
+        <h3>data/reference/notebooklm/ &mdash; NotebookLM Outputs (14 files)</h3>
+        <table>
+          <tr><th>File</th><th>Purpose</th></tr>
+          <tr><td>Onboarding Mapping Table [ONBOARD].docx</td><td>Source &rarr; bin_onboard.md guardrails</td></tr>
+          <tr><td>[SEC-ID] Identity and Authentication.docx</td><td>Source &rarr; bin_sec_id.md guardrails</td></tr>
+          <tr><td>[SYS-INFO] System Information.docx</td><td>Source &rarr; bin_sys_info.md guardrails</td></tr>
+          <tr><td>[IF-PHYS] Physical Interface.docx</td><td>Source &rarr; bin_if_phys.md guardrails</td></tr>
+          <tr><td>L2 Segmentation [L2-SEG].docx</td><td>Source &rarr; bin_l2_seg.md guardrails</td></tr>
+          <tr><td>[FAB-SDN] Fabric Setup (x2).docx</td><td>Source &rarr; bin_fab_sdn.md guardrails</td></tr>
+          <tr><td>[L3-VIRT] Layer 3 and Virtual Routing.docx</td><td>Source &rarr; bin_l3_virt.md guardrails</td></tr>
+          <tr><td>NoteBookLLM_CLI_DeepLevelAnalyes.docx</td><td>27-theme cross-bin deep extraction</td></tr>
+          <tr><td>NotebookLLM_CLI_EndItems.docx</td><td>NX-OS MDP architecture + end-item lists</td></tr>
+          <tr><td>Google NotebookLLM_EN-Cisco_CLI - Chat.docx</td><td>Full NotebookLM Q&amp;A session</td></tr>
+          <tr><td>Master Command Dataset for RAN-Enabled AI Agent Calibration.docx</td><td>Master calibration dataset</td></tr>
+          <tr><td>Cisco CLI Command Master Index NX-OS + IOS-XE.docx</td><td>Cisco command reference index</td></tr>
+          <tr><td>CLI Translation Master Dataset.docx</td><td>Full cross-platform translation dataset</td></tr>
+        </table>
+        <h3>data/reference/base_material/ &mdash; Pre-NotebookLM Source Docs (8 files)</h3>
+        <table>
+          <tr><th>File</th><th>Purpose</th></tr>
+          <tr><td>CISCO_EN_Commands_Mar 31 2026.docx</td><td>Direct CLI comparison compiled same day</td></tr>
+          <tr><td>CLI_X-Ref_Guide_1.0-3.pdf</td><td>CLI cross-reference guide v1.0</td></tr>
+          <tr><td>EXOS-Layer2-Lab-Guide-Shareable.html</td><td>Switch Engine L2 lab guide (EVE-NG)</td></tr>
+          <tr><td>Extreme XOS User Guide 22.7.pdf (43 MB)</td><td><strong>Primary EXOS/Switch Engine vendor doc</strong> &mdash; used for PDF extraction</td></tr>
+          <tr><td>VOSSUserGuide_9.0_UG.pdf (38 MB)</td><td><strong>Primary VOSS/Fabric Engine vendor doc v9.0</strong> &mdash; used for PDF extraction</td></tr>
+          <tr><td>Google_Search_EN-CISCO_Config_March 31 2026_10am.docx</td><td>Google research session output</td></tr>
+          <tr><td>Network_CLI_Cheat_Sheet 1.docx</td><td>Multi-vendor CLI cheat sheet</td></tr>
+          <tr><td>NotebookLLM_CLI_EndItems.docx</td><td>NotebookLM synthesis end items</td></tr>
+        </table>
+      </section>
 
-    <h3>Key NX-OS Architecture Insight — DME Model</h3>
-    <div class="box"><p><strong>Why <code>feature</code> commands exist:</strong> NX-OS uses a Data Management Engine (DME). Every protocol has its own sub-tree in the DME that is locked by default. The <code>feature</code> command unlocks that sub-tree, enabling CLI, SNMP, NETCONF, and REST access simultaneously. Without it, no configuration path works — not just CLI.</p></div>
-    <div class="box warn"><p><strong>Rosetta Stone Rule (added to system_master.md):</strong> NX-OS requires explicit <code>feature</code> activation for the same functional intent that IOS-XE accepts natively. Example: IOS-XE accepts <code>router ospf 1</code> directly. NX-OS requires <code>feature ospf</code> first.</p></div>
+      <!-- GITHUB -->
+      <section id="github">
+        <h2>GitHub &mdash; Fix &amp; Push (the repo must be created first)</h2>
+        <div class="box red"><p><strong>Why it failed:</strong> <code>git push</code> got "Repository not found" because the repo doesn't exist on github.com yet. The remote URL is correct &mdash; you just need to create the repo on the website first. 30 seconds.</p></div>
 
-    <h3>NX-OS Guestshell (added to bin_sys_info.md)</h3>
-    <p>On-box Linux container (CentOS). Enable: <code>feature guestshell</code> then <code>guestshell enable</code>. Runs Python 3. Has access to NX-OS mgmt VRF. <strong>NX-OS exclusive</strong> — no IOS-XE equivalent.</p>
-  </section>
+        <h3>Step 1 &mdash; Create the repo on github.com (browser)</h3>
+        <ol>
+          <li>Open <strong>github.com</strong> in your browser &rarr; click the <strong>+</strong> icon (top right) &rarr; <strong>New repository</strong></li>
+          <li>Owner: select <strong>khursheedkhanaiforgood-ai</strong> (your account)</li>
+          <li>Repository name: <strong>cisco-en-cli-agent</strong></li>
+          <li>Visibility: <strong>Public</strong></li>
+          <li><strong>Do NOT</strong> tick "Add a README file" or any other init option &mdash; leave all unchecked</li>
+          <li>Click <strong>Create repository</strong></li>
+        </ol>
 
-  <section id="d2-guardrails">
-    <h2>Guardrail Updates (Morning)</h2>
-    <table>
-      <tr><th>File</th><th>What was added</th></tr>
-      <tr><td><code>bin_onboard.md</code></td><td>IOS-XE Install Mode (17.15+): <code>factory-reset all</code> replaces <code>write erase</code>. Bundle Boot deprecated in 27.01. Theme 7: version reference table for all 6 OSes. Guardrail rules #6 and #7.</td></tr>
-      <tr><td><code>bin_sys_info.md</code></td><td>Full NX-OS Guestshell section. <code>feature guestshell</code> + <code>guestshell enable</code>. Flagged NX-OS exclusive.</td></tr>
-      <tr><td><code>system_master.md</code></td><td>DME "why" explanation. Rosetta Stone rule. <code>feature guestshell</code> added to prerequisite list.</td></tr>
-    </table>
-  </section>
+        <h3>Step 2 &mdash; Create a Personal Access Token (if you don't have one)</h3>
+        <ol>
+          <li>github.com &rarr; your avatar &rarr; <strong>Settings</strong> &rarr; <strong>Developer settings</strong> (bottom of left nav)</li>
+          <li>&rarr; <strong>Personal access tokens</strong> &rarr; <strong>Tokens (classic)</strong> &rarr; <strong>Generate new token (classic)</strong></li>
+          <li>Give it a name, set expiry, tick <strong>repo</strong> scope (full control)</li>
+          <li>Click Generate &rarr; <strong>copy the token immediately</strong> (you can't see it again)</li>
+        </ol>
 
-  <section id="d2-search">
-    <h2>3-Tier Search Architecture</h2>
-    <table>
-      <tr><th>Tier</th><th>Scope</th><th>Status</th><th>When triggered</th></tr>
-      <tr><td><strong>Tier 1</strong></td><td>Bin-scoped pgvector search</td><td><span class="badge g">Live</span></td><td>Every query — classify_tag() routes to one of 9 bins</td></tr>
-      <tr><td><strong>Tier 2</strong></td><td>Full-DB fallback (all bins)</td><td><span class="badge g">Live</span></td><td>Tier 1 returns zero results — catches mis-tagged rows</td></tr>
-      <tr><td><strong>Tier 3</strong></td><td>Web crawl + Claude extraction</td><td><span class="badge y">Designed — Sprint 5</span></td><td>Tier 2 also returns nothing — fetches from vendor docs</td></tr>
-    </table>
-    <div class="box ok"><p>When Tier 2 is used, Claude is informed in context with a ⚠️ notice: "No results in bin — results from FULL DATABASE fallback. Note the actual bin of each result."</p></div>
-    <h3>Architecture Principle: Bin = Index, Not Partition</h3>
-    <p>The bin tag (<code>[L2-SEG]</code>, <code>[MGMT-OPS]</code> etc.) is a search routing hint — NOT a data partition. The pgvector embedding encodes semantic meaning of <code>functional_intent</code> and finds correct rows regardless of tag. The bin can be wrong; the 6 OS columns are what matters.</p>
-  </section>
+        <h3>Step 3 &mdash; Push (the remote is already set)</h3>
+        <pre><code>cd /Users/khukhan/Projects/cisco-en-cli-agent
 
-  <!-- RAILWAY DEPLOY -->
-  <section id="d2-railway">
-    <h2>Railway Deploy — All Blockers and Fixes</h2>
-    <div class="box warn"><p>5 blockers encountered and resolved before the app went live. Each is documented below as a permanent reference for future Railway projects.</p></div>
+git push -u origin main
+# When prompted:
+#   Username: your GitHub username (khursheedkhanaiforgood-ai)
+#   Password: paste your PAT (NOT your GitHub account password)</code></pre>
 
-    <div class="jcard">
-      <h4>Blocker 1 — ModuleNotFoundError: No module named 'src'</h4>
-      <p><strong>Cause:</strong> Railway's Python environment doesn't include <code>/app</code> in PYTHONPATH by default.</p>
-      <p><strong>Fix:</strong> Added <code>PYTHONPATH=/app</code> as Railway environment variable.</p>
-    </div>
-    <div class="jcard">
-      <h4>Blocker 2 — Port mismatch ("application failed to respond")</h4>
-      <p><strong>Cause:</strong> Railway injects <code>$PORT=8080</code>. Target port was set to 8501 in Railway Networking settings.</p>
-      <p><strong>Fix:</strong> Change Railway Networking target port to 8080.</p>
-    </div>
-    <div class="jcard">
-      <h4>Blocker 3 — DATABASE_URL = <code>${{Postgres.DATABASE_URL}}</code> literal string</h4>
-      <p><strong>Cause:</strong> Railway canvas connector between PostgreSQL and the app service injects the reference template. Template only resolves if the service name matches exactly. When typed manually, stored as literal text.</p>
-      <p><strong>Fix:</strong> Remove canvas connector arrow. Copy the real <code>postgresql://</code> URL from PostgreSQL service → Connect tab → paste directly into app service Variables.</p>
-      <p><strong>Prevention:</strong> No canvas connector = no auto-re-injection on redeploy.</p>
-    </div>
-    <div class="jcard">
-      <h4>Blocker 4 — <code>relation "cli_mappings" does not exist</code></h4>
-      <p><strong>Cause:</strong> Migration runner split SQL on <code>;</code> which silently broke execution. All exceptions caught as warnings — migration appeared to succeed but tables were never created.</p>
-      <p><strong>Fix:</strong> Complete rewrite of <code>run_migrations()</code> using raw psycopg2 with explicit per-table <code>cursor.execute()</code> calls. Commit: b0680e6</p>
-    </div>
-    <div class="jcard">
-      <h4>Blocker 5 — IVFFlat index creation failed on empty table</h4>
-      <p><strong>Cause:</strong> <code>CREATE INDEX USING ivfflat WITH (lists=100)</code> requires ≥ 100 rows. Empty table = error.</p>
-      <p><strong>Fix:</strong> Moved IVFFlat index creation from <code>connection.py</code> to <code>seed.py</code> — created after rows are inserted.</p>
-    </div>
+        <h3>What will be pushed (5 commits)</h3>
+        <ul>
+          <li>All source code &mdash; RAG pipeline, 13-tab Streamlit UI, SBA E2E agent</li>
+          <li>9 seed CSVs, 9 bin guardrail files, system_master.md</li>
+          <li>14 NotebookLM output docx files (<code>data/reference/notebooklm/</code>)</li>
+          <li>8 base material files including EXOS + VOSS PDFs (<code>data/reference/base_material/</code>)</li>
+          <li>This session HTML summary</li>
+        </ul>
+        <div class="box warn"><p><strong>.env is in .gitignore</strong> &mdash; your ANTHROPIC_API_KEY will NOT be pushed. Never commit your API key.</p></div>
+      </section>
 
-    <h3>Self-Healing Schema (commit 886abf8)</h3>
-    <div class="box ok"><p><code>app.py</code> now calls <code>init_db()</code> on every startup (idempotent — skips if tables exist). Schema is always guaranteed when the app is running, independent of whether the Railway <code>releaseCommand</code> ran. DB Browser shows a prominent "🌱 Seed Database Now" button when rows = 0.</p></div>
+      <!-- RAILWAY -->
+      <section id="railway">
+        <h2>Railway Deployment &mdash; Step by Step</h2>
+        <div class="step"><div class="sn">1</div><div class="sb">Go to <strong>railway.app</strong> &rarr; <strong>New Project</strong> &rarr; <strong>Deploy from GitHub repo</strong> &rarr; select <code>cisco-en-cli-agent</code></div></div>
+        <div class="step"><div class="sn">2</div><div class="sb"><strong>Add PostgreSQL:</strong> Inside the project &rarr; click <strong>+ New</strong> &rarr; <strong>Database</strong> &rarr; <strong>PostgreSQL</strong>. Railway auto-injects <code>DATABASE_URL</code> into your service environment.</div></div>
+        <div class="step"><div class="sn">3</div><div class="sb"><strong>Set environment variables</strong> in Railway &rarr; your service &rarr; <strong>Variables</strong> tab:
+          <pre><code>ANTHROPIC_API_KEY=sk-ant-...your-key-here...
+MODEL=claude-sonnet-4-6</code></pre></div></div>
+        <div class="step"><div class="sn">4</div><div class="sb"><strong>Set start command</strong> in Railway &rarr; service &rarr; <strong>Settings</strong> &rarr; <strong>Deploy</strong> &rarr; <strong>Start Command</strong>:
+          <pre><code>streamlit run src/ui/app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true</code></pre></div></div>
+        <div class="step"><div class="sn">5</div><div class="sb"><strong>Deploy</strong> &rarr; Railway builds the Docker image, installs <code>requirements.txt</code>, starts Streamlit. Wait for green checkmark.</div></div>
+        <div class="step"><div class="sn">6</div><div class="sb"><strong>Run the database seed</strong> &mdash; Railway project &rarr; your service &rarr; <strong>Shell</strong> tab (or connect via railway CLI):
+          <pre><code>python -m src.database.seed</code></pre>
+          This creates tables, generates embeddings for all 528 rows, and builds the IVFFlat index.</div></div>
+        <div class="step"><div class="sn">7</div><div class="sb"><strong>Verify</strong> &mdash; open the Railway public URL &rarr; sidebar should show <strong>Total Mappings: 528</strong> &rarr; proceed to sandbox tests.</div></div>
 
-    <h3>Seed Is One-Time Only</h3>
-    <p>Embedding generation (all-MiniLM-L6-v2) is slow on first run: ~90MB model download from HuggingFace + CPU inference for 515 rows. Once seeded, data persists in Railway PostgreSQL permanently. The <code>releaseCommand</code> no longer runs the full seed — only a no-op echo.</p>
-  </section>
+        <div class="box warn"><p><strong>Pre-requisite:</strong> The GitHub repo must be pushed before Railway can deploy. Repo is live at <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent" target="_blank">github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent</a></p></div>
 
-  <!-- DASHBOARD -->
-  <section id="d2-dashboard">
-    <h2>Sprint 0 — DB Completeness Dashboard</h2>
-    <p>New file: <code>src/rag/quality.py</code>. Three levels of completeness tracking, all visible to admin + superadmin.</p>
-    <table>
-      <tr><th>Level</th><th>What it shows</th><th>Where</th></tr>
-      <tr><td>Overall progress</td><td>Total rows / 12,000 target + % progress bar</td><td>Sidebar</td></tr>
-      <tr><td>Per-bin status</td><td>🟢/🟡/🔴 status, row count, OS fill %, progress to 1,333 target</td><td>Sidebar + DB Browser</td></tr>
-      <tr><td>OS column fill rates</td><td>% of rows with each OS column populated (VOSS + SLX expected lowest)</td><td>DB Browser</td></tr>
-      <tr><td>2D heatmap</td><td>Rows = functional intents, Cols = 6 OSes, Cell = ✅/❌</td><td>DB Browser (per bin)</td></tr>
-    </table>
-    <div class="box"><p><strong>Blank distinction rule:</strong> <code>""</code> = unknown gap (counts against score) | <code>"No equivalent on this platform"</code> = legitimate (counts as filled) | <code>"[Pending Source Verification]"</code> = partial gap.</p></div>
-  </section>
+        <h3>Step 1 &mdash; Create Account / Log In</h3>
+        <p>Go to <strong>railway.app</strong> &rarr; click <strong>Login</strong> &rarr; use <strong>GitHub login</strong> (easiest &mdash; auto-connects to your repos).</p>
 
-  <!-- E2E WIZARD -->
-  <section id="d2-e2e">
-    <h2>E2E Wizard — First Live Test</h2>
-    <p>Query: "Dual-VLAN interconnect between two EXOS switches"</p>
-    <table>
-      <tr><th>What worked</th><th>Observation</th></tr>
-      <tr><td>Topology diagram</td><td>ASCII topology auto-generated with correct IP layout</td></tr>
-      <tr><td>NX-OS prerequisites</td><td>Mandatory <code>feature</code> block rendered from guardrails</td></tr>
-      <tr><td>VOSS ZTF notice</td><td>SPB/I-SID architecture warning rendered from guardrails</td></tr>
-      <tr><td>Platform scope notice</td><td>EXOS=full, others=stubs — honest about DB gaps</td></tr>
-      <tr><td>Follow-up questions</td><td>5 refinement questions rendered at bottom</td></tr>
-    </table>
-    <h3>DB Gaps Exposed by Test</h3>
-    <ul>
-      <li><code>create vlan &lt;name&gt; tag &lt;vid&gt;</code> — EXOS VLAN creation with tag ID not in seed</li>
-      <li><code>configure vlan &lt;name&gt; add ports &lt;x&gt; untagged</code> — access port syntax missing</li>
-      <li><code>configure iproute add default &lt;gw&gt;</code> — default gateway not seeded</li>
-      <li>IOS/IOS-XE/NX-OS/VOSS/SLX returned stubs only — DB is EXOS-heavy for L2-SEG bin</li>
-    </ul>
-    <div class="box warn"><p>These gaps are the first concrete evidence of what the 12K row target needs to fill. The "Consult vendor docs" stubs are intentional and honest — the agent does not invent commands for missing data.</p></div>
-    <h3>Tab Switch Stall — Fixed (commit 0f5e1a5)</h3>
-    <p>Root cause: Streamlit re-runs entire <code>app.py</code> on every tab switch. The Generate button reset to False → result lost. Fix: E2E result now cached in <code>st.session_state</code>. Switching tabs and returning restores the output instantly without re-calling Claude.</p>
-  </section>
+        <h3>Step 2 &mdash; New Project from GitHub</h3>
+        <ol>
+          <li>Click <strong>New Project</strong></li>
+          <li>Select <strong>Deploy from GitHub repo</strong></li>
+          <li>If prompted, click <strong>Configure GitHub App</strong> &rarr; authorize Railway</li>
+          <li>Select <strong>khursheedkhanaiforgood-ai/cisco-en-cli-agent</strong></li>
+          <li>Railway detects <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/railway.toml" target="_blank">railway.toml</a> and starts building &mdash; <strong>let it run, don't touch yet</strong></li>
+        </ol>
 
-  <!-- MULTI-USER -->
-  <section id="d2-multiuser">
-    <h2>Multi-User Access + Session Query Logging</h2>
-    <h3>Concurrency</h3>
-    <p>Streamlit assigns each browser session an independent <code>session_state</code>. The SQLAlchemy connection pool (<code>pool_size=5, max_overflow=10</code>) handles up to 15 concurrent DB connections. Multiple team members can be logged in simultaneously without affecting each other.</p>
-    <h3>Users (credentials in Railway Variables only)</h3>
-    <table>
-      <tr><th>User</th><th>Role</th><th>Access</th></tr>
-      <tr><td>admin</td><td>admin</td><td>Full app + completeness dashboard + query history</td></tr>
-      <tr><td>babla</td><td>superadmin</td><td>Full app + all admin features</td></tr>
-      <tr><td>SA_Team</td><td>admin</td><td>Full app — added April 1 for beta testing</td></tr>
-    </table>
-    <h3>Per-User Query Logging (commit 0ed5ada)</h3>
-    <p>Every query now logged with: <code>Time | Username | Source | Query text | Bin | Results count | Response time ms</code></p>
-    <p>Visible in DB Browser → Query History section (admin+ only). Exportable as CSV. Username threaded through full call chain: <code>query_box → orchestrator → search → QueryLog</code>.</p>
-    <p><code>source</code> column values: <code>ai_query</code> | <code>e2e_wizard</code> | <code>bin_tab</code></p>
-  </section>
+        <h3>Step 3 &mdash; Add PostgreSQL Database</h3>
+        <ol>
+          <li>In your project canvas, click <strong>+ New</strong> (top right)</li>
+          <li>Select <strong>Database</strong> &rarr; <strong>PostgreSQL</strong></li>
+          <li>Railway creates a Postgres instance and <strong>auto-injects <code>DATABASE_URL</code></strong> into your app &mdash; nothing to copy or paste</li>
+        </ol>
 
-  <!-- T1-T8 TESTS -->
-  <section id="d2-tests">
-    <h2>T1-T8 Acceptance Tests — PENDING</h2>
-    <div class="box warn"><p>Railway is live. Tests have NOT been run yet. Run these against <a href="https://cisco-en-cli-agent-production-fbf7.up.railway.app" target="_blank">cisco-en-cli-agent-production-fbf7.up.railway.app</a>.</p></div>
-    <table>
-      <tr><th>#</th><th>Action</th><th>Expected</th><th>Pass?</th></tr>
-      <tr><td>T1</td><td>Login: admin / [Railway Variables]</td><td>App loads, blue ● badge in sidebar</td><td>⬜</td></tr>
-      <tr><td>T2</td><td>AI Query: "save config Switch Engine"</td><td><code>save</code> returned, NOT <code>copy run start</code></td><td>⬜</td></tr>
-      <tr><td>T3</td><td>AI Query: "enable OSPF NX-OS"</td><td><code>feature ospf</code> appears prominently</td><td>⬜</td></tr>
-      <tr><td>T4</td><td>AI Query: "configure OSPF Switch Engine VLAN Corp"</td><td><code>enable ipforwarding vlan Corp</code> included</td><td>⬜</td></tr>
-      <tr><td>T5</td><td>AI Query: "what version is IOS-XE"</td><td>17.18.1 + verify caveat shown</td><td>⬜</td></tr>
-      <tr><td>T6</td><td>AI Query: "enable SSH Switch Engine"</td><td><code>enable ssh2</code> not <code>enable ssh</code></td><td>⬜</td></tr>
-      <tr><td>T7</td><td>Ask any FE command → follow up: "best guess"</td><td>⚠️ label appears on response</td><td>⬜</td></tr>
-      <tr><td>T8</td><td>DB Browser → select [L2-SEG]</td><td>Rows shown + 2D heatmap expands</td><td>⬜</td></tr>
-    </table>
-  </section>
+        <h3>Step 4 &mdash; Set Environment Variables</h3>
+        <p>Click your <strong>cisco-en-cli-agent service</strong> &rarr; <strong>Variables</strong> tab &rarr; add these three:</p>
+        <table>
+          <tr><th>Variable</th><th>Value</th></tr>
+          <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Your Anthropic API key (<code>sk-ant-api03-...</code>)</td></tr>
+          <tr><td><code>APP_REQUIRE_LOGIN</code></td><td><code>true</code></td></tr>
+          <tr><td><code>APP_USERS</code></td><td><code>{"admin":{"password":"REDACTED_PASS","role":"admin"},"babla":{"password":"REDACTED_PASS","role":"superadmin"}}</code></td></tr>
+        </table>
+        <div class="box ok"><p><code>DATABASE_URL</code> is already injected automatically from Step 3 &mdash; do NOT add it manually.</p></div>
 
-  <!-- PG DUMP -->
-  <section id="d2-pgdump">
-    <h2>pg_dump Backup — PENDING</h2>
-    <div class="box warn"><p>Do this once T1-T8 pass. Never re-run the embedding seed again after this — just restore from dump on any new Railway project.</p></div>
-    <h3>Steps</h3>
-    <ol>
-      <li>Railway → PostgreSQL service → <strong>Connect</strong> tab → copy the <strong>Public URL</strong> (not the internal .railway.internal one)</li>
-      <li>Run locally:
-        <pre><code>pg_dump "&lt;public-postgresql-url&gt;" \
-  --no-owner --no-acl -Fc \
-  -f railway_backup_20260401.dump</code></pre>
-      </li>
-      <li>Store the <code>.dump</code> file securely (do NOT commit to GitHub — contains credentials)</li>
-      <li>To restore on a new Railway project:
-        <pre><code>pg_restore -d "&lt;new-database-url&gt;" \
-  --no-owner -Fc railway_backup_20260401.dump</code></pre>
-      </li>
-    </ol>
-    <h3>After pg_dump — Rotate PostgreSQL Password</h3>
-    <p>The PostgreSQL password appeared in conversation. After confirming the dump works: Railway → PostgreSQL service → Settings → Regenerate credentials. Update <code>DATABASE_URL</code> in the app service Variables with the new URL.</p>
-  </section>
+        <h3>Step 5 &mdash; Confirm Start Command</h3>
+        <p>Click your service &rarr; <strong>Settings</strong> tab &rarr; scroll to <strong>Deploy</strong>. The start command is pre-set in <code>railway.toml</code>:</p>
+        <pre><code>streamlit run src/ui/app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true</code></pre>
+        <p>If the field is blank, paste it in manually.</p>
 
-  <!-- SPRINT ROADMAP -->
-  <section id="d2-sprints">
-    <h2>Sprint Roadmap</h2>
-    <table>
-      <tr><th>Sprint</th><th>Feature</th><th>Status</th></tr>
-      <tr><td>Sprint 0</td><td>DB Completeness Dashboard (per-bin progress, 2D heatmap, OS fill rates)</td><td><span class="badge g">Done</span></td></tr>
-      <tr><td>Sprint 1</td><td>Verification Workflow (admin review queue, ✅ Verify / ❌ Reject per row)</td><td><span class="badge r">Not built</span></td></tr>
-      <tr><td>Sprint 2</td><td>📚 Standards &amp; References Tab (RFC/IEEE per bin, clickable links)</td><td><span class="badge r">Not built</span></td></tr>
-      <tr><td>Sprint 3</td><td>📖 Tutorial Mode toggle (concept + RFC + per-OS note appended to responses)</td><td><span class="badge r">Not built</span></td></tr>
-      <tr><td>Sprint 4</td><td>Download Everything (CLI table CSV, tutorial PDF, topology PNG)</td><td><span class="badge r">Not built</span></td></tr>
-      <tr><td>Sprint 5</td><td>Tier 3 Web Search + User-Approved Insert (cisco.com + extremenetworks.com crawl)</td><td><span class="badge r">Not built</span></td></tr>
-      <tr><td>Sprint 6</td><td>Save E2E Wizard output as switch-loadable script (.cli per OS, ZIP option)</td><td><span class="badge r">Not built</span></td></tr>
-      <tr><td>Sprint 7</td><td>Voyage AI embedding migration (voyage-code-2, 1024-dim, better for CLI text)</td><td><span class="badge y">Architectural decision — do at 12K rows</span></td></tr>
-      <tr><td>Sprint 8</td><td>UI Banner Polish (styled alerts, color-coded, dismissible)</td><td><span class="badge y">Low priority</span></td></tr>
-      <tr><td>Sprint 9</td><td>OS Version numbers in all outputs (EXOS 33.x, NX-OS 10.5(5)M etc. in headers)</td><td><span class="badge r">Not built</span></td></tr>
-    </table>
+        <h3>Step 6 &mdash; Wait for Build</h3>
+        <p>Go to the <strong>Deployments</strong> tab &mdash; watch the build log. First build takes <strong>4&ndash;6 minutes</strong> (torch + sentence-transformers are large). You will see:</p>
+        <pre><code>&#x2713; Build successful
+&#x2713; Deploy successful</code></pre>
+        <p>Railway generates a public URL like: <code>cisco-en-cli-agent-production.up.railway.app</code></p>
 
-    <h3>Sprint 2 — RFC/IEEE Standards Reference (designed)</h3>
-    <table>
-      <tr><th>Bin</th><th>Standards</th></tr>
-      <tr><td>[ONBOARD]</td><td>RFC 8572, RFC 8071 (SZTP/NETCONF zero-touch)</td></tr>
-      <tr><td>[SEC-ID]</td><td>IEEE 802.1X, RFC 2865 (RADIUS), RFC 8907 (TACACS+)</td></tr>
-      <tr><td>[L2-SEG]</td><td>IEEE 802.1Q (VLAN), IEEE 802.1aq (SPBM), IEEE 802.1D (STP)</td></tr>
-      <tr><td>[FAB-SDN]</td><td>RFC 7432 (EVPN), RFC 7348 (VXLAN), RFC 7426 (SDN Layers), RFC 6830 (LISP)</td></tr>
-      <tr><td>[L3-VIRT]</td><td>RFC 2328 (OSPF), RFC 4271 (BGP), RFC 4364 (VRF/MPLS L3VPN)</td></tr>
-      <tr><td>[IF-PHYS]</td><td>IEEE 802.3 (Ethernet), IEEE 802.1AX (LAG/LACP)</td></tr>
-      <tr><td>[MGMT-OPS]</td><td>RFC 6241 (NETCONF), RFC 5905 (NTP), RFC 5424 (Syslog)</td></tr>
-      <tr><td>[DIAG-LOG]</td><td>RFC 792 (ICMP/ping), RFC 4443 (ICMPv6)</td></tr>
-      <tr><td>[SYS-INFO]</td><td>RFC 8342 (NMDA), RFC 6020/7950 (YANG)</td></tr>
-    </table>
-  </section>
+        <h3>Step 7 &mdash; Seed the Database <span style="color:var(--red)">(critical &mdash; do before testing)</span></h3>
+        <p>Click your service &rarr; <strong>Shell</strong> tab &rarr; run:</p>
+        <pre><code>python -m src.database.seed</code></pre>
+        <p>This creates the tables, loads all ~528 rows, generates embeddings, and builds the IVFFlat pgvector index. Takes 2&ndash;3 minutes. Expected output:</p>
+        <pre><code>Total rows:    528
+Embedded:      528
+Verified:      ...
+By tag:
+  [ONBOARD]        xx rows
+  [SEC-ID]         xx rows
+  ...</code></pre>
 
-  <!-- SECURITY -->
-  <section id="d2-security">
-    <h2>Security Notes</h2>
-    <table>
-      <tr><th>Risk</th><th>Severity</th><th>Action</th></tr>
-      <tr><td>PostgreSQL password appeared in conversation twice</td><td><span class="badge r">High</span></td><td>Rotate after pg_dump confirmed — Railway → PostgreSQL → Regenerate</td></tr>
-      <tr><td>all-MiniLM-L6-v2 downloaded from HuggingFace at runtime</td><td><span class="badge y">Medium</span></td><td>Future: pin model to commit hash, cache in Railway volume</td></tr>
-      <tr><td>ANTHROPIC_API_KEY in Railway Variables</td><td><span class="badge y">Medium</span></td><td>Restrict Railway project access to trusted team members only</td></tr>
-      <tr><td>Credentials in APP_USERS env var (not code)</td><td><span class="badge g">Handled</span></td><td>Never in code or memory files — Railway Variables only</td></tr>
-    </table>
+        <h3>Step 8 &mdash; Open the App &amp; Sign In</h3>
+        <p>Click the Railway public URL &rarr; login page appears:</p>
+        <table>
+          <tr><th>User</th><th>Username</th><th>Password</th><th>Role</th></tr>
+          <tr><td>Team / testers</td><td><code>admin</code></td><td><code>REDACTED_PASS</code></td><td>admin</td></tr>
+          <tr><td>Khursheed (owner)</td><td><code>babla</code></td><td><code>REDACTED_PASS</code></td><td>superadmin</td></tr>
+        </table>
+        <p>Sidebar should show <strong>Total Mappings: 528</strong> after seeding.</p>
 
-    <h3>What is all-MiniLM-L6-v2?</h3>
-    <p>A 384-dimensional sentence embedding model (~90MB) from Microsoft/HuggingFace. Converts CLI intent text into a vector for pgvector similarity search. Runs entirely inside the Railway container — no data leaves Railway during inference. Not Claude. Claude is only called for the final text response formatting.</p>
+        <h3>Step 9 &mdash; Run Sandbox Tests</h3>
+        <p>See the <strong>Sandbox Test Plan</strong> section above (T1&ndash;T8) to validate all layers are working correctly.</p>
 
-    <hr>
-    <p style="color:var(--mut);font-size:11px;text-align:center;margin-top:16px;">Generated by Claude Sonnet 4.6 &nbsp;|&nbsp; CISCO-EN CLI Mapping Agent &nbsp;|&nbsp; April 1, 2026<br>Architecture: Khursheed Khan × Claude &nbsp;|&nbsp; Research pipeline: Google → NotebookLM → Claude Code</p>
-  </section>
-</div><!-- end day2 -->
-</main>
-</div><!-- end body-wrap -->
+        <h3>If the Build Fails</h3>
+        <div class="box warn"><p>Most likely cause: <code>torch</code> is too large for Railway's free tier memory. If you see an OOM or timeout error, tell Khursheed &mdash; a CPU-only torch pin can be pushed to <code>requirements.txt</code> in under 2 minutes to fix it.</p></div>
+
+        <h3>After Deployment &mdash; Grow the Database</h3>
+        <ol>
+          <li><strong>PDF extraction</strong> &mdash; in Railway shell: <code>python -m src.database.seed --pdf</code> (uses EXOS 22.7 + VOSS 9.0 PDFs already in repo &mdash; adds ~3,000&ndash;4,000 rows)</li>
+          <li><strong>Web crawler</strong> &mdash; Add Data tab &rarr; Web Crawler subtab &rarr; set timeout &rarr; approve results &rarr; push toward 12,000 rows</li>
+        </ol>
+      </section>
+
+      <!-- SANDBOX -->
+      <section id="sandbox">
+        <h2>Sandbox Test Plan</h2>
+        <p>Once the app is live on Railway, run these tests in order. Each one validates a specific layer of the stack.</p>
+        <h3>T1 &mdash; Database Connectivity</h3>
+        <pre><code>&rarr; Open app in browser
+&rarr; Sidebar should show: Total Mappings: ~528 | Embedded: ~528 | Coverage: 100%
+&#x2713; If blank or error: DATABASE_URL not set, or seed not run</code></pre>
+        <h3>T2 &mdash; Semantic Search Working</h3>
+        <pre><code>&rarr; AI Query tab &rarr; type: "configure ospf"
+&rarr; Open "&#x1F4CA; Raw RAG results" expander
+&#x2713; Should show rows with similarity scores 0.4&ndash;0.9
+&#x2713; Should show correct OS columns populated
+&#x2717; If empty: pgvector index not built, or embeddings not generated</code></pre>
+        <h3>T3 &mdash; Guardrail Injection (L3-VIRT bin)</h3>
+        <pre><code>&rarr; Query: "Configure OSPF on a VLAN interface on Switch Engine"
+&#x2713; Response MUST include: enable ipforwarding vlan [name]
+&#x2717; If missing: orchestrator bin injection not working &rarr; check orchestrator.py</code></pre>
+        <h3>T4 &mdash; NX-OS Feature Prereq (system_master)</h3>
+        <pre><code>&rarr; Query: "Configure BGP on NX-OS"
+&#x2713; Response MUST start NX-OS section with: feature bgp
+&#x2717; If missing: system_master.md not loading correctly</code></pre>
+        <h3>T5 &mdash; Zero-Hallucination (Fabric Engine)</h3>
+        <pre><code>&rarr; Query: "Configure PIM multicast on Fabric Engine"
+&#x2713; Should show: [Pending Source Verification] for FE commands
+&#x2713; Add "best guess" &rarr; should show &#x26A0;&#xFE0F; labelled speculative block</code></pre>
+        <h3>T6 &mdash; E2E Wizard</h3>
+        <pre><code>&rarr; E2E Design Wizard tab &rarr; paste:
+  "Campus network: VLANs for users and voice, 802.1X, OSPF uplinks, SNMP"
+&#x2713; Should detect bins: ONBOARD, SEC-ID, IF-PHYS, L2-SEG, L3-VIRT, MGMT-OPS
+&#x2713; CLI script download should produce a .md file
+&#x2713; EXOS OSPF section must include enable ipforwarding</code></pre>
+        <h3>T7 &mdash; DB Browser</h3>
+        <pre><code>&rarr; DB Browser tab &rarr; search "vlan"
+&#x2713; Should return multiple rows with tag [L2-SEG]
+&#x2713; All 6 OS columns should be visible</code></pre>
+        <h3>T8 &mdash; Add Data Tab</h3>
+        <pre><code>&rarr; Add Data tab &rarr; Upload CSV subtab
+&rarr; Download the template &rarr; fill 2&ndash;3 rows &rarr; upload
+&#x2713; Should show preview &rarr; Approve &rarr; rows appear in DB Browser</code></pre>
+      </section>
+
+      <!-- REMAINING STEPS -->
+      <section id="remaining">
+        <h2>Remaining Steps &mdash; Prioritized Roadmap</h2>
+        <table>
+          <tr><th>#</th><th>Step</th><th>When</th></tr>
+          <tr><td>1</td><td><strong>Create GitHub repo</strong> on github.com (browser, 30 sec) &rarr; run <code>git push -u origin main</code></td><td><span class="badge r">Now</span></td></tr>
+          <tr><td>2</td><td><strong>Railway deploy</strong> &mdash; create project, add PostgreSQL, set env vars, deploy</td><td><span class="badge r">Now</span></td></tr>
+          <tr><td>3</td><td><strong>Seed the database</strong> &mdash; <code>python -m src.database.seed</code> via Railway shell</td><td><span class="badge r">Now</span></td></tr>
+          <tr><td>4</td><td><strong>Run sandbox tests T1&ndash;T8</strong> above to confirm all layers work</td><td><span class="badge y">Today</span></td></tr>
+          <tr><td>5</td><td><strong>PDF extraction</strong> &mdash; <code>python -m src.database.seed --pdf</code> (EXOS 22.7 + VOSS 9.0 already in repo) &mdash; adds ~3,000&ndash;4,000 rows</td><td><span class="badge y">This week</span></td></tr>
+          <tr><td>6</td><td><strong>Web crawler</strong> &mdash; Add Data tab &rarr; crawler &rarr; approve results &rarr; push toward 12K rows</td><td><span class="badge y">This week</span></td></tr>
+          <tr><td>7</td><td><strong>Topology Generator</strong> &mdash; add Mermaid diagram to E2E Wizard for campus/DC/branch design (<code>pip install streamlit-mermaid</code>)</td><td><span class="badge b">Soon</span></td></tr>
+          <tr><td>8</td><td><strong>AI gap-fill agent</strong> &mdash; fill blank OS columns using existing rows as few-shot examples</td><td><span class="badge b">Soon</span></td></tr>
+          <tr><td>9</td><td><strong>DIAG-LOG + MGMT-OPS enrichment</strong> &mdash; thinnest bins, add more seed rows</td><td><span class="badge b">Soon</span></td></tr>
+          <tr><td>10</td><td><strong>RAG eval script</strong> &mdash; 50 known queries &rarr; recall@5 at similarity &ge; 0.5 to measure tuning quality</td><td><span class="badge p">Later</span></td></tr>
+          <tr><td>11</td><td><strong>design_patterns.md</strong> &mdash; campus/DC/branch E2E design templates tied to topology generator</td><td><span class="badge p">Later</span></td></tr>
+        </table>
+      </section>
+
+      <!-- RESEARCH PIPELINE -->
+      <section id="pipeline">
+        <h2>Research Pipeline &amp; Complete File Inventory</h2>
+        <p>Every file used and produced &mdash; in the order they were created. Click any link to view the file on GitHub.</p>
+
+        <h3>&#x2460; Google Research &mdash; Raw Source Material</h3>
+        <p>Files compiled from Google research before NotebookLM. Stored in <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/base_material/" target="_blank">data/reference/base_material/</a>.</p>
+        <ul>
+          <li>&#128196; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/base_material/CLI_X-Ref_Guide_1.0-3.pdf" target="_blank">CLI_X-Ref_Guide_1.0-3.pdf</a> &mdash; CLI Cross-Reference Guide v1.0, multi-platform command mapping</li>
+          <li>&#128196; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/base_material/Network_CLI_Cheat_Sheet%201.docx" target="_blank">Network_CLI_Cheat_Sheet 1.docx</a> &mdash; Multi-vendor CLI quick reference cheat sheet</li>
+          <li>&#128196; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/base_material/CISCO_EN_Commands_Mar%2031%202026.docx" target="_blank">CISCO_EN_Commands_Mar 31 2026.docx</a> &mdash; Direct Cisco &harr; Extreme command comparison, compiled March 31 2026</li>
+          <li>&#128196; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/base_material/Google_Search_EN-CISCO_Config_March%2031%202026_10am.docx" target="_blank">Google_Search_EN-CISCO_Config_March 31 2026_10am.docx</a> &mdash; Google research session output</li>
+          <li>&#128196; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/base_material/EXOS-Layer2-Lab-Guide-Shareable.html" target="_blank">EXOS-Layer2-Lab-Guide-Shareable.html</a> &mdash; Switch Engine Layer 2 lab guide (EVE-NG, shareable)</li>
+        </ul>
+
+        <h3>&#x2461; Vendor Documentation Fed Into NotebookLM</h3>
+        <p>Official PDFs used as primary sources. Also the input for the PDF extraction pipeline (<code>python -m src.database.seed --pdf</code> &rarr; +3,000&ndash;4,000 DB rows). Stored in <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/base_material/" target="_blank">data/reference/base_material/</a>.</p>
+        <ul>
+          <li>&#128213; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/base_material/Extreme%20XOS%20User%20Guide%2022.7.pdf" target="_blank">Extreme XOS User Guide 22.7.pdf</a> <span style="color:#8b949e">(43 MB)</span> &mdash; Primary Switch Engine / ExtremeXOS vendor reference. Source for all EXOS guardrails.</li>
+          <li>&#128213; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/base_material/VOSSUserGuide_9.0_UG.pdf" target="_blank">VOSSUserGuide_9.0_UG.pdf</a> <span style="color:#8b949e">(38 MB)</span> &mdash; Primary Fabric Engine / VOSS vendor reference v9.0. Source for all FE guardrails.</li>
+        </ul>
+
+        <h3>&#x2462; Google NotebookLM Outputs &mdash; Per-Bin Command Tables</h3>
+        <p>Generated by NotebookLM from the vendor PDFs. One file per functional bin. These became the seed CSVs and bin guardrail files. Stored in <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/notebooklm/" target="_blank">data/reference/notebooklm/</a>.</p>
+        <ul>
+          <li>&#128203; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/notebooklm/Onboarding%20Mapping%20Table_%20%5BONBOARD%5D%20Functional%20Group.docx" target="_blank">Onboarding Mapping Table [ONBOARD].docx</a> &rarr; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/bins/bin_onboard.md" target="_blank">bin_onboard.md</a> + <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/seed/onboard.csv" target="_blank">onboard.csv</a></li>
+          <li>&#128203; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/notebooklm/%5BSEC-ID%5D%20Functional%20Group_%20Identity%20and%20Authentication%20Command%20Mapping%20Table.docx" target="_blank">[SEC-ID] Identity and Authentication.docx</a> &rarr; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/bins/bin_sec_id.md" target="_blank">bin_sec_id.md</a> + <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/seed/sec_id.csv" target="_blank">sec_id.csv</a></li>
+          <li>&#128203; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/notebooklm/%5BSYS-INFO%5D%20Multi-Vendor%20System%20Information%20and%20Inventory%20Mapping%20Table.docx" target="_blank">[SYS-INFO] System Information.docx</a> &rarr; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/bins/bin_sys_info.md" target="_blank">bin_sys_info.md</a> + <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/seed/sys_info.csv" target="_blank">sys_info.csv</a></li>
+          <li>&#128203; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/notebooklm/%5BIF-PHYS%5D%20Physical%20Interface%20and%20Port%20Access%20Mapping%20Table.docx" target="_blank">[IF-PHYS] Physical Interface.docx</a> &rarr; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/bins/bin_if_phys.md" target="_blank">bin_if_phys.md</a> + <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/seed/if_phys.csv" target="_blank">if_phys.csv</a></li>
+          <li>&#128203; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/notebooklm/L2%20Segmentation%20%5BL2-SEG%5D%20Command%20Mapping%20Reference.docx" target="_blank">L2 Segmentation [L2-SEG].docx</a> &rarr; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/bins/bin_l2_seg.md" target="_blank">bin_l2_seg.md</a> + <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/seed/l2_seg.csv" target="_blank">l2_seg.csv</a></li>
+          <li>&#128203; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/notebooklm/%5BFAB-SDN%5D%20Fabric%20Setup%20Mapping%20Table.docx" target="_blank">[FAB-SDN] Fabric Setup.docx</a> + <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/notebooklm/%5BFAB-SDN%5D%20Fabric%20Setup%20Mapping%20Table-2.docx" target="_blank">(Part 2)</a> &rarr; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/bins/bin_fab_sdn.md" target="_blank">bin_fab_sdn.md</a> + <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/seed/fab_sdn.csv" target="_blank">fab_sdn.csv</a></li>
+          <li>&#128203; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/notebooklm/%5BL3-VIRT%5D%20Layer%203%20and%20Virtual%20Routing%20Command%20Mapping%20Table.docx" target="_blank">[L3-VIRT] Layer 3 and Virtual Routing.docx</a> &rarr; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/bins/bin_l3_virt.md" target="_blank">bin_l3_virt.md</a> + <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/seed/l3_virt.csv" target="_blank">l3_virt.csv</a></li>
+        </ul>
+
+        <h3>&#x2463; Google NotebookLM Outputs &mdash; Cross-Bin Analysis &amp; Master Datasets</h3>
+        <p>Synthesis and master reference documents. Source for the 27 thematic DB rows and AI calibration. Stored in <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/notebooklm/" target="_blank">data/reference/notebooklm/</a>.</p>
+        <ul>
+          <li>&#128218; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/notebooklm/NoteBookLLM_CLI_DeepLevelAnalyes.docx" target="_blank">NoteBookLLM_CLI_DeepLevelAnalyes.docx</a> &mdash; Deep-level cross-bin thematic extraction: 27 themes across all 9 volumes. Source for <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/database/seed_themes.py" target="_blank">seed_themes.py</a></li>
+          <li>&#128218; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/notebooklm/NotebookLLM_CLI_EndItems.docx" target="_blank">NotebookLLM_CLI_EndItems.docx</a> &mdash; NX-OS MDP architecture + end-item command synthesis</li>
+          <li>&#128218; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/notebooklm/Google%20NotebookLLM_EN-Cisco_CLI%20-%20Chat.docx" target="_blank">Google NotebookLLM_EN-Cisco_CLI - Chat.docx</a> &mdash; Full NotebookLM Q&amp;A session: surfaced EXOS dual-step L3, I-SID model, ZTF rules</li>
+          <li>&#128218; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/notebooklm/Master%20Command%20Dataset%20for%20RAN-Enabled%20AI%20Agent%20Calibration%20%28Cisco%20NX-OS_IOS-XE%20%26%20Extreme%20Networks%29.docx" target="_blank">Master Command Dataset for RAN-Enabled AI Agent Calibration.docx</a> &mdash; Master calibration dataset</li>
+          <li>&#128218; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/notebooklm/Cisco%20CLI%20Command%20Master%20Index_%20NX-OS%2010.5%28x%29%20%26%20IOS-XE%2017.17.x.docx" target="_blank">Cisco CLI Command Master Index NX-OS + IOS-XE.docx</a> &mdash; Full Cisco NX-OS 10.5(x) and IOS-XE 17.17.x command index</li>
+          <li>&#128218; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/reference/notebooklm/CLI%20Translation%20Master%20Dataset_%20Cisco%20IOS-XE_NX-OS%20%26%20Extreme%20Switch%20Engine_Fabric%20Engine.docx" target="_blank">CLI Translation Master Dataset.docx</a> &mdash; Complete cross-platform translation dataset</li>
+        </ul>
+
+        <h3>&#x2464; Claude Code &mdash; Built From All of the Above</h3>
+        <p>Everything produced in the joint architecture and development sessions. All linked to GitHub.</p>
+        <table>
+          <tr><th>File on GitHub</th><th>What it does</th></tr>
+          <tr><td colspan="2" style="background:var(--sur);color:var(--mut);font-size:11px;padding:5px 11px;">AI PROMPT LAYER</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/system_master.md" target="_blank">prompts/system_master.md</a></td><td>Master Claude system prompt &mdash; 8 platform rules, zero-hallucination policy, best-guess option</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/bins/bin_onboard.md" target="_blank">bins/bin_onboard.md</a></td><td>[ONBOARD] &mdash; ZTF exclusive, Universal Hardware persona, factory reset commands</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/bins/bin_sec_id.md" target="_blank">bins/bin_sec_id.md</a></td><td>[SEC-ID] &mdash; netlogin vs dot1x, TrustSec SGT &ne; ONEPolicy role</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/bins/bin_sys_info.md" target="_blank">bins/bin_sys_info.md</a></td><td>[SYS-INFO] &mdash; NX-OS telemetry model, EXOS show commands</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/bins/bin_if_phys.md" target="_blank">bins/bin_if_phys.md</a></td><td>[IF-PHYS] &mdash; port notation, enable/disable ports, no interface sub-mode on EXOS</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/bins/bin_l2_seg.md" target="_blank">bins/bin_l2_seg.md</a></td><td>[L2-SEG] &mdash; named VLANs, no trunk mode, STPD model, ELRP</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/bins/bin_fab_sdn.md" target="_blank">bins/bin_fab_sdn.md</a></td><td>[FAB-SDN] &mdash; ZTF exclusive, I-SID, Fabric Attach, stacking-support prereq</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/bins/bin_l3_virt.md" target="_blank">bins/bin_l3_virt.md</a></td><td>[L3-VIRT] &mdash; <strong>ipforwarding dual-step rule</strong>, VLAN-based OSPF, VR vs VRF</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/bins/bin_diag_log.md" target="_blank">bins/bin_diag_log.md</a></td><td>[DIAG-LOG] &mdash; l2tracetree FE-only, ethanalyzer NX-OS-only, no embedded capture on EXOS</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/prompts/bins/bin_mgmt_ops.md" target="_blank">bins/bin_mgmt_ops.md</a></td><td>[MGMT-OPS] &mdash; save not copy-run, ssh2 not ssh, prompt+sysname both needed on FE</td></tr>
+          <tr><td colspan="2" style="background:var(--sur);color:var(--mut);font-size:11px;padding:5px 11px;">SEED DATA &mdash; 9 CSVs &rarr; ~528 rows in PostgreSQL + pgvector</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/seed/" target="_blank">data/seed/*.csv (&times;9)</a></td><td>onboard, sec_id, sys_info, if_phys, l2_seg, fab_sdn, l3_virt, diag_log, mgmt_ops &mdash; all 6 OS columns populated</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/database/seed_themes.py" target="_blank">src/database/seed_themes.py</a></td><td>27 thematic rows sourced from NoteBookLLM_CLI_DeepLevelAnalyes.docx</td></tr>
+          <tr><td colspan="2" style="background:var(--sur);color:var(--mut);font-size:11px;padding:5px 11px;">APPLICATION CODE</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/orchestrator.py" target="_blank">src/agents/orchestrator.py</a></td><td>Classify &rarr; RAG &rarr; Claude; injects bin guardrail at query time; all 5 RAG settings</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/agents/e2e_deploy_agent.py" target="_blank">src/agents/e2e_deploy_agent.py</a></td><td>SBA E2E lead agent &mdash; ordered bin queries &rarr; CLI script download</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/rag/search.py" target="_blank">src/rag/search.py</a></td><td>Semantic + keyword + hybrid pgvector search with all filter options</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/ui/app.py" target="_blank">src/ui/app.py</a></td><td>13-tab Streamlit entry point with login gate</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/ui/components/auth.py" target="_blank">src/ui/components/auth.py</a></td><td>Login gate &mdash; credentials via Railway env vars only, never in source code</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/ui/components/e2e_wizard.py" target="_blank">src/ui/components/e2e_wizard.py</a></td><td>E2E Design Wizard &mdash; detect bins &rarr; generate CLI script &rarr; download as .md</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/ui/components/rag_settings.py" target="_blank">src/ui/components/rag_settings.py</a></td><td>Sidebar RAG tuning panel (threshold, top-k, mode, verified, confidence)</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/ui/components/data_ingest.py" target="_blank">src/ui/components/data_ingest.py</a></td><td>Add Data tab &mdash; PDF/CSV upload + web crawler with approval flow</td></tr>
+          <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/CLAUDE.md" target="_blank">CLAUDE.md</a></td><td>Project guide for Claude Code &mdash; architecture, patterns, setup, Railway deploy</td></tr>
+        </table>
+      </section>
+
+      <section id="files">
+        <h2>All Files Built &mdash; Complete Inventory</h2>
+        <table>
+          <tr><th>File</th><th>Description</th><th>Status</th></tr>
+          <tr><td colspan="3" style="background:var(--sur);color:var(--mut);font-size:11px;padding:6px 11px;">CORE APPLICATION</td></tr>
+          <tr><td><code>src/agents/orchestrator.py</code></td><td>Classify &rarr; RAG &rarr; Claude; bin prompt injection; all 5 RAG settings passed through</td><td><span class="badge g">Done</span></td></tr>
+          <tr><td><code>src/agents/e2e_deploy_agent.py</code></td><td>SBA E2E lead agent; ordered bin queries; CLI script assembly</td><td><span class="badge g">Done</span></td></tr>
+          <tr><td><code>src/rag/search.py</code></td><td>Semantic + keyword + hybrid search; verified_only; min_confidence filters</td><td><span class="badge g">Done</span></td></tr>
+          <tr><td><code>src/ui/app.py</code></td><td>13-tab Streamlit entry point</td><td><span class="badge g">Done</span></td></tr>
+          <tr><td><code>src/ui/components/query_box.py</code></td><td>AI Query tab; RAG settings wired through</td><td><span class="badge g">Done</span></td></tr>
+          <tr><td><code>src/ui/components/e2e_wizard.py</code></td><td>E2E Design Wizard; bin detection; CLI script download</td><td><span class="badge g">Done</span></td></tr>
+          <tr><td><code>src/ui/components/rag_settings.py</code></td><td>Sidebar RAG tuning panel with live recommendations</td><td><span class="badge g">Done</span></td></tr>
+          <tr><td><code>src/ui/components/data_ingest.py</code></td><td>PDF/CSV upload + web crawler with approval flow</td><td><span class="badge g">Done</span></td></tr>
+          <tr><td colspan="3" style="background:var(--sur);color:var(--mut);font-size:11px;padding:6px 11px;">PROMPT GUARDRAILS</td></tr>
+          <tr><td><code>src/agents/prompts/system_master.md</code></td><td>Master prompt: 8 platform rules + zero-hallucination + best-guess policy</td><td><span class="badge g">Done</span></td></tr>
+          <tr><td><code>src/agents/prompts/bins/bin_*.md</code> (&times;9)</td><td>Per-bin guardrail files injected at query time</td><td><span class="badge g">Done</span></td></tr>
+          <tr><td colspan="3" style="background:var(--sur);color:var(--mut);font-size:11px;padding:6px 11px;">DATA</td></tr>
+          <tr><td><code>data/seed/*.csv</code> (&times;9)</td><td>~500 rows across 9 bins; all 6 OS columns</td><td><span class="badge g">Done</span></td></tr>
+          <tr><td><code>src/database/seed_themes.py</code></td><td>27 thematic rows from NotebookLM deep analysis</td><td><span class="badge g">Done</span></td></tr>
+          <tr><td><code>data/reference/notebooklm/</code> (14 files)</td><td>NotebookLM output docs &mdash; backed up in repo</td><td><span class="badge g">Done</span></td></tr>
+          <tr><td><code>data/reference/base_material/</code> (8 files)</td><td>Source research docs incl. EXOS + VOSS PDFs &mdash; backed up in repo</td><td><span class="badge g">Done</span></td></tr>
+        </table>
+      </section>
+
+      <!-- PENDING -->
+      <section id="pending">
+        <h2>Pending Items</h2>
+        <ul>
+          <li>GitHub repo creation + push (30 seconds in browser, then <code>git push</code>)</li>
+          <li>Railway deploy + seed</li>
+          <li>Topology Generator &mdash; Mermaid diagrams in E2E Wizard for campus/DC/branch designs</li>
+          <li>Grow database: 528 &rarr; 12,000 rows (PDF extraction + web crawler)</li>
+          <li>AI gap-fill agent &mdash; fill blank OS columns using existing rows as few-shot examples</li>
+          <li>RAG eval harness &mdash; 50 golden queries &rarr; recall@5 score</li>
+          <li>design_patterns.md &mdash; E2E design templates tied to topology generator</li>
+          <li>DIAG-LOG + MGMT-OPS bins need more seed rows (currently thinnest)</li>
+        </ul>
+        <hr>
+        <p style="color:var(--mut);font-size:11.5px;text-align:center;margin-top:20px;">
+          Generated by Claude Sonnet 4.6 &nbsp;|&nbsp; CISCO-EN CLI Mapping Agent &nbsp;|&nbsp; March 31, 2026<br>
+          Research pipeline: Google &rarr; NotebookLM &rarr; Claude Code &nbsp;|&nbsp; Architecture: Khursheed Khan &times; Claude
+        </p>
+      </section>
+      <div style="margin-top:40px;"><p style="color:var(--mut,#8b949e);font-size:12px;text-align:center;margin-top:28px;padding-top:16px;border-top:1px solid #30363d;">&copy; 2026 Khursheed Khan. All rights reserved. &nbsp;|&nbsp; CISCO-EN CLI Mapping Agent &nbsp;|&nbsp; March 31, 2026</p></div>
+    </main>
+  </div><!-- /tab-day1 -->
+
+  <!-- TAB PANEL: DAY 2 -->
+  <div id="tab-day2" class="tab-panel">
+    <main>
+      <h1>CISCO &#x2194; Extreme Networks CLI Mapping Agent</h1>
+      <div class="sub">Session Summary &mdash; April 1, 2026 &nbsp;|&nbsp; Khursheed Khan, Extreme Networks SA Team &nbsp;|&nbsp; Day 2: Railway Live + Feature Sprint</div>
+
+      <div class="box ok">
+        <p><strong>Railway deployed and live. 515 rows seeded. Completeness dashboard active. Multi-user enabled. SA_Team onboarded for beta testing.</strong><br>
+        Railway URL: <a href="https://cisco-en-cli-agent-production-fbf7.up.railway.app" target="_blank">https://cisco-en-cli-agent-production-fbf7.up.railway.app</a><br>
+        DB rows: 515. Users: admin, babla (superadmin), SA_Team. Commits today: 8 (b0680e6 &rarr; 0ed5ada).</p>
+      </div>
+
+      <!-- d2-research -->
+      <section id="d2-research">
+        <h2>Morning: NX-OS/IOS-XE Research</h2>
+        <p>New PDF added to repo: <code>data/reference/notebooklm/Cisco NX-OS and IOS-XE Versions for AI-Architecture (CLI Mapping).pdf</code></p>
+
+        <h3>Version Table (web-verified April 1)</h3>
+        <table>
+          <tr><th>Platform</th><th>Current Version</th><th>Notes</th></tr>
+          <tr><td>Cisco IOS-XE</td><td>17.18.1</td><td>17.15.x = Long-Lived/Extended-Support; Bundle Boot deprecated 27.01; Install Mode <code>factory-reset all</code> replaces <code>write erase</code> from 17.15+</td></tr>
+          <tr><td>Cisco NX-OS</td><td>10.5(5)M / 10.6(2)F</td><td>Dec 2025; 10.6.x/10.7.x for 400G/800G</td></tr>
+          <tr><td>Extreme EXOS</td><td>33.x</td><td>confirm: <code>show version</code></td></tr>
+          <tr><td>Extreme VOSS/FE</td><td>9.x</td><td>confirm: <code>show sys-info</code></td></tr>
+          <tr><td>Extreme SLX-OS</td><td>20.x</td><td>confirm: <code>show version</code></td></tr>
+          <tr><td>Cisco IOS</td><td>15.x</td><td>classic, no new hardware</td></tr>
+        </table>
+
+        <h3>NX-OS DME Architecture</h3>
+        <p><code>feature</code> commands unlock DME sub-trees. Each protocol has its own sub-tree locked by default. The <code>feature</code> command unlocks that sub-tree enabling CLI, SNMP, NETCONF, REST simultaneously. Without it, no configuration path works.</p>
+
+        <h3>Rosetta Stone Rule (added to system_master.md)</h3>
+        <div class="box"><p>NX-OS requires explicit feature activation for the same functional intent that IOS-XE accepts natively. IOS-XE: <code>router ospf 1</code> directly. NX-OS: <code>feature ospf</code> first.</p></div>
+
+        <h3>NX-OS Guestshell (added to bin_sys_info.md)</h3>
+        <p>On-box Linux container (CentOS). Enable: <code>feature guestshell</code> then <code>guestshell enable</code>. Runs Python 3. Access to mgmt VRF. NX-OS exclusive &mdash; no IOS-XE equivalent.</p>
+      </section>
+
+      <!-- d2-guardrails -->
+      <section id="d2-guardrails">
+        <h2>Guardrail Updates</h2>
+        <table>
+          <tr><th>File</th><th>What Was Added</th></tr>
+          <tr><td><code>bin_onboard.md</code></td><td>IOS-XE Install Mode (17.15+): <code>factory-reset all</code> replaces <code>write erase</code>; Bundle Boot deprecated in 27.01; Theme 7 version reference table; guardrail rules #6 and #7</td></tr>
+          <tr><td><code>bin_sys_info.md</code></td><td>Full NX-OS Guestshell section; <code>feature guestshell</code> + <code>guestshell enable</code>; NX-OS exclusive</td></tr>
+          <tr><td><code>system_master.md</code></td><td>DME "why" explanation; Rosetta Stone rule; <code>feature guestshell</code> added to prereq list</td></tr>
+        </table>
+      </section>
+
+      <!-- d2-search -->
+      <section id="d2-search">
+        <h2>3-Tier Search Architecture</h2>
+        <table>
+          <tr><th>Tier</th><th>Description</th><th>Status</th><th>When Used</th></tr>
+          <tr><td>Tier 1</td><td>Bin-scoped pgvector search</td><td><span class="badge g">LIVE</span></td><td>Every query &mdash; <code>classify_tag()</code> routes to 1 of 9 bins</td></tr>
+          <tr><td>Tier 2</td><td>Full-DB fallback (all bins)</td><td><span class="badge g">LIVE</span></td><td>Tier 1 returns zero &mdash; catches mis-tagged rows</td></tr>
+          <tr><td>Tier 3</td><td>Web crawl + Claude extraction</td><td><span class="badge b">DESIGNED Sprint 5</span></td><td>Tier 2 also returns nothing</td></tr>
+        </table>
+        <div class="box warn"><p>When Tier 2 is used, Claude is informed with a &#x26A0;&#xFE0F; notice.</p></div>
+        <h3>Architecture Principle: Bin = Index, Not Partition</h3>
+        <p>The bin tag is a routing hint, not a data partition. The pgvector embedding finds correct rows regardless of tag. Bin can be wrong &mdash; the 6 OS columns are what matters.</p>
+      </section>
+
+      <!-- d2-railway -->
+      <section id="d2-railway">
+        <h2>Railway Deploy: All Blockers and Fixes</h2>
+
+        <div class="jcard">
+          <h4>Blocker 1 &mdash; <code>ModuleNotFoundError: No module named 'src'</code></h4>
+          <p><strong>Fix:</strong> Set <code>PYTHONPATH=/app</code> as Railway environment variable.</p>
+        </div>
+
+        <div class="jcard">
+          <h4>Blocker 2 &mdash; Port mismatch ("application failed to respond")</h4>
+          <p><strong>Fix:</strong> Railway Networking target port must be <code>8080</code>. Railway injects <code>$PORT=8080</code>, not 8501.</p>
+        </div>
+
+        <div class="jcard">
+          <h4>Blocker 3 &mdash; <code>DATABASE_URL = ${{Postgres.DATABASE_URL}}</code> literal string</h4>
+          <p><strong>Cause:</strong> Railway canvas connector injects an unresolved template string instead of the real URL.<br>
+          <strong>Fix:</strong> Remove the canvas connector arrow. Copy the real <code>postgresql://</code> URL from the PostgreSQL Connect tab and paste it directly into the app Variables.</p>
+        </div>
+
+        <div class="jcard">
+          <h4>Blocker 4 &mdash; <code>relation "cli_mappings" does not exist</code></h4>
+          <p><strong>Cause:</strong> Migration runner split SQL on <code>;</code> which silently broke execution. All exceptions were caught as warnings &mdash; appeared to succeed but tables were never created.<br>
+          <strong>Fix:</strong> Complete rewrite of <code>run_migrations()</code> using raw psycopg2 with explicit per-table <code>cursor.execute()</code>. Commit: <code>b0680e6</code></p>
+        </div>
+
+        <div class="jcard">
+          <h4>Blocker 5 &mdash; IVFFlat index failed on empty table</h4>
+          <p><strong>Cause:</strong> <code>CREATE INDEX USING ivfflat WITH (lists=100)</code> requires &ge;100 rows.<br>
+          <strong>Fix:</strong> Moved index creation to <code>seed.py</code> after rows are inserted.</p>
+        </div>
+
+        <h3>Self-Healing Schema (commit 886abf8)</h3>
+        <p><code>app.py</code> calls <code>init_db()</code> on every startup (idempotent). Schema is guaranteed whenever the app is running.</p>
+
+        <h3>Seed is One-Time Only</h3>
+        <p>all-MiniLM-L6-v2 ~90MB download + CPU inference for 515 rows. Once seeded, data persists permanently. <code>releaseCommand</code> no longer runs the full seed.</p>
+      </section>
+
+      <!-- d2-dashboard -->
+      <section id="d2-dashboard">
+        <h2>Sprint 0: DB Completeness Dashboard</h2>
+        <p>New file: <code>src/rag/quality.py</code></p>
+
+        <h3>Three Levels of Completeness Reporting</h3>
+        <table>
+          <tr><th>Level</th><th>What It Shows</th><th>Where</th></tr>
+          <tr><td>Overall</td><td>Total rows / 12,000 target + % progress bar</td><td>Sidebar</td></tr>
+          <tr><td>Per-bin</td><td>&#x1F7E2;/&#x1F7E1;/&#x1F534; status, row count, OS fill %, progress to 1,333 target</td><td>Sidebar + DB Browser</td></tr>
+          <tr><td>OS column fill rates</td><td>% of rows with each column populated</td><td>DB Browser</td></tr>
+          <tr><td>2D heatmap</td><td>Rows=functional intents, Cols=6 OSes, Cell=&#x2705;/&#x274C;</td><td>DB Browser per bin</td></tr>
+        </table>
+
+        <h3>Blank Cell Distinction</h3>
+        <ul>
+          <li><code>""</code> = unknown gap</li>
+          <li><code>"No equivalent on this platform"</code> = legitimate absence</li>
+          <li><code>"[Pending Source Verification]"</code> = partial / unverified</li>
+        </ul>
+
+        <div class="box"><p>Access: admin + superadmin (<code>is_admin()</code> covers both roles).</p></div>
+      </section>
+
+      <!-- d2-e2e -->
+      <section id="d2-e2e">
+        <h2>E2E Wizard: First Live Test</h2>
+        <p><strong>Query:</strong> "Dual-VLAN interconnect between two EXOS switches"</p>
+
+        <h3>What Worked</h3>
+        <ul>
+          <li>Topology diagram auto-generated</li>
+          <li>NX-OS feature prerequisites box rendered</li>
+          <li>VOSS ZTF/SPB notice rendered</li>
+          <li>Platform scope notice (EXOS=full, others=stubs)</li>
+          <li>5 follow-up questions generated</li>
+        </ul>
+
+        <h3>DB Gaps Exposed</h3>
+        <ul>
+          <li><code>create vlan &lt;name&gt; tag &lt;vid&gt;</code> not in seed</li>
+          <li><code>configure vlan &lt;name&gt; add ports &lt;x&gt; untagged</code> missing</li>
+          <li><code>configure iproute add default &lt;gw&gt;</code> not seeded</li>
+          <li>IOS/IOS-XE/NX-OS/VOSS/SLX returned stubs only (DB is EXOS-heavy for L2-SEG)</li>
+        </ul>
+
+        <h3>Tab Switch Stall Fixed (commit 0f5e1a5)</h3>
+        <p><strong>Root cause:</strong> Streamlit re-runs entire <code>app.py</code> on every tab switch. Generate button reset to <code>False</code> &rarr; result was lost.<br>
+        <strong>Fix:</strong> E2E result cached in <code>st.session_state</code>. Switching tabs restores output instantly without re-calling Claude.</p>
+      </section>
+
+      <!-- d2-multiuser -->
+      <section id="d2-multiuser">
+        <h2>Multi-User Access + Session Query Logging</h2>
+
+        <h3>Concurrency</h3>
+        <p>Streamlit assigns each browser session independent <code>session_state</code>. SQLAlchemy pool (<code>pool_size=5</code>, <code>max_overflow=10</code>) handles 15 concurrent DB connections. Multiple team members can be logged in simultaneously.</p>
+
+        <h3>Users Table</h3>
+        <p style="color:var(--mut);font-size:12px;">(Credentials in Railway Variables only &mdash; never in code or this document)</p>
+        <table>
+          <tr><th>Username</th><th>Role</th><th>Access</th></tr>
+          <tr><td><code>admin</code></td><td>admin</td><td>Full app + completeness dashboard + query history</td></tr>
+          <tr><td><code>babla</code></td><td>superadmin</td><td>Full app + all admin features</td></tr>
+          <tr><td><code>SA_Team</code></td><td>admin</td><td>Full app &mdash; added April 1 for beta testing</td></tr>
+        </table>
+
+        <h3>Per-User Query Logging (commit 0ed5ada)</h3>
+        <p>Every query logged with: Time, Username, Source, Query text, Bin, Results count, Response time ms. Visible in DB Browser &rarr; Query History (admin+ only, CSV export). Username threaded through full chain: <code>query_box</code> &rarr; <code>orchestrator</code> &rarr; <code>search</code> &rarr; <code>QueryLog</code>.</p>
+        <p><code>source</code> column values: <code>ai_query</code> | <code>e2e_wizard</code> | <code>bin_tab</code></p>
+
+        <div class="box warn"><p><strong>Sprint 10 note (E2E Wizard Chat Mode):</strong> Maintain conversation history across follow-up queries within same session.</p></div>
+      </section>
+
+      <!-- d2-tests -->
+      <section id="d2-tests">
+        <h2>T1-T8 Acceptance Tests: PENDING</h2>
+        <p>URL: <a href="https://cisco-en-cli-agent-production-fbf7.up.railway.app" target="_blank">https://cisco-en-cli-agent-production-fbf7.up.railway.app</a></p>
+        <table>
+          <tr><th>Test</th><th>Action</th><th>Expected Result</th><th>Pass</th></tr>
+          <tr><td>T1</td><td>Login admin</td><td>App loads, blue &#x25CF; badge in sidebar</td><td>&#x2B1C;</td></tr>
+          <tr><td>T2</td><td>AI Query "save config Switch Engine"</td><td><code>save</code> returned, NOT <code>copy run start</code></td><td>&#x2B1C;</td></tr>
+          <tr><td>T3</td><td>AI Query "enable OSPF NX-OS"</td><td><code>feature ospf</code> appears prominently</td><td>&#x2B1C;</td></tr>
+          <tr><td>T4</td><td>AI Query "configure OSPF Switch Engine VLAN Corp"</td><td><code>enable ipforwarding vlan Corp</code> included</td><td>&#x2B1C;</td></tr>
+          <tr><td>T5</td><td>AI Query "what version is IOS-XE"</td><td>17.18.1 + verify caveat shown</td><td>&#x2B1C;</td></tr>
+          <tr><td>T6</td><td>AI Query "enable SSH Switch Engine"</td><td><code>enable ssh2</code> not <code>enable ssh</code></td><td>&#x2B1C;</td></tr>
+          <tr><td>T7</td><td>Ask any FE command &rarr; follow up "best guess"</td><td>&#x26A0;&#xFE0F; label appears</td><td>&#x2B1C;</td></tr>
+          <tr><td>T8</td><td>DB Browser &rarr; select [L2-SEG]</td><td>Rows shown + 2D heatmap expands</td><td>&#x2B1C;</td></tr>
+        </table>
+      </section>
+
+      <!-- d2-pgdump -->
+      <section id="d2-pgdump">
+        <h2>pg_dump Backup: PENDING</h2>
+        <div class="box warn"><p><strong>Warning:</strong> Do after T1-T8 pass. Never re-run the embedding seed again after this.</p></div>
+
+        <h3>Steps</h3>
+        <ol>
+          <li>Railway &rarr; PostgreSQL &rarr; Connect tab &rarr; copy Public URL (not <code>.railway.internal</code>)</li>
+          <li><pre><code>pg_dump "&lt;public-postgresql-url&gt;" --no-owner --no-acl -Fc -f railway_backup_20260401.dump</code></pre></li>
+          <li>Store the <code>.dump</code> file securely (do NOT commit &mdash; contains credentials)</li>
+          <li>Restore: <pre><code>pg_restore -d "&lt;new-database-url&gt;" --no-owner -Fc railway_backup_20260401.dump</code></pre></li>
+        </ol>
+
+        <div class="box red"><p><strong>After pg_dump:</strong> Rotate PostgreSQL password &mdash; Railway &rarr; PostgreSQL &rarr; Settings &rarr; Regenerate credentials &rarr; update <code>DATABASE_URL</code> in app Variables.</p></div>
+      </section>
+
+      <!-- d2-sprints -->
+      <section id="d2-sprints">
+        <h2>Sprint Roadmap</h2>
+        <table>
+          <tr><th>Sprint</th><th>Feature</th><th>Status</th></tr>
+          <tr><td>Sprint 0</td><td>DB Completeness Dashboard</td><td><span class="badge g">DONE</span></td></tr>
+          <tr><td>Sprint 1</td><td>Verification Workflow (admin review queue, &#x2705; Verify / &#x274C; Reject)</td><td><span class="badge r">Not built</span></td></tr>
+          <tr><td>Sprint 2</td><td>&#x1F4DA; Standards &amp; References Tab (RFC/IEEE per bin, clickable links)</td><td><span class="badge r">Not built</span></td></tr>
+          <tr><td>Sprint 3</td><td>&#x1F4D6; Tutorial Mode toggle</td><td><span class="badge r">Not built</span></td></tr>
+          <tr><td>Sprint 4</td><td>Download Everything (CLI CSV, tutorial PDF, topology PNG)</td><td><span class="badge r">Not built</span></td></tr>
+          <tr><td>Sprint 5</td><td>Tier 3 Web Search + User-Approved Insert</td><td><span class="badge r">Not built</span></td></tr>
+          <tr><td>Sprint 6</td><td>Save E2E Wizard output as switch-loadable script (.cli per OS, ZIP)</td><td><span class="badge r">Not built</span></td></tr>
+          <tr><td>Sprint 7</td><td>Voyage AI embedding migration (voyage-code-2, 1024-dim)</td><td><span class="badge p">Architectural decision &mdash; do at 12K rows</span></td></tr>
+          <tr><td>Sprint 8</td><td>UI Banner Polish</td><td><span class="badge y">Low priority</span></td></tr>
+          <tr><td>Sprint 9</td><td>OS Version numbers in outputs (EXOS 33.x, NX-OS 10.5(5)M in headers)</td><td><span class="badge r">Not built</span></td></tr>
+          <tr><td>Sprint 10</td><td>E2E Wizard Chat Mode (conversation history across follow-up queries)</td><td><span class="badge r">Not built</span></td></tr>
+        </table>
+
+        <h3>Sprint 2 RFC/IEEE Standards &mdash; All 9 Bins</h3>
+        <table>
+          <tr><th>Bin</th><th>Standards</th></tr>
+          <tr><td>[ONBOARD]</td><td>RFC 8572, RFC 8071</td></tr>
+          <tr><td>[SEC-ID]</td><td>IEEE 802.1X, RFC 2865 (RADIUS), RFC 8907 (TACACS+)</td></tr>
+          <tr><td>[L2-SEG]</td><td>IEEE 802.1Q, IEEE 802.1aq (SPBM), IEEE 802.1D (STP)</td></tr>
+          <tr><td>[FAB-SDN]</td><td>RFC 7432 (EVPN), RFC 7348 (VXLAN), RFC 7426 (SDN Layers), RFC 6830 (LISP)</td></tr>
+          <tr><td>[L3-VIRT]</td><td>RFC 2328 (OSPF), RFC 4271 (BGP), RFC 4364 (VRF/MPLS L3VPN)</td></tr>
+          <tr><td>[IF-PHYS]</td><td>IEEE 802.3 (Ethernet), IEEE 802.1AX (LAG/LACP)</td></tr>
+          <tr><td>[MGMT-OPS]</td><td>RFC 6241 (NETCONF), RFC 5905 (NTP), RFC 5424 (Syslog)</td></tr>
+          <tr><td>[DIAG-LOG]</td><td>RFC 792 (ICMP), RFC 4443 (ICMPv6)</td></tr>
+          <tr><td>[SYS-INFO]</td><td>RFC 8342 (NMDA), RFC 6020/7950 (YANG)</td></tr>
+        </table>
+      </section>
+
+      <!-- d2-security -->
+      <section id="d2-security">
+        <h2>Security Notes</h2>
+        <table>
+          <tr><th>Item</th><th>Severity</th><th>Action</th></tr>
+          <tr><td>PostgreSQL password in conversation</td><td><span class="badge r">High</span></td><td>Rotate after pg_dump &mdash; Railway &rarr; PostgreSQL &rarr; Regenerate</td></tr>
+          <tr><td>all-MiniLM-L6-v2 from HuggingFace at runtime</td><td><span class="badge y">Medium</span></td><td>Future: pin model hash, cache in volume</td></tr>
+          <tr><td>ANTHROPIC_API_KEY in Railway Variables</td><td><span class="badge y">Medium</span></td><td>Restrict Railway project access</td></tr>
+          <tr><td>Credentials in APP_USERS env var not code</td><td><span class="badge g">Handled</span></td><td>Never in code or memory files</td></tr>
+        </table>
+
+        <h3>What is all-MiniLM-L6-v2</h3>
+        <p>A 384-dimensional sentence embedding model (~90MB, Microsoft/HuggingFace). Converts CLI intent text into a vector for pgvector similarity search. Runs entirely inside the Railway container &mdash; no data leaves Railway during inference. Not Claude. Claude is only called for final text response formatting.</p>
+
+        <hr>
+        <p style="color:var(--mut);font-size:11.5px;text-align:center;margin-top:20px;">
+          Generated by Claude Sonnet 4.6 &nbsp;|&nbsp; CISCO-EN CLI Mapping Agent &nbsp;|&nbsp; April 1, 2026<br>
+          Architecture: Khursheed Khan &times; Claude &nbsp;|&nbsp; Research pipeline: Google &rarr; NotebookLM &rarr; Claude Code
+        </p>
+      </section>
+      <div style="margin-top:40px;"><p style="color:var(--mut,#8b949e);font-size:12px;text-align:center;margin-top:28px;padding-top:16px;border-top:1px solid #30363d;">&copy; 2026 Khursheed Khan. All rights reserved. &nbsp;|&nbsp; CISCO-EN CLI Mapping Agent &nbsp;|&nbsp; April 1, 2026</p></div>
+    </main>
+  </div><!-- /tab-day2 -->
+
+</div><!-- /body-wrap -->
 
 <script>
 // Tab switching
-function switchTab(id, btn) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+function switchTab(day, btn) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('nav-day1').style.display = 'none';
+  document.getElementById('nav-day2').style.display = 'none';
+  document.getElementById('tab-' + day).classList.add('active');
+  document.getElementById('nav-' + day).style.display = 'block';
   btn.classList.add('active');
-  // Show correct nav
-  document.getElementById('nav-day1').style.display = id === 'day1' ? '' : 'none';
-  document.getElementById('nav-day2').style.display = id === 'day2' ? '' : 'none';
-  window.scrollTo(0, 0);
+  setupObserver(day);
 }
 
-// Active nav link tracking per tab
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const id = entry.target.id;
-      document.querySelectorAll('nav a').forEach(a => {
-        a.classList.toggle('active', a.getAttribute('href') === '#' + id);
-      });
-    }
-  });
-}, { threshold: 0.25 });
+var currentObserver = null;
 
-document.querySelectorAll('section[id]').forEach(s => observer.observe(s));
+function setupObserver(day) {
+  if (currentObserver) { currentObserver.disconnect(); }
+  var panel = document.getElementById('tab-' + day);
+  var sections = panel.querySelectorAll('section[id]');
+  var navLinks = document.querySelectorAll('#nav-' + day + ' a');
+
+  navLinks.forEach(function(l){ l.classList.remove('active'); });
+
+  currentObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(x) {
+      if (x.isIntersecting) {
+        navLinks.forEach(function(l){ l.classList.remove('active'); });
+        var a = document.querySelector('#nav-' + day + ' a[href="#' + x.target.id + '"]');
+        if (a) { a.classList.add('active'); }
+      }
+    });
+  }, {threshold: 0.2, rootMargin: '-48px 0px 0px 0px'});
+
+  sections.forEach(function(s){ currentObserver.observe(s); });
+}
+
+// Initialize on load for Day 1
+setupObserver('day1');
 </script>
 </body>
 </html>
