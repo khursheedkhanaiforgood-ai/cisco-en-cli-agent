@@ -65,7 +65,10 @@ def render_query_box():
 def _run_query(query: str, os_filter, tag_filter):
     from src.agents.orchestrator import query as agent_query
     from src.ui.components.rag_settings import get_rag_settings
+    from src.ui.components.auth import get_current_user
     rag = get_rag_settings()
+    current_user = get_current_user()
+    username = current_user["username"] if current_user else "anonymous"
 
     with st.spinner("Searching database and generating response..."):
         start = time.time()
@@ -79,6 +82,7 @@ def _run_query(query: str, os_filter, tag_filter):
                 verified_only=rag["rag_verified_only"],
                 min_confidence=rag["rag_min_confidence"],
                 search_mode=rag["rag_search_mode"],
+                username=username,
             )
         except Exception as e:
             st.error(f"Error: {e}")

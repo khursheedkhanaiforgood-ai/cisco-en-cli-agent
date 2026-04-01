@@ -96,14 +96,16 @@ class ExtractionRun(Base):
 class QueryLog(Base):
     __tablename__ = "query_log"
 
-    id              = Column(Integer, primary_key=True, autoincrement=True)
-    query_text      = Column(Text, nullable=False)
-    tag_filter      = Column(String(20))
-    os_filter       = Column(String(30))
-    results_count   = Column(Integer)
-    top_similarity  = Column(Float)
+    id               = Column(Integer, primary_key=True, autoincrement=True)
+    query_text       = Column(Text, nullable=False)
+    tag_filter       = Column(String(20))
+    os_filter        = Column(String(30))
+    results_count    = Column(Integer)
+    top_similarity   = Column(Float)
     response_time_ms = Column(Integer)
-    created_at      = Column(DateTime(timezone=True), server_default=func.now())
+    username         = Column(String(50))   # who made the query
+    source           = Column(String(20))   # "ai_query" | "e2e_wizard" | "bin_tab"
+    created_at       = Column(DateTime(timezone=True), server_default=func.now())
 
 
 class CrawlerURL(Base):

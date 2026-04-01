@@ -97,6 +97,7 @@ def query(
     verified_only: bool = False,
     min_confidence: float = 0.0,
     search_mode: str = "Semantic (vector)",
+    username: Optional[str] = None,
 ) -> dict:
     """
     Main entry point: process a user query end-to-end.
@@ -126,22 +127,25 @@ def query(
         verified_only=verified_only,
         min_confidence=min_confidence,
         search_mode=search_mode,
+        username=username,
+        source="ai_query",
     )
 
     # 2b. Fallback: if bin-scoped search returns nothing, search entire DB
-    # This handles mis-tagged rows or edge cases where classify_tag picks the wrong bin.
     fallback_used = False
     if not results and tag_filter:
         logger.info(f"No results in bin '{tag_filter}' — falling back to full-DB search")
         results = search(
             query=user_query,
-            tag_filter=None,          # drop bin filter — search all 9 bins
+            tag_filter=None,
             os_filter=os_filter,
             limit=top_k,
             threshold=threshold,
             verified_only=verified_only,
             min_confidence=min_confidence,
             search_mode=search_mode,
+            username=username,
+            source="ai_query",
         )
         fallback_used = bool(results)
 

@@ -150,11 +150,23 @@ def run_migrations():
                 logger.info("Migration complete — tables created.")
             else:
                 logger.info("Schema already exists, skipping migration.")
+
+            # Additive migrations — safe to run on existing schema
+            _run_additive_migrations(cur)
+            raw_conn.commit()
+
     except Exception as e:
         raw_conn.rollback()
         raise
     finally:
         raw_conn.close()
+
+
+def _run_additive_migrations(cur):
+    """Add new columns to existing tables. Idempotent — uses IF NOT EXISTS."""
+    # query_log: add username + source columns (added 2026-04-01)
+    cur.execute("ALTER TABLE query_log ADD COLUMN IF NOT EXISTS username VARCHAR(50);")
+    cur.execute("ALTER TABLE query_log ADD COLUMN IF NOT EXISTS source VARCHAR(20);")
 
 
 def init_db():

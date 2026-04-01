@@ -182,6 +182,39 @@ def render_db_browser():
     st.divider()
     st.subheader("⚙️ Database Administration")
 
+    # Query History (admin only)
+    if is_admin():
+        st.divider()
+        st.subheader("📋 Query History")
+        try:
+            from sqlalchemy import text as _t
+            from src.database.connection import get_session
+            with get_session() as session:
+                log_rows = session.execute(_t("""
+                    SELECT created_at, username, source, query_text,
+                           tag_filter, results_count, response_time_ms
+                    FROM query_log
+                    ORDER BY created_at DESC
+                    LIMIT 200
+                """)).fetchall()
+            if log_rows:
+                import pandas as pd
+                log_df = pd.DataFrame(log_rows, columns=[
+                    "Time", "User", "Source", "Query",
+                    "Bin", "Results", "ms"
+                ])
+                log_df["Time"] = pd.to_datetime(log_df["Time"]).dt.strftime("%m-%d %H:%M")
+                st.dataframe(log_df, use_container_width=True, height=300)
+                csv = log_df.to_csv(index=False)
+                st.download_button("⬇️ Export query log", csv,
+                                   "query_log.csv", "text/csv")
+            else:
+                st.info("No queries logged yet.")
+        except Exception as _e:
+            st.warning(f"Query history unavailable: {_e}")
+
+    st.divider()
+
     if stats["total"] == 0:
         st.warning("Database is empty. Click below to load all seed data (~528 rows).")
         if st.button("🌱 Seed Database Now", type="primary"):

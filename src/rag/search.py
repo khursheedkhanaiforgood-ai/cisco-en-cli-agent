@@ -21,6 +21,8 @@ def search(
     verified_only: bool = False,
     min_confidence: float = 0.0,
     search_mode: str = "Semantic (vector)",
+    username: Optional[str] = None,
+    source: str = "ai_query",
 ) -> list[dict]:
     """
     Semantic search over CLI mappings.
@@ -52,7 +54,7 @@ def search(
         return sem + [r for r in kw if r.get("id") not in seen]
 
     return _semantic_search(query, tag_filter, os_filter, limit, threshold,
-                            verified_only, min_confidence)
+                            verified_only, min_confidence, username=username, source=source)
 
 
 def _semantic_search(
@@ -63,6 +65,8 @@ def _semantic_search(
     threshold: float,
     verified_only: bool,
     min_confidence: float,
+    username: Optional[str] = None,
+    source: str = "ai_query",
 ) -> list[dict]:
     """Core pgvector cosine similarity search."""
     start_time = time.time()
@@ -132,6 +136,8 @@ def _semantic_search(
             results_count=len(results),
             top_similarity=top_sim,
             response_time_ms=elapsed_ms,
+            username=username,
+            source=source,
         )
         session.add(log)
 
