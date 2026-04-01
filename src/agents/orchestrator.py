@@ -116,7 +116,7 @@ def query(
     if not tag_filter:
         tag_filter = classify_tag(user_query)
 
-    # 2. Semantic search
+    # 2. Semantic search — bin-scoped first
     results = search(
         query=user_query,
         tag_filter=tag_filter,
@@ -128,8 +128,25 @@ def query(
         search_mode=search_mode,
     )
 
+    # 2b. Fallback: if bin-scoped search returns nothing, search entire DB
+    # This handles mis-tagged rows or edge cases where classify_tag picks the wrong bin.
+    fallback_used = False
+    if not results and tag_filter:
+        logger.info(f"No results in bin '{tag_filter}' — falling back to full-DB search")
+        results = search(
+            query=user_query,
+            tag_filter=None,          # drop bin filter — search all 9 bins
+            os_filter=os_filter,
+            limit=top_k,
+            threshold=threshold,
+            verified_only=verified_only,
+            min_confidence=min_confidence,
+            search_mode=search_mode,
+        )
+        fallback_used = bool(results)
+
     # 3. Build context for Claude
-    context = _build_context(user_query, results, tag_filter)
+    context = _build_context(user_query, results, tag_filter, fallback_used=fallback_used)
 
     # 4. Call Claude for formatted response (inject bin guardrails if tag known)
     try:
@@ -148,23 +165,28 @@ def query(
     elapsed_ms = int((time.time() - start) * 1000)
 
     return {
-        "query": user_query,
-        "tag_used": tag_filter,
-        "results": results,
-        "ai_response": ai_response,
-        "elapsed_ms": elapsed_ms,
+        "query":        user_query,
+        "tag_used":     tag_filter,
+        "fallback_used": fallback_used,
+        "results":      results,
+        "ai_response":  ai_response,
+        "elapsed_ms":   elapsed_ms,
     }
 
 
-def _build_context(query: str, results: list[dict], tag: Optional[str]) -> str:
+def _build_context(query: str, results: list[dict], tag: Optional[str], fallback_used: bool = False) -> str:
     """Build the context message sent to Claude."""
     lines = [
         f"User query: {query}",
         f"Detected functional bin: {tag or 'unclassified'}",
-        "",
-        "Retrieved CLI mappings from database:",
-        "",
     ]
+    if fallback_used:
+        lines.append(
+            f"⚠️ Search scope: No results found in bin '{tag}' — results below are from a "
+            f"FULL DATABASE fallback search across all bins. The command may be mis-tagged "
+            f"in the database. Note the actual bin of each result in your response."
+        )
+    lines += ["", "Retrieved CLI mappings from database:", ""]
     for i, r in enumerate(results, 1):
         lines.append(f"## Result {i} — {r['tag']} | {r['functional_intent']} (similarity: {r['similarity']})")
         lines.append(f"  Cisco IOS:      {r['cisco_ios'] or '—'}")
