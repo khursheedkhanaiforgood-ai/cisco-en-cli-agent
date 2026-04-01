@@ -72,6 +72,7 @@
   <a href="#railway">Railway — Step by Step</a>
   <a href="#sandbox">Sandbox Test Plan</a>
   <div class="section-label">Roadmap</div>
+  <a href="#railway">Railway Deployment</a>
   <a href="#remaining">Remaining Steps</a>
   <a href="#pipeline">Research Pipeline &amp; Files</a>
   <a href="#files">All Files Built</a>
@@ -425,6 +426,87 @@ MODEL=claude-sonnet-4-6</code></pre></div></div>
   </section>
 
   <!-- REMAINING STEPS -->
+  <!-- RAILWAY DEPLOYMENT -->
+  <section id="railway">
+    <h2>Railway Deployment — Step by Step</h2>
+    <p>The application is deployed on Railway using PostgreSQL + pgvector + Streamlit. Follow these steps exactly in order.</p>
+
+    <div class="box warn"><p><strong>Pre-requisite:</strong> The GitHub repo must be pushed before Railway can deploy. Repo is live at <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent" target="_blank">github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent</a></p></div>
+
+    <h3>Step 1 — Create Account / Log In</h3>
+    <p>Go to <strong>railway.app</strong> → click <strong>Login</strong> → use <strong>GitHub login</strong> (easiest — auto-connects to your repos).</p>
+
+    <h3>Step 2 — New Project from GitHub</h3>
+    <ol>
+      <li>Click <strong>New Project</strong></li>
+      <li>Select <strong>Deploy from GitHub repo</strong></li>
+      <li>If prompted, click <strong>Configure GitHub App</strong> → authorize Railway</li>
+      <li>Select <strong>khursheedkhanaiforgood-ai/cisco-en-cli-agent</strong></li>
+      <li>Railway detects <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/railway.toml" target="_blank">railway.toml</a> and starts building — <strong>let it run, don't touch yet</strong></li>
+    </ol>
+
+    <h3>Step 3 — Add PostgreSQL Database</h3>
+    <ol>
+      <li>In your project canvas, click <strong>+ New</strong> (top right)</li>
+      <li>Select <strong>Database</strong> → <strong>PostgreSQL</strong></li>
+      <li>Railway creates a Postgres instance and <strong>auto-injects <code>DATABASE_URL</code></strong> into your app — nothing to copy or paste</li>
+    </ol>
+
+    <h3>Step 4 — Set Environment Variables</h3>
+    <p>Click your <strong>cisco-en-cli-agent service</strong> → <strong>Variables</strong> tab → add these three:</p>
+    <table>
+      <tr><th>Variable</th><th>Value</th></tr>
+      <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Your Anthropic API key (<code>sk-ant-api03-...</code>)</td></tr>
+      <tr><td><code>APP_REQUIRE_LOGIN</code></td><td><code>true</code></td></tr>
+      <tr><td><code>APP_USERS</code></td><td><code>{"admin":{"password":"REDACTED_PASS","role":"admin"},"babla":{"password":"REDACTED_PASS","role":"superadmin"}}</code></td></tr>
+    </table>
+    <div class="box ok"><p><code>DATABASE_URL</code> is already injected automatically from Step 3 — do NOT add it manually.</p></div>
+
+    <h3>Step 5 — Confirm Start Command</h3>
+    <p>Click your service → <strong>Settings</strong> tab → scroll to <strong>Deploy</strong>. The start command is pre-set in <code>railway.toml</code>:</p>
+    <pre><code>streamlit run src/ui/app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true</code></pre>
+    <p>If the field is blank, paste it in manually.</p>
+
+    <h3>Step 6 — Wait for Build</h3>
+    <p>Go to the <strong>Deployments</strong> tab — watch the build log. First build takes <strong>4–6 minutes</strong> (torch + sentence-transformers are large). You will see:</p>
+    <pre><code>✓ Build successful
+✓ Deploy successful</code></pre>
+    <p>Railway generates a public URL like: <code>cisco-en-cli-agent-production.up.railway.app</code></p>
+
+    <h3>Step 7 — Seed the Database <span style="color:var(--red)">(critical — do before testing)</span></h3>
+    <p>Click your service → <strong>Shell</strong> tab → run:</p>
+    <pre><code>python -m src.database.seed</code></pre>
+    <p>This creates the tables, loads all ~528 rows, generates embeddings, and builds the IVFFlat pgvector index. Takes 2–3 minutes. Expected output:</p>
+    <pre><code>Total rows:    528
+Embedded:      528
+Verified:      ...
+By tag:
+  [ONBOARD]        xx rows
+  [SEC-ID]         xx rows
+  ...</code></pre>
+
+    <h3>Step 8 — Open the App &amp; Sign In</h3>
+    <p>Click the Railway public URL → login page appears:</p>
+    <table>
+      <tr><th>User</th><th>Username</th><th>Password</th><th>Role</th></tr>
+      <tr><td>Team / testers</td><td><code>admin</code></td><td><code>REDACTED_PASS</code></td><td>admin</td></tr>
+      <tr><td>Khursheed (owner)</td><td><code>babla</code></td><td><code>REDACTED_PASS</code></td><td>superadmin</td></tr>
+    </table>
+    <p>Sidebar should show <strong>Total Mappings: 528</strong> after seeding.</p>
+
+    <h3>Step 9 — Run Sandbox Tests</h3>
+    <p>See the <strong>Sandbox Test Plan</strong> section above (T1–T8) to validate all layers are working correctly.</p>
+
+    <h3>If the Build Fails</h3>
+    <div class="box warn"><p>Most likely cause: <code>torch</code> is too large for Railway's free tier memory. If you see an OOM or timeout error, tell Khursheed — a CPU-only torch pin can be pushed to <code>requirements.txt</code> in under 2 minutes to fix it.</p></div>
+
+    <h3>After Deployment — Grow the Database</h3>
+    <ol>
+      <li><strong>PDF extraction</strong> — in Railway shell: <code>python -m src.database.seed --pdf</code> (uses EXOS 22.7 + VOSS 9.0 PDFs already in repo — adds ~3,000–4,000 rows)</li>
+      <li><strong>Web crawler</strong> — Add Data tab → Web Crawler subtab → set timeout → approve results → push toward 12,000 rows</li>
+    </ol>
+  </section>
+
   <section id="remaining">
     <h2>Remaining Steps — Prioritized Roadmap</h2>
     <table>
