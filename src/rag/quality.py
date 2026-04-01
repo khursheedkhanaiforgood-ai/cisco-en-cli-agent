@@ -19,7 +19,7 @@ def get_completeness_by_bin() -> list[dict]:
         SELECT
             tag,
             COUNT(*) AS row_count,
-            ROUND(100.0 * AVG(
+            ROUND(CAST(100.0 * AVG(
                 (CASE WHEN cisco_ios     <> '' THEN 1 ELSE 0 END +
                  CASE WHEN cisco_iosxe   <> '' THEN 1 ELSE 0 END +
                  CASE WHEN cisco_nxos    <> '' THEN 1 ELSE 0 END +
@@ -27,7 +27,7 @@ def get_completeness_by_bin() -> list[dict]:
                  CASE WHEN extreme_voss  <> '' THEN 1 ELSE 0 END +
                  CASE WHEN extreme_slxos <> '' THEN 1 ELSE 0 END
                 )::float / 6
-            ), 1) AS avg_fill_pct,
+            ) AS numeric), 1) AS avg_fill_pct,
             COUNT(CASE WHEN is_verified THEN 1 END) AS verified_count
         FROM cli_mappings
         WHERE tag IS NOT NULL
@@ -126,12 +126,12 @@ def get_os_fill_rates() -> dict[str, float]:
     """Overall fill rate per OS column across the entire DB."""
     sql = text("""
         SELECT
-            ROUND(100.0 * COUNT(CASE WHEN cisco_ios     <> '' THEN 1 END) / NULLIF(COUNT(*),0), 1) AS cisco_ios,
-            ROUND(100.0 * COUNT(CASE WHEN cisco_iosxe   <> '' THEN 1 END) / NULLIF(COUNT(*),0), 1) AS cisco_iosxe,
-            ROUND(100.0 * COUNT(CASE WHEN cisco_nxos    <> '' THEN 1 END) / NULLIF(COUNT(*),0), 1) AS cisco_nxos,
-            ROUND(100.0 * COUNT(CASE WHEN extreme_exos  <> '' THEN 1 END) / NULLIF(COUNT(*),0), 1) AS extreme_exos,
-            ROUND(100.0 * COUNT(CASE WHEN extreme_voss  <> '' THEN 1 END) / NULLIF(COUNT(*),0), 1) AS extreme_voss,
-            ROUND(100.0 * COUNT(CASE WHEN extreme_slxos <> '' THEN 1 END) / NULLIF(COUNT(*),0), 1) AS extreme_slxos
+            ROUND(CAST(100.0 * COUNT(CASE WHEN cisco_ios     <> '' THEN 1 END) / NULLIF(COUNT(*),0) AS numeric), 1) AS cisco_ios,
+            ROUND(CAST(100.0 * COUNT(CASE WHEN cisco_iosxe   <> '' THEN 1 END) / NULLIF(COUNT(*),0) AS numeric), 1) AS cisco_iosxe,
+            ROUND(CAST(100.0 * COUNT(CASE WHEN cisco_nxos    <> '' THEN 1 END) / NULLIF(COUNT(*),0) AS numeric), 1) AS cisco_nxos,
+            ROUND(CAST(100.0 * COUNT(CASE WHEN extreme_exos  <> '' THEN 1 END) / NULLIF(COUNT(*),0) AS numeric), 1) AS extreme_exos,
+            ROUND(CAST(100.0 * COUNT(CASE WHEN extreme_voss  <> '' THEN 1 END) / NULLIF(COUNT(*),0) AS numeric), 1) AS extreme_voss,
+            ROUND(CAST(100.0 * COUNT(CASE WHEN extreme_slxos <> '' THEN 1 END) / NULLIF(COUNT(*),0) AS numeric), 1) AS extreme_slxos
         FROM cli_mappings
     """)
     with get_session() as session:
