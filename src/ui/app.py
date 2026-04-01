@@ -55,8 +55,32 @@ with st.sidebar:
         col1, col2 = st.columns(2)
         col1.metric("Embedded", stats["embedded"])
         col2.metric("Coverage", f"{int(stats['embedded']/max(stats['total'],1)*100)}%")
-    except Exception:
-        st.info("Database not connected")
+    except Exception as _db_err:
+        st.warning(f"DB not connected: {_db_err}")
+
+    # ── DB Completeness (admin/superadmin) ────────────────────────────────────
+    from src.ui.components.auth import is_admin
+    if is_admin():
+        st.divider()
+        try:
+            from src.rag.quality import get_completeness_by_bin, DB_TARGET_ROWS
+            bins = get_completeness_by_bin()
+            total_rows = sum(b["row_count"] for b in bins)
+            pct_total = round(100 * total_rows / DB_TARGET_ROWS, 1)
+            st.markdown(f"**📊 DB Progress** — {total_rows:,} / {DB_TARGET_ROWS:,} rows")
+            st.progress(total_rows / DB_TARGET_ROWS, text=f"{pct_total}% of 12K target")
+            st.markdown("")
+            for b in bins:
+                short = b["tag"].strip("[]")
+                fill = b["avg_fill_pct"]
+                cnt = b["row_count"]
+                st.markdown(
+                    f"{b['status']} **{short}** &nbsp; {cnt} rows &nbsp; "
+                    f"<span style='color:#8b949e'>{fill}% filled</span>",
+                    unsafe_allow_html=True,
+                )
+        except Exception:
+            pass  # DB not ready yet — silent
 
     st.divider()
     render_rag_settings_panel()

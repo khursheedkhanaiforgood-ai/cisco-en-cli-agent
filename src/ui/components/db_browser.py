@@ -1,6 +1,90 @@
-"""DB Browser tab — full-text search, stats, and export."""
+"""DB Browser tab — full-text search, stats, completeness dashboard, and export."""
 import streamlit as st
 import pandas as pd
+
+
+def _render_completeness_dashboard(stats: dict):
+    """Landing overview: one row per bin + 12K progress."""
+    from src.rag.quality import get_completeness_by_bin, get_os_fill_rates, DB_TARGET_ROWS, BIN_TARGET_ROWS
+    from src.config import TAG_LABELS, OS_SHORT
+
+    st.subheader("📊 DB Completeness Dashboard")
+
+    bins = get_completeness_by_bin()
+    os_rates = get_os_fill_rates()
+    total_rows = sum(b["row_count"] for b in bins)
+    pct_total = round(100 * total_rows / DB_TARGET_ROWS, 1)
+
+    # Overall progress bar
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Total Rows", f"{total_rows:,}", f"/ {DB_TARGET_ROWS:,} target")
+    c2.metric("Overall Progress", f"{pct_total}%")
+    c3.metric("Bins Active", f"{sum(1 for b in bins if b['row_count'] > 0)} / {len(bins)}")
+    st.progress(total_rows / DB_TARGET_ROWS)
+    st.caption(f"Target: {DB_TARGET_ROWS:,} rows — ~{BIN_TARGET_ROWS:,} per bin")
+
+    st.markdown("---")
+
+    # One line per bin — row count + fill rate + progress toward bin target
+    st.markdown("**Per-Bin Status** — row count | OS fill % | progress to bin target (1,333 rows)")
+    header_cols = st.columns([2, 1, 1, 3])
+    header_cols[0].markdown("**Bin**")
+    header_cols[1].markdown("**Rows**")
+    header_cols[2].markdown("**Fill**")
+    header_cols[3].markdown("**Progress to 1,333**")
+
+    for b in bins:
+        c0, c1, c2, c3 = st.columns([2, 1, 1, 3])
+        c0.markdown(f"{b['status']} **{b['tag']}** {b['label']}")
+        c1.markdown(f"{b['row_count']:,}")
+        c2.markdown(f"{b['avg_fill_pct']}%")
+        c3.progress(b["bin_progress"])
+
+    st.markdown("---")
+
+    # OS column fill rates (global)
+    st.markdown("**OS Column Fill Rates** — across all rows in the database")
+    os_cols_display = list(OS_SHORT.items())  # [(col_key, short_label), ...]
+    rate_cols = st.columns(len(os_cols_display))
+    for i, (col, short) in enumerate(os_cols_display):
+        rate = os_rates.get(col, 0)
+        color = "🟢" if rate >= 70 else ("🟡" if rate >= 40 else "🔴")
+        rate_cols[i].metric(f"{color} {short}", f"{rate}%")
+
+
+def _render_bin_heatmap(tag: str):
+    """2D completeness matrix for a specific bin: intents × OS columns."""
+    from src.rag.quality import get_completeness_2d
+    from src.config import OS_SHORT
+
+    data = get_completeness_2d(tag)
+    if not data["intents"]:
+        st.info(f"No rows found for bin {tag}")
+        return
+
+    st.markdown(f"**2D Completeness — {tag}** ({data['total_rows']} rows × 6 OS columns)")
+
+    os_cols = data["os_cols"]
+    short_labels = [OS_SHORT.get(c, c) for c in os_cols]
+
+    # Build display DataFrame
+    rows_data = []
+    for intent in data["intents"]:
+        row = {"Functional Intent": intent[:60]}
+        for col, label in zip(os_cols, short_labels):
+            row[label] = "✅" if data["matrix"][intent][col] else "❌"
+        rows_data.append(row)
+
+    df = pd.DataFrame(rows_data)
+
+    # Summary row at bottom
+    fill_row = {"Functional Intent": "📊 Fill Rate"}
+    for col, label in zip(os_cols, short_labels):
+        fill_row[label] = f"{data['col_fill'][col]}%"
+    df_with_summary = pd.concat([df, pd.DataFrame([fill_row])], ignore_index=True)
+
+    st.dataframe(df_with_summary, use_container_width=True, height=400)
+    st.caption("✅ = command present | ❌ = empty (gap) | Last row = column fill rate")
 
 
 def render_db_browser():
@@ -21,14 +105,22 @@ def render_db_browser():
     cols[2].metric("Embedded", stats["embedded"])
     cols[3].metric("Bins Populated", len([v for v in stats["by_tag"].values() if v > 0]))
 
-    # Tag breakdown bar chart
-    if stats["by_tag"]:
-        st.subheader("Mappings per Functional Bin")
-        tag_df = pd.DataFrame(
-            [(tag, count) for tag, count in stats["by_tag"].items()],
-            columns=["Tag", "Count"],
-        ).sort_values("Count", ascending=False)
-        st.bar_chart(tag_df.set_index("Tag"))
+    # Completeness dashboard (admin/superadmin only)
+    from src.ui.components.auth import is_admin
+    if is_admin():
+        try:
+            _render_completeness_dashboard(stats)
+        except Exception as _e:
+            st.warning(f"Completeness dashboard unavailable: {_e}")
+    else:
+        # Non-admin: bar chart only
+        if stats["by_tag"]:
+            st.subheader("Mappings per Functional Bin")
+            tag_df = pd.DataFrame(
+                [(tag, count) for tag, count in stats["by_tag"].items()],
+                columns=["Tag", "Count"],
+            ).sort_values("Count", ascending=False)
+            st.bar_chart(tag_df.set_index("Tag"))
 
     st.divider()
 
@@ -56,6 +148,14 @@ def render_db_browser():
     else:
         rows = []
         st.info("Enter a search term or select a functional bin to browse mappings.")
+
+    # 2D heatmap when a specific bin is selected (admin only)
+    if tag_filter != "All" and is_admin():
+        try:
+            with st.expander(f"🔲 2D Completeness Heatmap — {tag_filter}", expanded=True):
+                _render_bin_heatmap(tag_filter)
+        except Exception as _e:
+            st.warning(f"Heatmap unavailable: {_e}")
 
     if rows:
         df = pd.DataFrame(rows)
