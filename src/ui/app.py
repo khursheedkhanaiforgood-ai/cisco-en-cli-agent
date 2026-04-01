@@ -23,6 +23,16 @@ from src.ui.components.auth import render_login_gate, render_user_badge
 # Initialise RAG session state defaults
 init_rag_settings()
 
+# Ensure DB schema exists on every startup (idempotent — skips if tables already exist)
+if "db_init_done" not in st.session_state:
+    try:
+        from src.database.connection import init_db
+        init_db()
+        st.session_state["db_init_done"] = True
+    except Exception as _init_err:
+        st.session_state["db_init_done"] = False
+        st.session_state["db_init_error"] = str(_init_err)
+
 # Login gate — stops rendering if login required and user is not authenticated
 if not render_login_gate():
     st.stop()

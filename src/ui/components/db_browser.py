@@ -182,20 +182,17 @@ def render_db_browser():
     st.divider()
     st.subheader("⚙️ Database Administration")
 
-    with st.expander("Seed & Initialize"):
-        st.markdown("""
-        **First-time setup:**
-        ```bash
-        # 1. Set your .env file
-        cp .env.example .env && nano .env
-
-        # 2. Initialize DB and load seed CSVs (~500 rows)
-        python -m src.database.seed
-
-        # 3. Optional: extract commands from PDFs (~3000+ more rows)
-        python -m src.database.seed --pdf
-        ```
-        """)
+    if stats["total"] == 0:
+        st.warning("Database is empty. Click below to load all seed data (~528 rows).")
+        if st.button("🌱 Seed Database Now", type="primary"):
+            from src.database.seed import main as seed_main
+            with st.spinner("Running seed — this takes ~60s for embeddings..."):
+                try:
+                    seed_main(overwrite=False)
+                    st.success("Seed complete! Refresh the page.")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Seed failed: {e}")
 
     with st.expander("Re-seed / Overwrite"):
         st.warning("This will overwrite existing data.")
