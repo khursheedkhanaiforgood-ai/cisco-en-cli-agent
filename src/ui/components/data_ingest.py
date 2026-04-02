@@ -159,6 +159,14 @@ def _render_pdf_approval():
     display_cols = [c for c in ["_action", "tag", "functional_intent", os_col, "source_ref"]
                     if c in df.columns]
 
+    col_config = {
+        "_action":           st.column_config.TextColumn("Action",   width="small"),
+        "tag":               st.column_config.TextColumn("Bin",      width="small"),
+        "functional_intent": st.column_config.TextColumn("Intent",   width="large"),
+        os_col:              st.column_config.TextColumn("Commands",  width="large"),
+        "source_ref":        st.column_config.TextColumn("Source",   width="medium"),
+    }
+
     page_size = 100
     total_pages = max(1, (len(df) + page_size - 1) // page_size)
     if total_pages > 1:
@@ -168,9 +176,11 @@ def _render_pdf_approval():
         )
         start = (page - 1) * page_size
         st.caption(f"Rows {start + 1}–{min(start + page_size, len(df))} of {len(df)}")
-        st.dataframe(df[display_cols].iloc[start:start + page_size], use_container_width=True, height=400)
+        st.dataframe(df[display_cols].iloc[start:start + page_size],
+                     use_container_width=True, height=420, column_config=col_config)
     else:
-        st.dataframe(df[display_cols], use_container_width=True, height=400)
+        st.dataframe(df[display_cols], use_container_width=True, height=420,
+                     column_config=col_config)
 
     col1, col2 = st.columns(2)
     if col1.button(

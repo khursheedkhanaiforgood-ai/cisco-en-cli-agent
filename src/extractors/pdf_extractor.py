@@ -96,10 +96,28 @@ def classify_tag(section_title: str, chapter_title: str = "") -> str:
     return max(scores, key=scores.get)
 
 
+# Section headings that indicate TOC/index pages — skip entirely
+_SKIP_HEADINGS = re.compile(
+    r"^(CONTEN\s*TS?|TABLE\s+OF\s+CONTENTS?|INDEX|PART\s*\d*|APPENDIX\s*\w*|"
+    r"CHAPTER\s*\d+|PREFACE|GLOSSARY|NOTICES?|ABOUT\s+THIS|BEFORE\s+YOU|"
+    r"REVISION\s+HISTORY|LEGAL\s+NOTICE|COPYRIGHT|TRADEMARKS?)$",
+    re.IGNORECASE,
+)
+
+# Lines to reject as commands — help system noise, not real CLI
+_BAD_COMMAND = re.compile(
+    r"(\?|<tab>|\.\.\.more|%\s+(incomplete|invalid|ambiguous|error)|"
+    r"^\s*%\s|^\s*#\s*$|^\s*-{3,}|^[A-Z\s]{1,4}$)",
+    re.IGNORECASE,
+)
+
+
 def is_cli_command(line: str, is_monospace: bool = False) -> bool:
     """Determine if a text line is likely a CLI command."""
     line = line.strip()
-    if not line or len(line) < 3:
+    if not line or len(line) < 4:
+        return False
+    if _BAD_COMMAND.search(line):
         return False
     for pattern in _ALL_PROMPTS:
         if re.match(pattern, line):
@@ -180,6 +198,12 @@ def extract_from_pdf(
                         if record:
                             records.append(record)
                     command_buffer = []
+
+                    # Skip TOC/index/part headings — they produce garbage records
+                    if _SKIP_HEADINGS.match(text.strip()):
+                        current_section = ""
+                        continue
+
                     if size > 16:
                         current_chapter = text
                     else:
@@ -376,13 +400,17 @@ def _make_record(
     if not commands:
         return None
 
-    # Deduplicate commands, keep first 10
+    # Deduplicate + reject noise commands
     seen = set()
     unique_cmds = []
     for cmd in commands:
-        if cmd not in seen and len(cmd) > 2:
-            seen.add(cmd)
-            unique_cmds.append(cmd)
+        cmd = cmd.strip()
+        if cmd in seen or len(cmd) < 4:
+            continue
+        if _BAD_COMMAND.search(cmd):
+            continue
+        seen.add(cmd)
+        unique_cmds.append(cmd)
     if not unique_cmds:
         return None
 
