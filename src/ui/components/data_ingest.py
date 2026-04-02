@@ -5,6 +5,7 @@ web crawler results with approval before DB insertion.
 import streamlit as st
 import io
 import time
+import re
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -366,96 +367,132 @@ def _insert_csv(csv_content: str, overwrite: bool):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# WEB CRAWLER WITH APPROVAL
+# WEB CRAWLER — 3-phase: Discover → Select → Extract
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _render_crawler():
-    st.subheader("Web Crawler — Find New CLI Commands")
+    st.subheader("Web Crawler — Discover & Import Documents")
     st.markdown(
-        "The crawler searches vendor documentation sites for new CLI commands. "
-        "**Results are shown for your approval before anything is inserted into the database.**"
+        "Paste any vendor documentation index page. The crawler finds all documents "
+        "on that page, lets you **choose which ones** to extract, then imports the "
+        "commands into the database using the same merge/insert logic as PDF upload."
     )
 
-    from src.config import VENDOR_SEED_URLS, OS_COLUMNS
+    from src.config import OS_COLUMNS
 
-    col1, col2 = st.columns(2)
+    # ── Phase 1: URL input + Discover ────────────────────────────────────────
+    col1, col2 = st.columns([4, 1])
     with col1:
-        url_source = st.selectbox(
-            "Source",
-            ["Custom URL"] + list(VENDOR_SEED_URLS.keys()),
+        url = st.text_input(
+            "Documentation index URL",
+            placeholder="https://www.cisco.com/c/en/us/.../products-command-reference-list.html",
+            value=st.session_state.get("_crawler_url", ""),
+            label_visibility="collapsed",
         )
     with col2:
-        os_col = st.selectbox("Target OS column", OS_COLUMNS)
+        os_col = st.selectbox("OS column", OS_COLUMNS, key="_crawler_os_col")
 
-    if url_source == "Custom URL":
-        crawl_url = st.text_input("Enter URL to crawl",
-                                  placeholder="https://documentation.extremenetworks.com/...")
-    else:
-        crawl_url = VENDOR_SEED_URLS[url_source]
-        st.info(f"URL: `{crawl_url}`")
-        os_col = url_source
+    discover_btn = st.button("🔍 Discover Documents", type="primary")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        max_pages = st.slider("Max pages", 5, 100, 20,
-                              help="Crawler stops after this many pages.")
-    with col2:
-        timeout_sec = st.slider("Timeout (seconds)", 10, 120, 30,
-                                help="Crawler stops if this time limit is exceeded.")
-
-    if st.button("🕷️ Start Crawler (dry run — preview only)", type="primary"):
-        if not crawl_url:
-            st.warning("Please enter a URL.")
+    if discover_btn and url:
+        st.session_state["_crawler_url"] = url
+        st.session_state.pop("_crawler_docs", None)
+        st.session_state.pop("_crawler_selected", None)
+        with st.spinner("Fetching page and discovering document links..."):
+            from src.extractors.web_crawler import discover_documents
+            docs = discover_documents(url)
+        if docs and "error" in docs[0]:
+            st.error(docs[0]["error"])
+        elif not docs:
+            st.warning("No document links found on that page. Try a more specific URL.")
         else:
-            _run_crawler_preview(crawl_url, os_col, max_pages, timeout_sec)
+            st.session_state["_crawler_docs"] = docs
+            st.rerun()
 
-
-def _run_crawler_preview(url: str, os_col: str, max_pages: int, timeout_sec: int):
-    from src.extractors.web_crawler import crawl_url
-    import threading
-
-    results_holder = {}
-    done = threading.Event()
-
-    def _crawl():
-        try:
-            result = crawl_url(url, os_col=os_col, max_pages=max_pages,
-                               rate_limit=0.5, dry_run=True)
-            results_holder["result"] = result
-        except Exception as e:
-            results_holder["error"] = str(e)
-        finally:
-            done.set()
-
-    with st.spinner(f"Crawling up to {max_pages} pages (timeout: {timeout_sec}s)..."):
-        t = threading.Thread(target=_crawl, daemon=True)
-        t.start()
-        done.wait(timeout=timeout_sec)
-
-    if "error" in results_holder:
-        st.error(f"Crawler error: {results_holder['error']}")
+    # ── Phase 2: Document selection ──────────────────────────────────────────
+    docs = st.session_state.get("_crawler_docs")
+    if not docs:
+        st.info("Enter a documentation index URL above and click **Discover Documents**.")
         return
 
-    if not done.is_set():
-        st.warning(f"Crawler timed out after {timeout_sec}s. Showing partial results.")
+    pdfs  = [d for d in docs if d["doc_type"] == "pdf"]
+    htmls = [d for d in docs if d["doc_type"] == "html"]
+    st.success(f"Found **{len(docs)} documents** — {len(pdfs)} PDFs, {len(htmls)} HTML pages")
 
-    result = results_holder.get("result", {})
-    records = result.get("records", 0)
-    crawled = result.get("crawled", 0)
+    import pandas as pd
+    doc_df = pd.DataFrame([
+        {"#": i + 1, "Type": d["doc_type"].upper(), "Title": d["title"], "URL": d["url"]}
+        for i, d in enumerate(docs)
+    ])
+    st.dataframe(doc_df, use_container_width=True, height=350)
 
-    st.info(f"Crawled **{crawled} pages**, found **{records} potential records**.")
+    st.markdown("**Select documents to extract from:**")
+    titles = [f"{d['doc_type'].upper()} — {d['title'][:80]}" for d in docs]
+    selected_titles = st.multiselect(
+        "Documents",
+        options=titles,
+        default=[],
+        label_visibility="collapsed",
+        key="_crawler_multiselect",
+    )
 
-    if records == 0:
-        st.info("No new CLI commands found. Try a more specific URL or different OS column.")
+    max_pdf_pages = st.slider(
+        "Max pages per PDF (0 = all)", 0, 500, 50,
+        help="Use a low limit to test before doing a full extract.",
+        key="_crawler_max_pages",
+    )
+
+    if not selected_titles:
+        st.info("Select one or more documents above, then click Extract.")
         return
 
-    st.success(f"**{records} records ready for review.** Run the crawler again with 'Insert' to approve and save.")
+    selected_docs = [docs[titles.index(t)] for t in selected_titles]
 
-    col1, col2 = st.columns(2)
-    if col1.button(f"✅ Approve & Insert {records} records", type="primary"):
-        with st.spinner("Inserting approved crawler results..."):
-            final = crawl_url(url, os_col=os_col, max_pages=max_pages,
-                              rate_limit=0.5, dry_run=False)
-        st.success(f"Inserted **{final.get('inserted', 0)} records** into the database.")
-    if col2.button("❌ Discard — do not insert"):
-        st.info("Crawler results discarded.")
+    col1, col2 = st.columns([1, 3])
+    extract_btn = col1.button(
+        f"⬇️ Extract from {len(selected_docs)} document(s)",
+        type="primary", key="_crawler_extract"
+    )
+    col2.caption(f"Will extract `{os_col}` commands — merge into existing rows or insert new")
+
+    # ── Phase 3: Extract selected documents ──────────────────────────────────
+    if extract_btn:
+        all_records = []
+        errors = []
+
+        progress = st.progress(0)
+        status = st.empty()
+
+        from src.extractors.web_crawler import extract_from_doc
+
+        for i, doc in enumerate(selected_docs):
+            status.info(f"Extracting {i + 1}/{len(selected_docs)}: {doc['title'][:60]}...")
+            result = extract_from_doc(
+                doc["url"],
+                os_col=os_col,
+                max_pages=max_pdf_pages,
+            )
+            if result.get("error"):
+                errors.append(f"{doc['title'][:50]}: {result['error']}")
+            else:
+                all_records.extend(result["records"])
+            progress.progress((i + 1) / len(selected_docs))
+            time.sleep(0.3)  # polite rate limit
+
+        progress.empty()
+        status.empty()
+
+        if errors:
+            for err in errors:
+                st.warning(f"⚠️ {err}")
+
+        if not all_records:
+            st.error("No CLI commands extracted. Documents may be login-gated, JS-rendered, or have no command blocks.")
+            return
+
+        # Hand off to the shared PDF approval flow
+        st.session_state["_pdf_records"] = all_records
+        st.session_state["_pdf_os_col"]  = os_col
+        st.session_state["_pdf_source"]  = f"{len(selected_docs)} crawled doc(s)"
+        st.session_state.pop("_crawler_docs", None)
+        st.rerun()
