@@ -233,6 +233,131 @@ def extract_from_pdf(
     return records
 
 
+def extract_from_cisco_cr_pdf(
+    pdf_path: Path,
+    os_col: str,
+    source_name: str = "",
+    max_pages: int = 0,
+) -> list[dict]:
+    """
+    Extractor for Cisco Command Reference PDFs (IOS / IOS-XE / NX-OS).
+
+    These PDFs have no monospace fonts. Structure per page:
+      - Large heading (size > 14, Univers-CondensedBold) = command name
+      - Times-Bold + Times-Italic tokens in Syntax section = command syntax
+      - Section labels (Univers-CondensedBold, smaller) = "SyntaxDescription",
+        "CommandDefault", "CommandModes", "Examples" etc.
+
+    Strategy:
+      1. Accumulate heading words at size > 14 → functional_intent
+      2. After "SyntaxDescription" label → collect Bold+Italic tokens → syntax
+      3. Stop on next section label → flush record
+    """
+    try:
+        import pdfplumber
+    except ImportError:
+        logger.error("pdfplumber not installed.")
+        return []
+
+    if not source_name:
+        source_name = pdf_path.name
+
+    _SECTION_LABELS = {
+        "SyntaxDescription", "CommandDefault", "CommandModes",
+        "CommandHistory", "UsageGuidelines", "Examples",
+        "RelatedCommands", "Contents", "Preface",
+    }
+
+    logger.info(f"Extracting Cisco CR ({os_col}) from: {pdf_path.name}")
+    records = []
+    seen_intents: set[str] = set()
+
+    current_heading_words: list[str] = []
+    current_syntax_tokens: list[str] = []
+    in_syntax = False
+
+    def _flush_record():
+        nonlocal current_heading_words, current_syntax_tokens, in_syntax
+        if current_heading_words and current_syntax_tokens:
+            intent = " ".join(current_heading_words).strip()[:200]
+            norm = intent.lower()
+            if norm not in seen_intents and len(intent) > 2:
+                seen_intents.add(norm)
+                syntax = " ".join(current_syntax_tokens[:30])
+                tag = classify_tag(intent)
+                records.append({
+                    "tag":               tag,
+                    "functional_intent": intent,
+                    "commands_text":     syntax,
+                    os_col:              syntax,
+                    "source_ref":        source_name,
+                    "page_ref":          "",
+                    "notes":             "",
+                })
+        current_heading_words = []
+        current_syntax_tokens = []
+        in_syntax = False
+
+    with pdfplumber.open(pdf_path) as pdf:
+        pages = pdf.pages[:max_pages] if max_pages else pdf.pages
+        total = len(pages)
+
+        for page_num, page in enumerate(pages):
+            if page_num % 200 == 0 and page_num > 0:
+                logger.info(f"  Page {page_num}/{total} — {len(records)} records so far")
+
+            words = page.extract_words(extra_attrs=["fontname", "size"])
+            if not words:
+                continue
+
+            last_heading_y = -999  # track Y position to group same-line heading words
+
+            for w in words:
+                text = w.get("text", "").strip()
+                font = w.get("fontname", "")
+                size = float(w.get("size", 10))
+                word_y = float(w.get("top", 0))
+
+                if not text:
+                    continue
+
+                is_heading_font = "Univers" in font or "UniversCondensed" in font
+                is_bold         = "Bold" in font or "Times-Bold" in font
+                is_italic       = "Italic" in font or "Times-Italic" in font
+                is_large        = size > 14
+
+                # ── Large heading word = command name ──────────────────────
+                if is_large and is_heading_font:
+                    # Same horizontal line as previous heading word → append
+                    if abs(word_y - last_heading_y) < 4 and current_heading_words:
+                        current_heading_words.append(text)
+                    else:
+                        # New line → flush previous record, start fresh heading
+                        if current_heading_words:
+                            _flush_record()
+                        current_heading_words = [text]
+                    last_heading_y = word_y
+                    continue
+
+                # ── Section label (small Univers-CondensedBold) ────────────
+                # Strip spaces from label to match set keys
+                label_key = text.replace(" ", "")
+                if is_heading_font and not is_large:
+                    if label_key in _SECTION_LABELS:
+                        in_syntax = (label_key == "SyntaxDescription")
+                    continue
+
+                # ── Syntax tokens (Bold or Italic, normal size) ────────────
+                if in_syntax and (is_bold or is_italic) and size >= 9:
+                    # Skip obvious noise
+                    if text not in ("no", "default") or current_syntax_tokens:
+                        current_syntax_tokens.append(text)
+
+    _flush_record()
+    logger.info(f"Extracted {len(records)} records from {source_name}")
+    return records
+
+
 # Keep old names as aliases so existing seed.py code still works
 def extract_from_voss_pdf(pdf_path: Path, output_path: Path, max_pages: int = 0) -> list[dict]:
     records = extract_from_pdf(pdf_path, os_col="extreme_voss",
