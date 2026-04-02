@@ -123,12 +123,41 @@ def _render_pdf_approval():
         return
 
     import pandas as pd
+    from sqlalchemy import text as _t
+    from src.database.connection import get_session
+
+    # Classify each record as MERGE (intent exists) or NEW
+    try:
+        with get_session() as session:
+            existing_intents = set(
+                session.execute(
+                    _t("SELECT LOWER(TRIM(functional_intent)) FROM cli_mappings")
+                ).scalars().all()
+            )
+        def _action(r):
+            return "↗ merge" if r["functional_intent"].lower().strip() in existing_intents else "✨ new"
+        for r in records:
+            r["_action"] = _action(r)
+    except Exception:
+        for r in records:
+            r["_action"] = "?"
+
     df = pd.DataFrame(records)
-    display_cols = [c for c in ["tag", "functional_intent", os_col, "source_ref"] if c in df.columns]
+    n_merge = sum(1 for r in records if r["_action"] == "↗ merge")
+    n_new   = len(records) - n_merge
 
-    st.success(f"Found **{len(records)} records** from `{source_name}` — review before inserting:")
+    st.success(
+        f"**{len(records)} records** extracted from `{source_name}` — "
+        f"✨ **{n_new} new rows** to insert | ↗ **{n_merge} existing rows** to fill `{os_col}`"
+    )
+    st.caption(
+        "↗ merge = intent already in DB — will fill the OS column on that row  |  "
+        "✨ new = not yet in DB — will insert a new row"
+    )
 
-    # Pagination for large result sets
+    display_cols = [c for c in ["_action", "tag", "functional_intent", os_col, "source_ref"]
+                    if c in df.columns]
+
     page_size = 100
     total_pages = max(1, (len(df) + page_size - 1) // page_size)
     if total_pages > 1:
@@ -137,13 +166,16 @@ def _render_pdf_approval():
             key="_pdf_page"
         )
         start = (page - 1) * page_size
-        st.caption(f"Showing rows {start + 1}–{min(start + page_size, len(df))} of {len(df)}")
+        st.caption(f"Rows {start + 1}–{min(start + page_size, len(df))} of {len(df)}")
         st.dataframe(df[display_cols].iloc[start:start + page_size], use_container_width=True, height=400)
     else:
         st.dataframe(df[display_cols], use_container_width=True, height=400)
 
     col1, col2 = st.columns(2)
-    if col1.button(f"✅ Insert all {len(records)} records", type="primary", key="_pdf_insert"):
+    if col1.button(
+        f"✅ Apply — insert {n_new} new + merge {n_merge} existing",
+        type="primary", key="_pdf_insert"
+    ):
         _insert_approved_records(records, os_col)
         st.session_state.pop("_pdf_records", None)
         st.session_state.pop("_pdf_os_col", None)
@@ -212,9 +244,12 @@ def _insert_approved_records(records: list[dict], os_col: str):
         finally:
             os.unlink(tmp_path)
 
-    st.success(f"Inserted **{result['added']} new records** into the database.")
-    if result.get("skipped", 0):
-        st.info(f"Skipped **{result['skipped']}** duplicates (same tag + intent already in DB).")
+    st.success(
+        f"✅ **{result['added']} new rows inserted** | "
+        f"↗ **{result.get('merged', 0)} existing rows updated** with `{os_col}` commands"
+    )
+    if result.get("errors", 0):
+        st.warning(f"{result['errors']} errors — check logs.")
     st.info("Refresh the page to see updated row counts in the sidebar.")
 
 

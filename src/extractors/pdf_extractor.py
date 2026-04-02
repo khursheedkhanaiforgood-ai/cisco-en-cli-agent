@@ -229,7 +229,17 @@ def extract_from_exos_pdf(pdf_path: Path, output_path: Path, max_pages: int = 0)
 
 
 def load_extracted_to_db(json_path: Path, os_col: str) -> dict:
-    """Load extracted JSON records into the database with duplicate skipping."""
+    """
+    UPSERT extracted records into the database.
+
+    Matching logic (by normalized functional_intent):
+      - Match found  → UPDATE the target os_col column on the existing row
+      - No match     → INSERT new row with only the target os_col filled
+
+    This allows building up the cross-OS matrix incrementally:
+      upload Cisco IOS PDF  → fills cisco_ios on new/existing rows
+      upload NX-OS PDF later → fills cisco_nxos on those same rows
+    """
     from src.database.connection import get_session
     from src.database.models import CLIMapping
     from src.embeddings.encoder import encode_batch
@@ -239,54 +249,78 @@ def load_extracted_to_db(json_path: Path, os_col: str) -> dict:
         records = json.load(f)
 
     if not records:
-        return {"added": 0, "skipped": 0}
+        return {"added": 0, "merged": 0, "errors": 0}
 
-    logger.info(f"Loading {len(records)} extracted records ({os_col}) into DB...")
+    logger.info(f"Upserting {len(records)} extracted records ({os_col}) into DB...")
 
-    # Check which intents already exist (deduplicate by tag + intent)
+    # Load all existing intents → id map (lowercase for case-insensitive match)
     with get_session() as session:
-        existing = set(
-            session.execute(
-                text("SELECT tag || '|' || functional_intent FROM cli_mappings")
-            ).scalars().all()
-        )
+        existing_rows = session.execute(
+            text("SELECT id, LOWER(TRIM(functional_intent)) AS norm_intent FROM cli_mappings")
+        ).fetchall()
+    existing_map = {row.norm_intent: row.id for row in existing_rows}
 
-    to_insert = [r for r in records
-                 if (r["tag"] + "|" + r["functional_intent"]) not in existing]
-    skipped = len(records) - len(to_insert)
+    to_insert = []
+    to_merge  = []  # (record, existing_id)
 
-    if not to_insert:
-        logger.info("All records already exist — nothing to insert.")
-        return {"added": 0, "skipped": skipped}
+    for r in records:
+        norm = r["functional_intent"].lower().strip()
+        if norm in existing_map:
+            to_merge.append((r, existing_map[norm]))
+        else:
+            to_insert.append(r)
 
-    logger.info(f"Generating embeddings for {len(to_insert)} new records...")
-    intents = [r["functional_intent"] for r in to_insert]
-    embeddings = encode_batch(intents)
-
-    added = 0
+    merged = 0
+    added  = 0
     errors = 0
-    with get_session() as session:
-        for record, embedding in zip(to_insert, embeddings):
-            try:
-                mapping = CLIMapping(
-                    tag=record["tag"],
-                    functional_intent=record["functional_intent"],
-                    **{os_col: record.get("commands_text", "")},
-                    notes=record.get("notes", ""),
-                    source_ref=record.get("source_ref", ""),
-                    page_ref=record.get("page_ref", ""),
-                    confidence=0.8,
-                    is_verified=False,
-                    embedding=embedding,
-                )
-                session.add(mapping)
-                added += 1
-            except Exception as e:
-                logger.warning(f"Error inserting record: {e}")
-                errors += 1
 
-    logger.info(f"Inserted {added}, skipped {skipped} duplicates, {errors} errors.")
-    return {"added": added, "skipped": skipped, "errors": errors}
+    # ── MERGE: UPDATE existing rows with the new OS column value ─────────────
+    if to_merge:
+        logger.info(f"Merging {os_col} into {len(to_merge)} existing rows...")
+        with get_session() as session:
+            for record, row_id in to_merge:
+                try:
+                    cmd = record.get("commands_text", "")
+                    if cmd:
+                        session.execute(
+                            text(f"UPDATE cli_mappings SET {os_col} = :cmd "
+                                 "WHERE id = :id AND ({os_col} IS NULL OR {os_col} = '')".format(
+                                     os_col=os_col)),
+                            {"cmd": cmd, "id": row_id},
+                        )
+                        merged += 1
+                except Exception as e:
+                    logger.warning(f"Merge error for id {row_id}: {e}")
+                    errors += 1
+
+    # ── INSERT: new rows not yet in the DB ────────────────────────────────────
+    if to_insert:
+        logger.info(f"Generating embeddings for {len(to_insert)} new records...")
+        intents = [r["functional_intent"] for r in to_insert]
+        embeddings = encode_batch(intents)
+
+        with get_session() as session:
+            for record, embedding in zip(to_insert, embeddings):
+                try:
+                    mapping = CLIMapping(
+                        tag=record["tag"],
+                        functional_intent=record["functional_intent"],
+                        **{os_col: record.get("commands_text", "")},
+                        notes=record.get("notes", ""),
+                        source_ref=record.get("source_ref", ""),
+                        page_ref=record.get("page_ref", ""),
+                        confidence=0.8,
+                        is_verified=False,
+                        embedding=embedding,
+                    )
+                    session.add(mapping)
+                    added += 1
+                except Exception as e:
+                    logger.warning(f"Insert error: {e}")
+                    errors += 1
+
+    logger.info(f"Done — inserted {added} new, merged {merged} existing, {errors} errors.")
+    return {"added": added, "merged": merged, "errors": errors}
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
