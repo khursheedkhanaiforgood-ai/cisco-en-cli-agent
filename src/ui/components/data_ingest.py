@@ -86,11 +86,13 @@ def _extract_and_preview(uploaded_file, os_col: str, max_pages: int):
 
         try:
             if suffix.lower() == ".pdf":
-                from src.extractors.pdf_extractor import extract_from_voss_pdf, extract_from_exos_pdf
-                if "voss" in os_col:
-                    records = extract_from_voss_pdf(tmp_path, tmp_path.with_suffix(".json"), max_pages or 0)
-                else:
-                    records = extract_from_exos_pdf(tmp_path, tmp_path.with_suffix(".json"), max_pages or 0)
+                from src.extractors.pdf_extractor import extract_from_pdf
+                records = extract_from_pdf(
+                    tmp_path,
+                    os_col=os_col,
+                    source_name=uploaded_file.name,
+                    max_pages=max_pages or 0,
+                )
             elif suffix.lower() == ".txt":
                 records = _extract_from_txt(tmp_path, os_col)
             else:
@@ -210,7 +212,9 @@ def _insert_approved_records(records: list[dict], os_col: str):
         finally:
             os.unlink(tmp_path)
 
-    st.success(f"Inserted **{result['added']} records** into the database.")
+    st.success(f"Inserted **{result['added']} new records** into the database.")
+    if result.get("skipped", 0):
+        st.info(f"Skipped **{result['skipped']}** duplicates (same tag + intent already in DB).")
     st.info("Refresh the page to see updated row counts in the sidebar.")
 
 
