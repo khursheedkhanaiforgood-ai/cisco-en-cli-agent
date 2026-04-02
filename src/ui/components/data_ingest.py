@@ -69,13 +69,16 @@ def _render_document_upload():
     if uploaded and st.button("🔍 Extract & Preview", type="primary"):
         _extract_and_preview(uploaded, os_col, max_pages)
 
+    # Render cached approval table if extraction already ran
+    elif st.session_state.get("_pdf_records") and st.session_state.get("_pdf_os_col"):
+        _render_pdf_approval()
+
 
 def _extract_and_preview(uploaded_file, os_col: str, max_pages: int):
     import tempfile, os
     from pathlib import Path
 
     with st.spinner(f"Extracting CLI commands from {uploaded_file.name}..."):
-        # Save to temp file
         suffix = Path(uploaded_file.name).suffix
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             tmp.write(uploaded_file.read())
@@ -84,7 +87,6 @@ def _extract_and_preview(uploaded_file, os_col: str, max_pages: int):
         try:
             if suffix.lower() == ".pdf":
                 from src.extractors.pdf_extractor import extract_from_voss_pdf, extract_from_exos_pdf
-                # Auto-select extractor based on OS
                 if "voss" in os_col:
                     records = extract_from_voss_pdf(tmp_path, tmp_path.with_suffix(".json"), max_pages or 0)
                 else:
@@ -101,8 +103,55 @@ def _extract_and_preview(uploaded_file, os_col: str, max_pages: int):
         st.warning("No CLI commands found in this document. Try a different file or check the OS column selection.")
         return
 
-    st.success(f"Found **{len(records)} records** — review before inserting:")
-    _show_approval_table(records, os_col, source_name=uploaded_file.name)
+    # Cache in session_state so approval table survives reruns
+    st.session_state["_pdf_records"] = records
+    st.session_state["_pdf_os_col"] = os_col
+    st.session_state["_pdf_source"] = uploaded_file.name
+    st.session_state["_pdf_inserted"] = False
+    _render_pdf_approval()
+
+
+def _render_pdf_approval():
+    """Render cached PDF approval table — persists across reruns."""
+    records = st.session_state.get("_pdf_records", [])
+    os_col = st.session_state.get("_pdf_os_col", "")
+    source_name = st.session_state.get("_pdf_source", "upload")
+
+    if not records:
+        return
+
+    import pandas as pd
+    df = pd.DataFrame(records)
+    display_cols = [c for c in ["tag", "functional_intent", os_col, "source_ref"] if c in df.columns]
+
+    st.success(f"Found **{len(records)} records** from `{source_name}` — review before inserting:")
+
+    # Pagination for large result sets
+    page_size = 100
+    total_pages = max(1, (len(df) + page_size - 1) // page_size)
+    if total_pages > 1:
+        page = st.number_input(
+            f"Page (1–{total_pages})", min_value=1, max_value=total_pages, value=1, step=1,
+            key="_pdf_page"
+        )
+        start = (page - 1) * page_size
+        st.caption(f"Showing rows {start + 1}–{min(start + page_size, len(df))} of {len(df)}")
+        st.dataframe(df[display_cols].iloc[start:start + page_size], use_container_width=True, height=400)
+    else:
+        st.dataframe(df[display_cols], use_container_width=True, height=400)
+
+    col1, col2 = st.columns(2)
+    if col1.button(f"✅ Insert all {len(records)} records", type="primary", key="_pdf_insert"):
+        _insert_approved_records(records, os_col)
+        st.session_state.pop("_pdf_records", None)
+        st.session_state.pop("_pdf_os_col", None)
+        st.session_state.pop("_pdf_source", None)
+    if col2.button("❌ Discard — do not insert", key="_pdf_discard"):
+        st.session_state.pop("_pdf_records", None)
+        st.session_state.pop("_pdf_os_col", None)
+        st.session_state.pop("_pdf_source", None)
+        st.info("Records discarded. Nothing was added to the database.")
+        st.rerun()
 
 
 def _extract_from_txt(path, os_col: str) -> list[dict]:
@@ -122,7 +171,6 @@ def _extract_from_txt(path, os_col: str) -> list[dict]:
         if not line:
             continue
         if len(line) < 60 and not line.startswith(" ") and not CLI_VERB_PATTERNS.match(line):
-            # Treat as section header
             if commands:
                 records.append({
                     "tag": classify_tag(current_section),
@@ -148,28 +196,12 @@ def _extract_from_txt(path, os_col: str) -> list[dict]:
     return records
 
 
-def _show_approval_table(records: list[dict], os_col: str, source_name: str):
-    """Show extracted records for user approval before DB insertion."""
-    import pandas as pd
-
-    df = pd.DataFrame(records)
-    display_cols = [c for c in ["tag", "functional_intent", os_col, "source_ref"] if c in df.columns]
-
-    st.dataframe(df[display_cols], use_container_width=True, height=400)
-
-    col1, col2 = st.columns(2)
-    if col1.button(f"✅ Insert all {len(records)} records", type="primary"):
-        _insert_approved_records(records, os_col)
-    if col2.button("❌ Discard — do not insert"):
-        st.info("Records discarded. Nothing was added to the database.")
-
-
 def _insert_approved_records(records: list[dict], os_col: str):
     from src.extractors.pdf_extractor import load_extracted_to_db
     import json, tempfile, os
     from pathlib import Path
 
-    with st.spinner("Inserting approved records..."):
+    with st.spinner("Inserting approved records — generating embeddings..."):
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as tmp:
             json.dump(records, tmp)
             tmp_path = Path(tmp.name)
@@ -211,40 +243,87 @@ def _render_csv_upload():
     if uploaded and st.button("🔍 Preview CSV", type="primary"):
         _preview_csv(uploaded, overwrite)
 
+    # Render cached CSV approval if preview already ran
+    elif st.session_state.get("_csv_content"):
+        _render_csv_approval()
+
 
 def _preview_csv(uploaded_file, overwrite: bool):
-    import pandas as pd, csv, io
+    import pandas as pd
 
     content = uploaded_file.read().decode("utf-8")
     df = pd.read_csv(io.StringIO(content))
-    st.markdown(f"**{len(df)} rows detected** — preview:")
-    st.dataframe(df.head(20), use_container_width=True)
 
     missing = [c for c in ["tag", "functional_intent"] if c not in df.columns]
     if missing:
         st.error(f"Missing required columns: {missing}")
         return
 
-    if st.button(f"✅ Insert {len(df)} rows", type="primary"):
+    # Cache in session_state
+    st.session_state["_csv_content"] = content
+    st.session_state["_csv_overwrite"] = overwrite
+    st.session_state["_csv_row_count"] = len(df)
+    _render_csv_approval()
+
+
+def _render_csv_approval():
+    """Render cached CSV approval table — persists across reruns."""
+    import pandas as pd
+
+    content = st.session_state.get("_csv_content", "")
+    overwrite = st.session_state.get("_csv_overwrite", False)
+    row_count = st.session_state.get("_csv_row_count", 0)
+
+    if not content:
+        return
+
+    df = pd.read_csv(io.StringIO(content))
+    st.markdown(f"**{len(df)} rows detected** — preview (first 20 rows):")
+    st.dataframe(df.head(20), use_container_width=True)
+
+    if len(df) > 20:
+        with st.expander(f"Show all {len(df)} rows"):
+            page_size = 100
+            total_pages = max(1, (len(df) + page_size - 1) // page_size)
+            page = st.number_input(
+                f"Page (1–{total_pages})", min_value=1, max_value=total_pages, value=1, step=1,
+                key="_csv_page"
+            )
+            start = (page - 1) * page_size
+            st.dataframe(df.iloc[start:start + page_size], use_container_width=True, height=500)
+
+    col1, col2 = st.columns(2)
+    if col1.button(f"✅ Insert {len(df)} rows", type="primary", key="_csv_insert"):
         _insert_csv(content, overwrite)
+        st.session_state.pop("_csv_content", None)
+        st.session_state.pop("_csv_overwrite", None)
+        st.session_state.pop("_csv_row_count", None)
+    if col2.button("❌ Discard", key="_csv_discard"):
+        st.session_state.pop("_csv_content", None)
+        st.session_state.pop("_csv_overwrite", None)
+        st.session_state.pop("_csv_row_count", None)
+        st.info("CSV discarded.")
+        st.rerun()
 
 
 def _insert_csv(csv_content: str, overwrite: bool):
     import tempfile, os
     from pathlib import Path
 
-    with st.spinner("Inserting CSV rows..."):
+    with st.spinner("Inserting CSV rows — generating embeddings..."):
         with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False,
                                          encoding="utf-8") as tmp:
             tmp.write(csv_content)
             tmp_path = Path(tmp.name)
         try:
             from src.extractors.csv_loader import load_csv
-            result = load_csv(tmp_path, expected_tag="[MGMT-OPS]", overwrite=overwrite)
+            # Use empty string as fallback tag — actual tag comes from the CSV's tag column
+            result = load_csv(tmp_path, expected_tag="", overwrite=overwrite)
         finally:
             os.unlink(tmp_path)
 
     st.success(f"Added: **{result['added']}** | Skipped: {result['skipped']} | Errors: {result['errors']}")
+    st.info("Refresh the page to see updated row counts in the sidebar.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -275,12 +354,12 @@ def _render_crawler():
     else:
         crawl_url = VENDOR_SEED_URLS[url_source]
         st.info(f"URL: `{crawl_url}`")
-        os_col = url_source  # Match OS to source
+        os_col = url_source
 
     col1, col2 = st.columns(2)
     with col1:
         max_pages = st.slider("Max pages", 5, 100, 20,
-                              help="Crawler stops after this many pages. Keep low to avoid long waits.")
+                              help="Crawler stops after this many pages.")
     with col2:
         timeout_sec = st.slider("Timeout (seconds)", 10, 120, 30,
                                 help="Crawler stops if this time limit is exceeded.")
@@ -331,7 +410,6 @@ def _run_crawler_preview(url: str, os_col: str, max_pages: int, timeout_sec: int
         st.info("No new CLI commands found. Try a more specific URL or different OS column.")
         return
 
-    # For approval, we need the actual record list — re-run briefly to get data
     st.success(f"**{records} records ready for review.** Run the crawler again with 'Insert' to approve and save.")
 
     col1, col2 = st.columns(2)
