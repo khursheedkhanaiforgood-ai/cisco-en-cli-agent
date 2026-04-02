@@ -87,13 +87,32 @@ def _extract_and_preview(uploaded_file, os_col: str, max_pages: int):
 
         try:
             if suffix.lower() == ".pdf":
-                from src.extractors.pdf_extractor import extract_from_pdf
-                records = extract_from_pdf(
-                    tmp_path,
-                    os_col=os_col,
-                    source_name=uploaded_file.name,
-                    max_pages=max_pages or 0,
+                from src.extractors.pdf_extractor import (
+                    detect_pdf_format, extract_from_pdf,
+                    extract_from_cisco_cr_pdf, extract_from_extreme_cr_pdf,
                 )
+                fmt = detect_pdf_format(tmp_path)
+                _EXTRACTOR_LABEL = {
+                    "cisco_cr_pdf":   "Cisco Command Reference",
+                    "extreme_cr_pdf": "Extreme Networks CR",
+                    "pdf":            "Generic (EXOS/VOSS User Guide)",
+                }
+                st.info(f"Auto-detected format: **{_EXTRACTOR_LABEL.get(fmt, fmt)}**")
+                if fmt == "cisco_cr_pdf":
+                    records = extract_from_cisco_cr_pdf(
+                        tmp_path, os_col=os_col,
+                        source_name=uploaded_file.name, max_pages=max_pages or 0,
+                    )
+                elif fmt == "extreme_cr_pdf":
+                    records = extract_from_extreme_cr_pdf(
+                        tmp_path, os_col=os_col,
+                        source_name=uploaded_file.name, max_pages=max_pages or 0,
+                    )
+                else:
+                    records = extract_from_pdf(
+                        tmp_path, os_col=os_col,
+                        source_name=uploaded_file.name, max_pages=max_pages or 0,
+                    )
             elif suffix.lower() == ".txt":
                 records = _extract_from_txt(tmp_path, os_col)
             else:

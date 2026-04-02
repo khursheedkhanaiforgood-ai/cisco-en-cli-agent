@@ -91,6 +91,20 @@ SOURCES = [
         "os_col": "cisco_iosxe",
         "name":   "b_1715_9600_cr",
     },
+    # ── Extreme Networks CLI Reference (Fabric Engine 8.10) ──────────────────
+    {
+        "type":   "extreme_cr_pdf",
+        "path":   DOWNLOADS / "CLIRefFabricEngine_8.10_CRG.pdf",
+        "os_col": "extreme_voss",
+        "name":   "CLIRefFabricEngine_8.10",
+    },
+    # ── Extreme Networks EXOS User Guide (32.5) — monospace fonts ────────────
+    {
+        "type":   "pdf",
+        "path":   DOWNLOADS / "EXOS_User_Guide_32.5.pdf",
+        "os_col": "extreme_exos",
+        "name":   "EXOS_User_Guide_32.5",
+    },
 ]
 
 CACHE_DIR = Path(__file__).resolve().parents[2] / "data" / "extracted" / "bulk"
@@ -168,11 +182,42 @@ def _extract(source: dict) -> list[dict] | None:
     t = source["type"]
     if t == "cisco_cr_pdf":
         return _extract_cisco_cr(source)
+    elif t == "extreme_cr_pdf":
+        return _extract_extreme_cr(source)
     elif t == "pdf":
         return _extract_pdf(source)
+    elif t == "auto":
+        return _extract_auto(source)
     elif t == "github_md":
         return _extract_github_md(source)
     return None
+
+
+def _extract_extreme_cr(source: dict) -> list[dict] | None:
+    from src.extractors.pdf_extractor import extract_from_extreme_cr_pdf
+    path = Path(source["path"])
+    if not path.exists():
+        logger.warning(f"  File not found: {path}")
+        return None
+    t0 = time.time()
+    records = extract_from_extreme_cr_pdf(
+        path, os_col=source["os_col"], source_name=source["name"]
+    )
+    logger.info(f"  Extracted in {int(time.time()-t0)}s")
+    return records
+
+
+def _extract_auto(source: dict) -> list[dict] | None:
+    """Auto-detect extractor type from PDF font fingerprint then dispatch."""
+    from src.extractors.pdf_extractor import detect_pdf_format
+    path = Path(source["path"])
+    if not path.exists():
+        logger.warning(f"  File not found: {path}")
+        return None
+    detected = detect_pdf_format(path)
+    logger.info(f"  Auto-detected format: {detected}")
+    source_copy = dict(source, type=detected)
+    return _extract(source_copy)
 
 
 def _extract_cisco_cr(source: dict) -> list[dict] | None:

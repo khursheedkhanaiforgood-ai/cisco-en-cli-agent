@@ -358,6 +358,121 @@ def extract_from_cisco_cr_pdf(
     return records
 
 
+def extract_from_extreme_cr_pdf(
+    pdf_path: Path,
+    os_col: str,
+    source_name: str = "",
+    max_pages: int = 0,
+) -> list[dict]:
+    """
+    Extractor for Extreme Networks CLI Reference PDFs (Fabric Engine / VOSS).
+
+    Format: Montserrat font throughout, no monospace.
+      - Size 14  = command syntax words (one command per page)
+      - Size 12  = section labels: Syntax, Command Parameters, Command Mode, Default
+      - Size 10  = description text
+      - Size 13  = bullet point parameters
+
+    Strategy: collect size-14 words per page → one record per unique command.
+    """
+    try:
+        import pdfplumber
+    except ImportError:
+        logger.error("pdfplumber not installed.")
+        return []
+
+    if not source_name:
+        source_name = pdf_path.name
+
+    logger.info(f"Extracting Extreme CR ({os_col}) from: {pdf_path.name}")
+    records = []
+    seen_intents: set[str] = set()
+
+    with pdfplumber.open(pdf_path) as pdf:
+        pages = pdf.pages[:max_pages] if max_pages else pdf.pages
+        total = len(pages)
+
+        for page_num, page in enumerate(pages):
+            if page_num % 200 == 0 and page_num > 0:
+                logger.info(f"  Page {page_num}/{total} — {len(records)} records so far")
+
+            words = page.extract_words(extra_attrs=["fontname", "size"])
+            if not words:
+                continue
+
+            # Collect size-14 words (command syntax) in order
+            cmd_words = [
+                w["text"].strip() for w in words
+                if abs(float(w.get("size", 0)) - 14.0) < 0.5
+                and w.get("text", "").strip()
+            ]
+            if not cmd_words:
+                continue
+
+            command = " ".join(cmd_words)
+            # Use first 1-3 words as base intent key to group sub-commands
+            intent = command[:200]
+            norm = intent.lower()
+
+            if norm in seen_intents:
+                continue
+            seen_intents.add(norm)
+
+            tag = classify_tag(intent)
+            records.append({
+                "tag":               tag,
+                "functional_intent": intent,
+                "commands_text":     command,
+                os_col:              command,
+                "source_ref":        source_name,
+                "page_ref":          str(page_num + 1),
+                "notes":             "",
+            })
+
+    logger.info(f"Extracted {len(records)} records from {source_name}")
+    return records
+
+
+def detect_pdf_format(pdf_path: Path, sample_pages: int = 20) -> str:
+    """
+    Sample the first N pages of a PDF and return the best extractor type:
+      'cisco_cr_pdf'   — Cisco Command Reference (Univers-CondensedBold headings, no monospace)
+      'extreme_cr_pdf' — Extreme CR (Montserrat-only, size-14 command syntax)
+      'pdf'            — Generic (monospace / CourierNewPSMT) — works for EXOS UG, VOSS UG
+
+    Callers can rely on the returned string as a `type` value in seed_bulk.SOURCES.
+    """
+    try:
+        import pdfplumber
+    except ImportError:
+        return "pdf"
+
+    font_counts: dict[str, int] = {}
+    has_monospace = False
+    has_univers = False
+    has_montserrat = False
+
+    with pdfplumber.open(pdf_path) as pdf:
+        pages = pdf.pages[:sample_pages]
+        for page in pages:
+            words = page.extract_words(extra_attrs=["fontname", "size"])
+            for w in words:
+                fn = (w.get("fontname") or "").lower()
+                font_counts[fn] = font_counts.get(fn, 0) + 1
+                if _is_monospace_font(w.get("fontname", "")):
+                    has_monospace = True
+                if "univers" in fn and "condensed" in fn:
+                    has_univers = True
+                if "montserrat" in fn:
+                    has_montserrat = True
+
+    if has_univers:
+        return "cisco_cr_pdf"
+    if has_montserrat and not has_monospace:
+        return "extreme_cr_pdf"
+    return "pdf"
+
+
 # Keep old names as aliases so existing seed.py code still works
 def extract_from_voss_pdf(pdf_path: Path, output_path: Path, max_pages: int = 0) -> list[dict]:
     records = extract_from_pdf(pdf_path, os_col="extreme_voss",
