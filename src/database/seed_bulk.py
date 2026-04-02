@@ -32,7 +32,8 @@ logger = logging.getLogger(__name__)
 # SOURCE MANIFEST
 # Edit this list to add/remove files. os_col = target DB column.
 # ─────────────────────────────────────────────────────────────────────────────
-DOWNLOADS = Path.home() / "Downloads"
+_REPO_PDFS = Path(__file__).resolve().parents[2] / "data" / "source_pdfs"
+DOWNLOADS = _REPO_PDFS if _REPO_PDFS.exists() else Path.home() / "Downloads"
 
 SOURCES = [
     # ── GitHub cheat sheet — router + switch commands (cisco_ios) ───────────
