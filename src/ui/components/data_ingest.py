@@ -419,6 +419,11 @@ def _render_crawler():
             st.session_state["_crawler_docs"] = docs
             st.rerun()
 
+    # ── Show approval table if extraction already ran ────────────────────────
+    if st.session_state.get("_pdf_records") and st.session_state.get("_pdf_os_col"):
+        _render_pdf_approval()
+        return
+
     # ── Phase 2: Document selection ──────────────────────────────────────────
     docs = st.session_state.get("_crawler_docs")
     if not docs:
@@ -434,17 +439,24 @@ def _render_crawler():
         {"#": i + 1, "Type": d["doc_type"].upper(), "Title": d["title"], "URL": d["url"]}
         for i, d in enumerate(docs)
     ])
-    st.dataframe(doc_df, use_container_width=True, height=350)
+    st.dataframe(doc_df, use_container_width=True, height=300)
 
     st.markdown("**Select documents to extract from:**")
     titles = [f"{d['doc_type'].upper()} — {d['title'][:80]}" for d in docs]
+
+    # Persist selection explicitly in session_state so it survives reruns
+    if "_crawler_selected" not in st.session_state:
+        st.session_state["_crawler_selected"] = []
+
     selected_titles = st.multiselect(
         "Documents",
         options=titles,
-        default=[],
+        default=st.session_state["_crawler_selected"],
         label_visibility="collapsed",
         key="_crawler_multiselect",
     )
+    # Keep session_state in sync with widget
+    st.session_state["_crawler_selected"] = selected_titles
 
     max_pdf_pages = st.slider(
         "Max pages per PDF (0 = all)", 0, 500, 50,
@@ -452,18 +464,17 @@ def _render_crawler():
         key="_crawler_max_pages",
     )
 
-    if not selected_titles:
+    if selected_titles:
+        selected_docs = [docs[titles.index(t)] for t in selected_titles]
+        st.info(f"**{len(selected_docs)} document(s) selected** — OS: `{os_col}`")
+        extract_btn = st.button(
+            f"⬇️ Extract from {len(selected_docs)} document(s)",
+            type="primary", key="_crawler_extract",
+            use_container_width=True,
+        )
+    else:
         st.info("Select one or more documents above, then click Extract.")
-        return
-
-    selected_docs = [docs[titles.index(t)] for t in selected_titles]
-
-    col1, col2 = st.columns([1, 3])
-    extract_btn = col1.button(
-        f"⬇️ Extract from {len(selected_docs)} document(s)",
-        type="primary", key="_crawler_extract"
-    )
-    col2.caption(f"Will extract `{os_col}` commands — merge into existing rows or insert new")
+        extract_btn = False
 
     # ── Phase 3: Extract selected documents ──────────────────────────────────
     if extract_btn:
@@ -487,7 +498,7 @@ def _render_crawler():
             else:
                 all_records.extend(result["records"])
             progress.progress((i + 1) / len(selected_docs))
-            time.sleep(0.3)  # polite rate limit
+            time.sleep(0.3)
 
         progress.empty()
         status.empty()
@@ -500,9 +511,10 @@ def _render_crawler():
             st.error("No CLI commands extracted. Documents may be login-gated, JS-rendered, or have no command blocks.")
             return
 
-        # Hand off to the shared PDF approval flow
+        # Store for approval and clear crawler state
         st.session_state["_pdf_records"] = all_records
         st.session_state["_pdf_os_col"]  = os_col
         st.session_state["_pdf_source"]  = f"{len(selected_docs)} crawled doc(s)"
         st.session_state.pop("_crawler_docs", None)
+        st.session_state.pop("_crawler_selected", None)
         st.rerun()

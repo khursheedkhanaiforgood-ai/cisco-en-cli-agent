@@ -237,3 +237,50 @@ def render_db_browser():
                     st.success("Seed complete. Refresh the page.")
                 except Exception as e:
                     st.error(f"Seed failed: {e}")
+
+    with st.expander("🗑️ Delete Uploaded / Non-Seed Rows"):
+        st.warning(
+            "Deletes all rows where source_ref is NOT 'seed' or a CSV seed file. "
+            "Keeps the original ~515 seed rows. Use this to clean up bad PDF extractions."
+        )
+        from sqlalchemy import text as _t
+        from src.database.connection import get_session
+        try:
+            with get_session() as session:
+                sources = session.execute(_t(
+                    "SELECT source_ref, COUNT(*) as cnt FROM cli_mappings "
+                    "GROUP BY source_ref ORDER BY cnt DESC"
+                )).fetchall()
+            non_seed = [(s.source_ref, s.cnt) for s in sources
+                        if s.source_ref and s.source_ref not in ("seed", "")
+                        and not s.source_ref.startswith("CSV")]
+            if non_seed:
+                st.markdown("**Uploaded sources currently in DB:**")
+                for src, cnt in non_seed:
+                    c1, c2, c3 = st.columns([3, 1, 1])
+                    c1.markdown(f"`{src}`")
+                    c2.markdown(f"{cnt} rows")
+                    if c3.button("Delete", key=f"del_{src}", type="secondary"):
+                        with get_session() as session:
+                            session.execute(_t(
+                                "DELETE FROM cli_mappings WHERE source_ref = :src"
+                            ), {"src": src})
+                        st.success(f"Deleted {cnt} rows from `{src}`.")
+                        st.rerun()
+            else:
+                st.info("No uploaded rows found — only seed data in DB.")
+
+            st.divider()
+            if st.button("🗑️ Delete ALL non-seed rows", type="secondary"):
+                with get_session() as session:
+                    result = session.execute(_t(
+                        "DELETE FROM cli_mappings "
+                        "WHERE source_ref IS NOT NULL "
+                        "AND source_ref != 'seed' "
+                        "AND source_ref != '' "
+                        "AND source_ref NOT LIKE 'CSV%'"
+                    ))
+                st.success("All non-seed rows deleted. Refresh the page.")
+                st.rerun()
+        except Exception as _e:
+            st.warning(f"Could not load source list: {_e}")
