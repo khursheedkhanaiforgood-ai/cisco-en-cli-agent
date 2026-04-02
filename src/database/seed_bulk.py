@@ -35,12 +35,18 @@ logger = logging.getLogger(__name__)
 DOWNLOADS = Path.home() / "Downloads"
 
 SOURCES = [
-    # ── GitHub cheat sheet (cisco_ios) ──────────────────────────────────────
+    # ── GitHub cheat sheet — router + switch commands (cisco_ios) ───────────
     {
         "type":   "github_md",
-        "url":    "https://raw.githubusercontent.com/r7perezyera/Cisco-IOS-Command-CheatSheets/master/README.md",
+        "url":    "https://raw.githubusercontent.com/r7perezyera/Cisco-IOS-Command-CheatSheets/master/router_commands.md",
         "os_col": "cisco_ios",
-        "name":   "cisco-ios-cheatsheet",
+        "name":   "cisco-ios-router-cheatsheet",
+    },
+    {
+        "type":   "github_md",
+        "url":    "https://raw.githubusercontent.com/r7perezyera/Cisco-IOS-Command-CheatSheets/master/switch_commands.md",
+        "os_col": "cisco_ios",
+        "name":   "cisco-ios-switch-cheatsheet",
     },
     # ── Cisco IOS-XE 17.15 Command References (Cisco CR format) ─────────────
     {
