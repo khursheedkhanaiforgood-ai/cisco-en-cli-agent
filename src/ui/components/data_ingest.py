@@ -158,6 +158,31 @@ def _render_pdf_approval(ctx: str = "upload"):
         "✨ new = not yet in DB — will insert a new row"
     )
 
+    # ── Action buttons at TOP so they're always visible ───────────────────────
+    col1, col2 = st.columns(2)
+    apply = col1.button(
+        f"✅ Apply — insert {n_new} new + merge {n_merge} existing",
+        type="primary", key=f"_{ctx}_pdf_insert", use_container_width=True,
+    )
+    discard = col2.button(
+        "❌ Discard — do not insert",
+        key=f"_{ctx}_pdf_discard", use_container_width=True,
+    )
+
+    if apply:
+        _insert_approved_records(records, os_col)
+        st.session_state.pop("_pdf_records", None)
+        st.session_state.pop("_pdf_os_col", None)
+        st.session_state.pop("_pdf_source", None)
+        return
+    if discard:
+        st.session_state.pop("_pdf_records", None)
+        st.session_state.pop("_pdf_os_col", None)
+        st.session_state.pop("_pdf_source", None)
+        st.info("Records discarded. Nothing was added to the database.")
+        st.rerun()
+
+    # ── Preview table below the buttons ───────────────────────────────────────
     display_cols = [c for c in ["_action", "tag", "functional_intent", os_col, "source_ref"]
                     if c in df.columns]
 
@@ -174,7 +199,7 @@ def _render_pdf_approval(ctx: str = "upload"):
     if total_pages > 1:
         page = st.number_input(
             f"Page (1–{total_pages})", min_value=1, max_value=total_pages, value=1, step=1,
-            key="_pdf_page"
+            key=f"_{ctx}_pdf_page"
         )
         start = (page - 1) * page_size
         st.caption(f"Rows {start + 1}–{min(start + page_size, len(df))} of {len(df)}")
@@ -183,22 +208,6 @@ def _render_pdf_approval(ctx: str = "upload"):
     else:
         st.dataframe(df[display_cols], use_container_width=True, height=420,
                      column_config=col_config)
-
-    col1, col2 = st.columns(2)
-    if col1.button(
-        f"✅ Apply — insert {n_new} new + merge {n_merge} existing",
-        type="primary", key=f"_{ctx}_pdf_insert"
-    ):
-        _insert_approved_records(records, os_col)
-        st.session_state.pop("_pdf_records", None)
-        st.session_state.pop("_pdf_os_col", None)
-        st.session_state.pop("_pdf_source", None)
-    if col2.button("❌ Discard — do not insert", key=f"_{ctx}_pdf_discard"):
-        st.session_state.pop("_pdf_records", None)
-        st.session_state.pop("_pdf_os_col", None)
-        st.session_state.pop("_pdf_source", None)
-        st.info("Records discarded. Nothing was added to the database.")
-        st.rerun()
 
 
 def _extract_from_txt(path, os_col: str) -> list[dict]:
