@@ -72,7 +72,7 @@ def _render_document_upload():
 
     # Render cached approval table if extraction already ran
     elif st.session_state.get("_pdf_records") and st.session_state.get("_pdf_os_col"):
-        _render_pdf_approval()
+        _render_pdf_approval(ctx="upload")
 
 
 def _extract_and_preview(uploaded_file, os_col: str, max_pages: int):
@@ -114,8 +114,10 @@ def _extract_and_preview(uploaded_file, os_col: str, max_pages: int):
     _render_pdf_approval()
 
 
-def _render_pdf_approval():
-    """Render cached PDF approval table — persists across reruns."""
+def _render_pdf_approval(ctx: str = "upload"):
+    """Render cached PDF approval table — persists across reruns.
+    ctx: unique prefix for button keys to avoid duplicate key errors across tabs.
+    """
     records = st.session_state.get("_pdf_records", [])
     os_col = st.session_state.get("_pdf_os_col", "")
     source_name = st.session_state.get("_pdf_source", "upload")
@@ -185,13 +187,13 @@ def _render_pdf_approval():
     col1, col2 = st.columns(2)
     if col1.button(
         f"✅ Apply — insert {n_new} new + merge {n_merge} existing",
-        type="primary", key="_pdf_insert"
+        type="primary", key=f"_{ctx}_pdf_insert"
     ):
         _insert_approved_records(records, os_col)
         st.session_state.pop("_pdf_records", None)
         st.session_state.pop("_pdf_os_col", None)
         st.session_state.pop("_pdf_source", None)
-    if col2.button("❌ Discard — do not insert", key="_pdf_discard"):
+    if col2.button("❌ Discard — do not insert", key=f"_{ctx}_pdf_discard"):
         st.session_state.pop("_pdf_records", None)
         st.session_state.pop("_pdf_os_col", None)
         st.session_state.pop("_pdf_source", None)
@@ -421,7 +423,7 @@ def _render_crawler():
 
     # ── Show approval table if extraction already ran ────────────────────────
     if st.session_state.get("_pdf_records") and st.session_state.get("_pdf_os_col"):
-        _render_pdf_approval()
+        _render_pdf_approval(ctx="crawler")
         return
 
     # ── Phase 2: Document selection ──────────────────────────────────────────
