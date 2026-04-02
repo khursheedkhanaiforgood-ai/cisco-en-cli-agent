@@ -15,9 +15,10 @@ build/
 .venv/
 venv/
 
-# Data (keep seed CSVs, ignore extracted/generated)
+# Data (keep seed CSVs + source PDFs, ignore extracted/generated/backups)
 data/extracted/
 data/raw/
+data/backups/
 *.json.bak
 
 # Models (large files)
