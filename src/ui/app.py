@@ -106,6 +106,130 @@ with st.sidebar:
     render_user_badge()
     st.caption("Powered by Claude claude-sonnet-4-6 + pgvector")
 
+# ── Global input highlight CSS (all tabs) ────────────────────────────────────
+st.markdown("""
+<style>
+/* ── Input accent: purple left border on every interactive widget ── */
+
+/* Text input */
+div[data-testid="stTextInput"] > label,
+div[data-testid="stTextArea"]  > label,
+div[data-testid="stNumberInput"] > label {
+  color: #a78bfa !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px;
+}
+div[data-testid="stTextInput"] > label::before,
+div[data-testid="stTextArea"]  > label::before,
+div[data-testid="stNumberInput"] > label::before {
+  content: "▶ ";
+  color: #7b2fff;
+  font-size: 9px;
+}
+div[data-testid="stTextInput"] input,
+div[data-testid="stNumberInput"] input {
+  border-left: 3px solid #7b2fff !important;
+  background: rgba(123,47,255,0.04) !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+div[data-testid="stTextInput"] input:focus,
+div[data-testid="stNumberInput"] input:focus {
+  border-color: #a78bfa !important;
+  box-shadow: 0 0 0 2px rgba(123,47,255,0.25) !important;
+}
+div[data-testid="stTextArea"] textarea {
+  border-left: 3px solid #7b2fff !important;
+  background: rgba(123,47,255,0.04) !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+div[data-testid="stTextArea"] textarea:focus {
+  border-color: #a78bfa !important;
+  box-shadow: 0 0 0 2px rgba(123,47,255,0.25) !important;
+}
+
+/* Selectbox / dropdown */
+div[data-testid="stSelectbox"] > label {
+  color: #60a5fa !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+div[data-testid="stSelectbox"] > label::before {
+  content: "▼ ";
+  color: #3b82f6;
+  font-size: 9px;
+}
+div[data-testid="stSelectbox"] > div > div {
+  border-left: 3px solid #3b82f6 !important;
+  background: rgba(59,130,246,0.04) !important;
+}
+
+/* File uploader */
+div[data-testid="stFileUploader"] {
+  border-left: 3px solid #22c55e !important;
+  padding-left: 8px !important;
+  background: rgba(34,197,94,0.04) !important;
+  border-radius: 0 6px 6px 0 !important;
+}
+div[data-testid="stFileUploader"] > label {
+  color: #4ade80 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+div[data-testid="stFileUploader"] > label::before {
+  content: "📂 ";
+}
+
+/* Multiselect */
+div[data-testid="stMultiSelect"] > label {
+  color: #fb923c !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+div[data-testid="stMultiSelect"] > label::before {
+  content: "☰ ";
+  color: #f97316;
+  font-size: 9px;
+}
+div[data-testid="stMultiSelect"] > div > div {
+  border-left: 3px solid #f97316 !important;
+}
+
+/* Slider */
+div[data-testid="stSlider"] > label {
+  color: #f59e0b !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+div[data-testid="stSlider"] > label::before {
+  content: "⟵⟶ ";
+  color: #d97706;
+  font-size: 9px;
+}
+
+/* Radio */
+div[data-testid="stRadio"] > label {
+  color: #e879f9 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+div[data-testid="stRadio"] > label::before {
+  content: "◉ ";
+  color: #d946ef;
+  font-size: 9px;
+}
+
+/* Primary button pulse ring */
+div[data-testid="stButton"] > button[kind="primary"] {
+  border: 1px solid #7b2fff !important;
+  box-shadow: 0 0 8px rgba(123,47,255,0.4);
+}
+div[data-testid="stButton"] > button[kind="primary"]:hover {
+  box-shadow: 0 0 14px rgba(123,47,255,0.7) !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # ── BETA banner + copyright (all pages) ──────────────────────────────────────
 st.markdown("""
 <style>
