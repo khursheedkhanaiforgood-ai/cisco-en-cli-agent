@@ -90,6 +90,27 @@ def _render_bin_heatmap(tag: str):
 def render_db_browser():
     st.header("🗄️ Database Browser")
 
+    from src.config import FUNCTIONAL_TAGS, TAG_LABELS
+    from src.ui.components.bin_tabs import render_bin_tab
+    from src.ui.components.auth import is_admin
+
+    # Sub-tab navigation: Overview + one per functional bin
+    sub_labels = ["📊 Overview"] + [f"{TAG_LABELS.get(t, t)} {t}" for t in FUNCTIONAL_TAGS]
+    sub_tabs = st.tabs(sub_labels)
+
+    # Sub-tab 0 — Overview (existing DB browser content)
+    with sub_tabs[0]:
+        _render_db_overview()
+
+    # Sub-tabs 1-9 — one per functional bin
+    for i, tag in enumerate(FUNCTIONAL_TAGS):
+        with sub_tabs[i + 1]:
+            render_bin_tab(tag)
+
+
+def _render_db_overview():
+    """Original DB browser content — stats, search, completeness, admin."""
+
     try:
         from src.rag.search import get_stats
         stats = get_stats()
