@@ -66,6 +66,7 @@ h3 a:hover,li a:hover,td a:hover{color:#58a6ff;}
   <span class="tabbar-title">CISCO-EN CLI Agent</span>
   <button class="tab-btn active" onclick="switchTab('day1',this)">&#128197; Day 1 &mdash; March 31, 2026</button>
   <button class="tab-btn" onclick="switchTab('day2',this)">&#128197; Day 2 &mdash; April 1, 2026</button>
+  <button class="tab-btn" onclick="switchTab('day3',this)">&#128197; Day 3 &mdash; April 2, 2026</button>
 </div>
 
 <div class="body-wrap">
@@ -93,6 +94,31 @@ h3 a:hover,li a:hover,td a:hover{color:#58a6ff;}
     <a href="#pipeline">Research Pipeline &amp; Files</a>
     <a href="#files">All Files Built</a>
     <a href="#pending">Pending Items</a>
+  </nav>
+
+  <!-- NAV DAY 3 -->
+  <nav id="nav-day3" style="display:none;">
+    <h2>Navigation</h2>
+    <div class="section-label">Morning</div>
+    <a href="#d3-overview">Day 3 Overview</a>
+    <a href="#d3-user-inputs">Khursheed's Inputs</a>
+    <a href="#d3-session-state">Session State Fixes</a>
+    <a href="#d3-upsert">UPSERT Merge Design</a>
+    <a href="#d3-crawler">Web Crawler Rebuild</a>
+    <div class="section-label">Bulk Seeding</div>
+    <a href="#d3-extractors">New PDF Extractors</a>
+    <a href="#d3-autodetect">Auto-Detect Extractor</a>
+    <a href="#d3-seed-sources">Seed Sources</a>
+    <a href="#d3-seed-results">Bulk Seed Results</a>
+    <div class="section-label">Git &amp; Infra</div>
+    <a href="#d3-git-files">All Files Pushed to Git</a>
+    <a href="#d3-pdfs">Source PDFs in Repo</a>
+    <a href="#d3-pgdump">pg_dump Backup</a>
+    <a href="#d3-railway">Railway Password Rotation</a>
+    <div class="section-label">Roadmap</div>
+    <a href="#d3-eve-ng">Sprint 13 — EVE-NG Push</a>
+    <a href="#d3-sprints">Full Sprint Backlog</a>
+    <a href="#d3-pending">Pending Items</a>
   </nav>
 
   <!-- NAV DAY 2 -->
@@ -948,6 +974,330 @@ By tag:
 
 </div><!-- /body-wrap -->
 
+<!-- ═══════════════════════════════════════════════════════════════ DAY 3 ══ -->
+<div id="tab-day3" class="tab-panel">
+<main>
+<h1>CISCO &#x2194; Extreme Networks CLI Mapping Agent</h1>
+<div class="sub">Day 3 &mdash; April 2, 2026 &nbsp;|&nbsp; Khursheed Khan, Extreme Networks SA Team &nbsp;|&nbsp; Bulk Seed · Auto-Detect Extractor · pg_dump · Sprint 13</div>
+
+<!-- OVERVIEW -->
+<section id="d3-overview">
+<h2>Day 3 Overview</h2>
+<p>Day 3 focused on three goals: (1) fix data pipeline bugs that surfaced in testing, (2) bulk seed the Railway database from all available CLI reference documents, and (3) establish a reproducible backup process. By end of day, the database grew from 515 seed rows to <strong>4,144+ rows</strong> with embeddings, backed up via pg_dump, and all source PDFs committed to Git for full traceability.</p>
+<table>
+  <tr><th>Metric</th><th>Value</th></tr>
+  <tr><td>Rows before Day 3</td><td>515 (CSV seed)</td></tr>
+  <tr><td>Records extracted from PDFs + web</td><td>7,550</td></tr>
+  <tr><td>New rows inserted</td><td>3,629</td></tr>
+  <tr><td>Existing rows merged (OS col filled)</td><td>3,921</td></tr>
+  <tr><td>Total rows in DB (end of day)</td><td>~4,144 embedded | 515 verified</td></tr>
+  <tr><td>Source PDFs committed to Git</td><td>9 files (121 MB total)</td></tr>
+  <tr><td>pg_dump backup size</td><td>7.7 MB</td></tr>
+  <tr><td>Commits pushed</td><td>7 commits</td></tr>
+  <tr><td>New sprints added</td><td>Sprint 11 (Save Queries), Sprint 12 (Crawler Auto-OS), Sprint 13 (EVE-NG Push)</td></tr>
+</table>
+<div class="box ok"><p><strong>Key milestone:</strong> The UPSERT merge architecture is now proven — uploading the 9300/9400/9500/9600 Cisco CR PDFs correctly merged <code>cisco_iosxe</code> commands into rows already created by the 9200 CR. No duplicates. The cross-OS matrix is filling column by column exactly as designed.</p></div>
+</section>
+
+<!-- USER INPUTS -->
+<section id="d3-user-inputs">
+<h2>Khursheed's Inputs — Morning to End of Day</h2>
+<p>Every decision made today was driven by Khursheed's direct requests. Full conversation log:</p>
+<div class="jcard"><h4>1 &mdash; PDF Extraction Bug</h4><p><em>"I am testing the extraction from a pdf. It says there are 1217 records, generating embeddings. Wondering if we could seed the db ahead of time if I gave you all the files I have now? Also, in the rows that display, it shows tag, while some show the functional_intent — most show PART only?"</em></p><p><strong>Action:</strong> Fixed session_state bug (records disappearing on Insert click). Fixed Cisco CR PDF extractor — headings were split into single words ("PART", "authorization", "method") because of same-line multi-word heading grouping bug. Fixed by grouping words with Y-position tolerance &lt; 4px.</p></div>
+<div class="jcard"><h4>2 &mdash; Garbage Data</h4><p><em>"So, what do I do with the garbage in?"</em></p><p><strong>Action:</strong> Added "Delete Uploaded / Non-Seed Rows" expander in DB Browser (admin only) with per-source delete buttons and a bulk "Delete ALL non-seed rows" button.</p></div>
+<div class="jcard"><h4>3 &mdash; Crawler Extract Button Missing</h4><p><em>"Also, with the crawler, after I select a document, I don't see the extractor button to extract?"</em></p><p><strong>Action:</strong> Fixed multiselect state loss on Streamlit rerun. Selection now explicitly synced to <code>st.session_state["_crawler_selected"]</code>. Extract button shown conditionally (not via early return).</p></div>
+<div class="jcard"><h4>4 &mdash; Duplicate Key Crash</h4><p><em>[StreamlitDuplicateElementKey error paste — both Upload tab and Crawler tab calling _render_pdf_approval() simultaneously]</em></p><p><strong>Action:</strong> Added <code>ctx</code> parameter to <code>_render_pdf_approval(ctx="upload"|"crawler")</code>. Button keys become <code>_upload_pdf_insert</code> / <code>_crawler_pdf_insert</code>.</p></div>
+<div class="jcard"><h4>5 &mdash; Apply/Discard Hard to Find</h4><p><em>"Where is the insert button?" / "Hard to find"</em></p><p><strong>Action:</strong> Moved Apply/Discard buttons to TOP of approval table, above the dataframe. Previously at bottom — invisible for large result sets.</p></div>
+<div class="jcard"><h4>6 &mdash; Bulk Seed Request</h4><p><em>"OK, here are the references I want you to populate the database with: [7 Cisco IOS-XE CR PDFs from ~/Downloads + GitHub cheatsheet URL]"</em></p><p><strong>Action:</strong> Built <code>seed_bulk.py</code> with 11 sources (7 Cisco CR PDFs + 2 GitHub markdown cheatsheets). Wrote <code>extract_from_cisco_cr_pdf()</code> for Cisco Command Reference format (Univers-CondensedBold font detection).</p></div>
+<div class="jcard"><h4>7 &mdash; Deduplication Clarification</h4><p><em>"De-duplication is NOT at the file name level, it is when the extractor reads the values of the pdf, puts them in the right bins, tags them accordingly and fills out, if available the other OSs against this one."</em></p><p><strong>Action:</strong> Confirmed UPSERT design. Match by <code>LOWER(TRIM(functional_intent))</code>. If row exists → UPDATE <code>os_col</code> only if currently empty. If not exists → INSERT new row with embedding. Each OS column filled incrementally from separate documents.</p></div>
+<div class="jcard"><h4>8 &mdash; Web Crawler Rebuild</h4><p><em>"I want a crawler which can visit a webpage, open the documents in that webpage and then extract data from those documents... [Cisco URL example]"</em></p><p><strong>Action:</strong> Full rebuild of <code>web_crawler.py</code>. New 3-phase workflow: Discover → Select → Extract. Handles PDFs and HTML pages. Uses nearest-heading as functional intent for HTML code blocks.</p></div>
+<div class="jcard"><h4>9 &mdash; Save Queries / Designs Future Sprint</h4><p><em>"Before then, I need a way to save queries or design items. Can you update these to do on a future sprint?"</em> + <em>"The saved items should be able to be downloaded in pdf or other formats"</em> + <em>"All saves will be stored in the db."</em></p><p><strong>Action:</strong> Logged as Sprint 11. Design: <code>saved_items</code> DB table, "📌 Saved Items" tab, per-user visibility, download as PDF/CSV/JSON/.cli/ZIP.</p></div>
+<div class="jcard"><h4>10 &mdash; Hybrid File Tracking</h4><p><em>"Also, all uploaded files should be pushed in Git... is it possible, in a space where ALL such uploads could be tracked later on? Unless we store them in the internal database as well?" / "Hybrid pls"</em></p><p><strong>Action:</strong> Logged as Sprint 11 (hybrid layer): DB stores metadata (<code>uploaded_files</code> table with sha256 hash), actual files pushed to GitHub via API at <code>data/uploads/YYYY-MM/</code>. Today's source PDFs committed manually to <code>data/source_pdfs/</code>.</p></div>
+<div class="jcard"><h4>11 &mdash; OS Versions Tab</h4><p><em>"I want to ensure the version numbers and dates of each of the OS command is available if the user asks — keep as a tab somewhere? Note in the database as an additional tag?"</em></p><p><strong>Action:</strong> Logged as Sprint 9. OS_VERSIONS dict in config.py; version shown next to every OS label in E2E Wizard + AI Query responses.</p></div>
+<div class="jcard"><h4>12 &mdash; EN PDFs Added</h4><p><em>"I have more records this time for EN... /Users/khukhan/Downloads/CLIRefFabricEngine_8.10_CRG.pdf /Users/khukhan/Downloads/EXOS_User_Guide_32.5.pdf"</em></p><p><strong>Action:</strong> Added both to <code>seed_bulk.py</code>. Wrote <code>extract_from_extreme_cr_pdf()</code> for FabricEngine PDF (Montserrat-only, size-14 = command syntax). EXOS User Guide uses generic extractor (CourierNewPSMT monospace). Both extracted and seeded: 1,606 + 381 records.</p></div>
+<div class="jcard"><h4>13 &mdash; Auto-Detect Extractor</h4><p><em>"How do we now give the user the option to choose the right extractor? Should we build logic into the choice of extractor so the user does not worry if it is formatted the Cisco way or the EN way or a third way?"</em></p><p><strong>Action:</strong> Built <code>detect_pdf_format()</code> in pdf_extractor.py. Samples first 20 pages, fingerprints fonts → returns extractor type. Upload tab now auto-detects and shows label. User never needs to choose manually.</p></div>
+<div class="jcard"><h4>14 &mdash; Push All Files to Git</h4><p><em>"I want all the files I gave you today to be pushed on Git with the other files you had for the 515 rows already?"</em></p><p><strong>Action:</strong> All 9 source PDFs copied to <code>data/source_pdfs/</code> and committed/pushed. <code>seed_bulk.py</code> updated to resolve paths from <code>data/source_pdfs/</code> first — seed runs on Railway without manual file placement.</p></div>
+<div class="jcard"><h4>15 &mdash; pg_dump Backup</h4><p><em>"Option A" [install libpq via Homebrew]</em></p><p><strong>Action:</strong> <code>brew install libpq</code>. Ran pg_dump. Backup: <code>data/backups/railway_20260402_1340.dump</code> (7.7 MB, local only, gitignored).</p></div>
+<div class="jcard"><h4>16 &mdash; Password Rotation</h4><p><em>"This is the POSTGRES_PASSWORD [old password]"</em></p><p><strong>Action:</strong> Guided user to Railway → PostgreSQL → Config tab → Regenerate. Password rotated. App redeployed. New public URL pasted as DATABASE_URL in cisco-en-cli-agent Variables tab. DB reconnected (4,144 embedded, 515 verified confirmed).</p></div>
+<div class="jcard"><h4>17 &mdash; EVE-NG Integration / Sprint 13</h4><p><em>"On my Git you will see there is an eve-ng agent we had deployed... Can you tell me, if we can use that agent / or a modified version of it, to push a design that we create on this application for e2e network design, into EVE-NG?"</em></p><p><strong>Action:</strong> Full architectural analysis of eve-ng-lab-platform agent. Confirmed feasibility (~70% reuse). Designed Sprint 13 flow. Saved to memory and sprint backlog.</p></div>
+</section>
+
+<!-- SESSION STATE FIXES -->
+<section id="d3-session-state">
+<h2>Session State Fixes</h2>
+<p>Streamlit reruns on every button click — any variable not in <code>st.session_state</code> is lost. This caused multiple bugs fixed today, all following the same pattern.</p>
+<table>
+  <tr><th>Bug</th><th>Root Cause</th><th>Fix</th></tr>
+  <tr><td>PDF records disappeared on Insert click</td><td>"Extract &amp; Preview" not re-fired on rerun</td><td>Cache in <code>st.session_state["_pdf_records"]</code> after extraction; render from cache</td></tr>
+  <tr><td>CSV content lost on approval click</td><td>Same pattern — file not re-uploaded</td><td>Cache in <code>st.session_state["_csv_content"]</code></td></tr>
+  <tr><td>Crawler selection lost on rerun</td><td><code>st.multiselect</code> lost value between reruns</td><td>Explicitly sync: <code>st.session_state["_crawler_selected"] = selected</code></td></tr>
+  <tr><td>StreamlitDuplicateElementKey crash</td><td>Both Upload + Crawler tabs render simultaneously; both called <code>_render_pdf_approval()</code> with same button keys</td><td>Added <code>ctx</code> param: keys become <code>_upload_pdf_insert</code> vs <code>_crawler_pdf_insert</code></td></tr>
+  <tr><td>Approval table not shown after crawler extract</td><td><code>_render_pdf_approval()</code> only called in upload flow, not crawler</td><td>Added check at top of <code>_render_crawler()</code></td></tr>
+</table>
+<div class="box"><p><strong>Pattern rule established:</strong> Any multi-step interactive workflow in Streamlit MUST cache intermediate state in <code>st.session_state</code>. Buttons reset every rerun. This is now the standard pattern across PDF upload, CSV upload, crawler, and E2E wizard.</p></div>
+</section>
+
+<!-- UPSERT MERGE -->
+<section id="d3-upsert">
+<h2>UPSERT Merge — Cross-OS Matrix Architecture</h2>
+<p>This was the most important architectural decision of Day 3. Khursheed clarified that deduplication must happen at the <em>intent level</em>, not filename level — because the whole point is to build a cross-OS matrix by uploading separate documents per OS platform.</p>
+<h3>How It Works</h3>
+<ol>
+  <li>On every PDF insert, load all existing <code>functional_intent</code> values from DB → normalize with <code>LOWER(TRIM())</code></li>
+  <li>For each extracted record: if intent already exists → <strong>MERGE</strong> (UPDATE <code>os_col</code> only if currently empty); if new → <strong>INSERT</strong> new row with embedding</li>
+  <li>Approval table shows <code>↗ merge</code> vs <code>✨ new</code> per record BEFORE user clicks Apply</li>
+  <li>Success message reports: "X new rows inserted | Y existing rows updated with cisco_iosxe commands"</li>
+</ol>
+<h3>The Cross-OS Build Pattern</h3>
+<table>
+  <tr><th>Step</th><th>Upload</th><th>Result</th></tr>
+  <tr><td>1</td><td>Cisco 9200 CR PDF (cisco_iosxe)</td><td>877 new rows — cisco_iosxe filled</td></tr>
+  <tr><td>2</td><td>Cisco 9300 CR PDF (cisco_iosxe)</td><td>909 rows merged (same intents), 142 new</td></tr>
+  <tr><td>3</td><td>Cisco 9400 CR PDF (cisco_iosxe)</td><td>955 rows merged, 73 new</td></tr>
+  <tr><td>4</td><td>FabricEngine CLI Ref (extreme_voss)</td><td>31 merged, 1575 new — extreme_voss column fills</td></tr>
+  <tr><td>5</td><td>NX-OS CR (future)</td><td>cisco_nxos fills on matching rows</td></tr>
+</table>
+<div class="box ok"><p>Semantic merge (near-match intents using embedding similarity &gt; 0.9) is deferred to Sprint 7 (Voyage AI migration). Current merge is exact string match only.</p></div>
+</section>
+
+<!-- WEB CRAWLER -->
+<section id="d3-crawler">
+<h2>Web Crawler — Full Rebuild</h2>
+<p>The original crawler was a simple link-follower that visited HTML pages looking for <code>&lt;code&gt;</code> tags — it did not work for documentation portals. Day 3 brought a complete rebuild with a 3-phase document-aware workflow.</p>
+<h3>Phase 1 — Discover</h3>
+<p><code>discover_documents(url)</code>: Fetches any documentation index page, finds all PDF and HTML document links, filters by doc-keywords (command, reference, guide, config, cli, syntax, manual...). Returns list with title, URL, doc_type, domain, accessible flag.</p>
+<h3>Phase 2 — Select</h3>
+<p>DataFrame table of all discovered documents. <code>st.multiselect</code> to pick which ones to extract. Max pages slider for PDFs.</p>
+<h3>Phase 3 — Extract</h3>
+<p><code>extract_from_doc(url, os_col, max_pages)</code>: PDF links → download via httpx → <code>extract_from_pdf()</code>. HTML pages → BeautifulSoup → extract from <code>&lt;pre&gt;/&lt;code&gt;/&lt;tt&gt;/&lt;samp&gt;</code> blocks using nearest heading as intent. After extraction → hands off to shared PDF approval table (merge/new preview + UPSERT insert).</p>
+<div class="box warn"><p><strong>Known limitation:</strong> Cisco.com command reference PDF pages may require login (403 returned). HTML pages on cisco.com are generally accessible. Extreme documentation (documentation.extremenetworks.com) is fully open — no auth needed.</p></div>
+</section>
+
+<!-- NEW EXTRACTORS -->
+<section id="d3-extractors">
+<h2>New PDF Extractors</h2>
+<p>The original extractor used monospace font detection (CourierNewPSMT, Inconsolata, etc.) to find CLI commands. Cisco Command Reference PDFs have no monospace fonts at all — they use Univers-CondensedBold for headings and Times fonts for syntax. Extreme CLI Reference PDFs use Montserrat throughout. Each required a dedicated extractor.</p>
+<table>
+  <tr><th>Function</th><th>Target Document Format</th><th>Detection Signal</th></tr>
+  <tr><td><code>extract_from_pdf()</code></td><td>EXOS / VOSS User Guides, generic CLI docs</td><td>Monospace fonts: CourierNewPSMT, Inconsolata, SourceCode, DejaVuSansMono</td></tr>
+  <tr><td><code>extract_from_cisco_cr_pdf()</code></td><td>Cisco IOS-XE Command Reference PDFs (all catalyst series)</td><td>Univers-CondensedBold at size &gt;14 = command headings; Times-Bold = syntax keywords; Times-Italic = parameters</td></tr>
+  <tr><td><code>extract_from_extreme_cr_pdf()</code></td><td>Extreme Networks FabricEngine / VOSS CLI Reference PDFs</td><td>Montserrat-Regular only (no monospace); size 14 = command syntax words; one record per page</td></tr>
+</table>
+<h3>Heading Grouping Fix</h3>
+<p>Cisco CR PDFs had multi-word headings like "authorization method (DHCP)" — each word at size 21 on the same line. Without grouping, these became 3 separate records: "authorization", "method", "(DHCP)". Fix: group consecutive large-font words by Y-position tolerance &lt; 4px → one heading, one record.</p>
+<h3>TOC / Garbage Filtering</h3>
+<p><code>_SKIP_HEADINGS</code> regex skips table-of-contents pages (CONTENTS, TABLE OF CONTENTS, INDEX, PART I, APPENDIX, CHAPTER, PREFACE, GLOSSARY). <code>_BAD_COMMAND</code> regex filters help-text artifacts (<code>?</code>, <code>&lt;tab&gt;</code>, <code>...more</code>, <code>% Invalid command</code>).</p>
+</section>
+
+<!-- AUTO-DETECT -->
+<section id="d3-autodetect">
+<h2>Auto-Detect Extractor</h2>
+<p>Khursheed asked: <em>"Should we build logic into the choice of extractor so the user does not worry if it is formatted the Cisco way or the EN way or a third way?"</em> Answer: yes — <code>detect_pdf_format()</code> was built into <code>pdf_extractor.py</code>.</p>
+<h3>How It Works</h3>
+<p>Samples the first 20 pages of any PDF, counts font occurrences, and returns the extractor type string:</p>
+<table>
+  <tr><th>Font Fingerprint Found</th><th>Returns</th><th>Extractor Used</th></tr>
+  <tr><td>Univers-CondensedBold present</td><td><code>"cisco_cr_pdf"</code></td><td><code>extract_from_cisco_cr_pdf()</code></td></tr>
+  <tr><td>Montserrat present, no monospace</td><td><code>"extreme_cr_pdf"</code></td><td><code>extract_from_extreme_cr_pdf()</code></td></tr>
+  <tr><td>Monospace fonts (Courier, Inconsolata…)</td><td><code>"pdf"</code></td><td><code>extract_from_pdf()</code></td></tr>
+</table>
+<h3>Where It's Applied</h3>
+<ul>
+  <li><strong>Upload tab</strong>: auto-detects on drag-and-drop, shows label <em>"Auto-detected format: Cisco Command Reference"</em> before extraction begins</li>
+  <li><strong>seed_bulk.py</strong>: accepts <code>"type": "auto"</code> in SOURCES — calls detector then dispatches. Existing sources use explicit types since they are known documents.</li>
+</ul>
+<div class="box ok"><p>User never needs to know which extractor to choose. A third-party PDF (NX-OS guide, SLX-OS guide) will fall through to the generic extractor — worst case: 0 records extracted with a clear warning. Easy to extend by adding new font fingerprints to <code>detect_pdf_format()</code>.</p></div>
+</section>
+
+<!-- SEED SOURCES -->
+<section id="d3-seed-sources">
+<h2>Seed Sources — All 11 Documents</h2>
+<p>All sources are defined in <code>src/database/seed_bulk.py</code>. Source PDFs are committed in <code>data/source_pdfs/</code>. GitHub cheatsheets are fetched at runtime. Intermediate JSON cached in <code>data/extracted/bulk/</code> (gitignored) — safe to resume if interrupted.</p>
+<table>
+  <tr><th>#</th><th>Name</th><th>Type</th><th>OS Column</th><th>Records</th><th>Source</th></tr>
+  <tr><td>1</td><td>cisco-ios-router-cheatsheet</td><td>github_md</td><td>cisco_ios</td><td>25</td><td><a href="https://raw.githubusercontent.com/r7perezyera/Cisco-IOS-Command-CheatSheets/master/router_commands.md" target="_blank">router_commands.md</a></td></tr>
+  <tr><td>2</td><td>cisco-ios-switch-cheatsheet</td><td>github_md</td><td>cisco_ios</td><td>26</td><td><a href="https://raw.githubusercontent.com/r7perezyera/Cisco-IOS-Command-CheatSheets/master/switch_commands.md" target="_blank">switch_commands.md</a></td></tr>
+  <tr><td>3</td><td>ipaddr-cr-book</td><td>cisco_cr_pdf</td><td>cisco_iosxe</td><td>426</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/ipaddr-cr-book.pdf" target="_blank">ipaddr-cr-book.pdf</a></td></tr>
+  <tr><td>4</td><td>b_1715_programmability_cr</td><td>cisco_cr_pdf</td><td>cisco_iosxe</td><td>90</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/b_1715_programmability_cr.pdf" target="_blank">b_1715_programmability_cr.pdf</a></td></tr>
+  <tr><td>5</td><td>b_1715_9200_cr</td><td>cisco_cr_pdf</td><td>cisco_iosxe</td><td>913</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/b_1715_9200_cr.pdf" target="_blank">b_1715_9200_cr.pdf</a></td></tr>
+  <tr><td>6</td><td>b_1715_9300_cr</td><td>cisco_cr_pdf</td><td>cisco_iosxe</td><td>1,051</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/b_1715_9300_cr.pdf" target="_blank">b_1715_9300_cr.pdf</a></td></tr>
+  <tr><td>7</td><td>b_1715_9400_cr</td><td>cisco_cr_pdf</td><td>cisco_iosxe</td><td>1,028</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/b_1715_9400_cr.pdf" target="_blank">b_1715_9400_cr.pdf</a></td></tr>
+  <tr><td>8</td><td>b_1715_9500_cr</td><td>cisco_cr_pdf</td><td>cisco_iosxe</td><td>1,039</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/b_1715_9500_cr.pdf" target="_blank">b_1715_9500_cr.pdf</a></td></tr>
+  <tr><td>9</td><td>b_1715_9600_cr</td><td>cisco_cr_pdf</td><td>cisco_iosxe</td><td>965</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/b_1715_9600_cr.pdf" target="_blank">b_1715_9600_cr.pdf</a></td></tr>
+  <tr><td>10</td><td>CLIRefFabricEngine_8.10</td><td>extreme_cr_pdf</td><td>extreme_voss</td><td>1,606</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/CLIRefFabricEngine_8.10_CRG.pdf" target="_blank">CLIRefFabricEngine_8.10_CRG.pdf</a></td></tr>
+  <tr><td>11</td><td>EXOS_User_Guide_32.5</td><td>pdf</td><td>extreme_exos</td><td>381</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/EXOS_User_Guide_32.5.pdf" target="_blank">EXOS_User_Guide_32.5.pdf</a></td></tr>
+</table>
+</section>
+
+<!-- SEED RESULTS -->
+<section id="d3-seed-results">
+<h2>Bulk Seed Results</h2>
+<p>Run command: <code>DATABASE_URL="postgresql://..." python3 -m src.database.seed_bulk</code></p>
+<p>Runtime: ~14 minutes (network latency to Railway + embedding generation). Cache used for all 11 sources (JSON cached from earlier dry-run). The large merge steps (9300/9400/9500/9600 CR PDFs each merging 900+ rows) are network-bound — each UPDATE is an individual SQL call to Railway.</p>
+<table>
+  <tr><th>Source</th><th>OS Col</th><th>Records</th><th>Inserted (new)</th><th>Merged (existing)</th></tr>
+  <tr><td>cisco-ios-router + switch cheatsheets</td><td>cisco_ios</td><td>51</td><td>51</td><td>0</td></tr>
+  <tr><td>ipaddr-cr-book</td><td>cisco_iosxe</td><td>426</td><td>426</td><td>0</td></tr>
+  <tr><td>b_1715_programmability_cr</td><td>cisco_iosxe</td><td>90</td><td>88</td><td>2</td></tr>
+  <tr><td>b_1715_9200_cr</td><td>cisco_iosxe</td><td>913</td><td>877</td><td>36</td></tr>
+  <tr><td>b_1715_9300_cr</td><td>cisco_iosxe</td><td>1,051</td><td>142</td><td>909</td></tr>
+  <tr><td>b_1715_9400_cr</td><td>cisco_iosxe</td><td>1,028</td><td>73</td><td>955</td></tr>
+  <tr><td>b_1715_9500_cr</td><td>cisco_iosxe</td><td>1,039</td><td>13</td><td>1,026</td></tr>
+  <tr><td>b_1715_9600_cr</td><td>cisco_iosxe</td><td>965</td><td>7</td><td>958</td></tr>
+  <tr><td>CLIRefFabricEngine_8.10</td><td>extreme_voss</td><td>1,606</td><td>1,575</td><td>31</td></tr>
+  <tr><td>EXOS_User_Guide_32.5</td><td>extreme_exos</td><td>381</td><td>380</td><td>1</td></tr>
+  <tr><td><strong>TOTAL</strong></td><td></td><td><strong>7,550</strong></td><td><strong>3,629</strong></td><td><strong>3,921</strong></td></tr>
+</table>
+<div class="box ok"><p>The merge numbers tell the story: 9300–9600 CR PDFs share most of the same command headings as 9200. The UPSERT correctly merged cisco_iosxe into those rows instead of duplicating them. This is the cross-OS matrix filling exactly as designed.</p></div>
+</section>
+
+<!-- GIT FILES -->
+<section id="d3-git-files">
+<h2>All Files Pushed to Git — Day 3</h2>
+<p>Repository: <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent" target="_blank">github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent</a></p>
+<h3>Code Files Modified</h3>
+<table>
+  <tr><th>File</th><th>Commit</th><th>What Changed</th></tr>
+  <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/extractors/pdf_extractor.py" target="_blank">src/extractors/pdf_extractor.py</a></td><td>c40cfc9</td><td>Added <code>extract_from_cisco_cr_pdf()</code>, <code>extract_from_extreme_cr_pdf()</code>, <code>detect_pdf_format()</code>; heading Y-grouping fix; TOC/_BAD_COMMAND filtering; UPSERT <code>load_extracted_to_db()</code> with merge logic</td></tr>
+  <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/database/seed_bulk.py" target="_blank">src/database/seed_bulk.py</a></td><td>c40cfc9 + 5844583</td><td>New bulk seed script: 11 sources, <code>--dry-run</code>/<code>--clean</code> flags, JSON cache, auto path resolution (data/source_pdfs → ~/Downloads)</td></tr>
+  <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/ui/components/data_ingest.py" target="_blank">src/ui/components/data_ingest.py</a></td><td>multiple</td><td>Session state caching for PDF/CSV/crawler; ctx param for unique button keys; Apply/Discard at TOP; auto-detect extractor on upload; crawler 3-phase UI</td></tr>
+  <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/ui/components/db_browser.py" target="_blank">src/ui/components/db_browser.py</a></td><td>prev session</td><td>Added "Delete Uploaded/Non-Seed Rows" expander; per-source delete buttons; "Delete ALL non-seed rows" bulk button</td></tr>
+  <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/extractors/web_crawler.py" target="_blank">src/extractors/web_crawler.py</a></td><td>prev session</td><td>Full rebuild: discover_documents(), extract_from_doc(), _extract_pdf_from_response(), _extract_html_from_response(), _nearest_heading()</td></tr>
+  <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/.gitignore" target="_blank">.gitignore</a></td><td>d446293</td><td>Added <code>data/backups/</code> — pg_dump files are local-only</td></tr>
+</table>
+<h3>Source PDFs Committed</h3>
+<p>Directory: <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/tree/main/data/source_pdfs" target="_blank">data/source_pdfs/</a> — committed in commit 5844583</p>
+<table>
+  <tr><th>File (linked)</th><th>Size</th><th>OS Column</th><th>Vendor / Series</th></tr>
+  <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/ipaddr-cr-book.pdf" target="_blank">ipaddr-cr-book.pdf</a></td><td>8.8 MB</td><td>cisco_iosxe</td><td>Cisco IOS-XE 17.15 — IP Addressing Commands</td></tr>
+  <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/b_1715_programmability_cr.pdf" target="_blank">b_1715_programmability_cr.pdf</a></td><td>2.6 MB</td><td>cisco_iosxe</td><td>Cisco IOS-XE 17.15 — Programmability</td></tr>
+  <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/b_1715_9200_cr.pdf" target="_blank">b_1715_9200_cr.pdf</a></td><td>15 MB</td><td>cisco_iosxe</td><td>Cisco Catalyst 9200 — IOS-XE 17.15 CR</td></tr>
+  <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/b_1715_9300_cr.pdf" target="_blank">b_1715_9300_cr.pdf</a></td><td>17 MB</td><td>cisco_iosxe</td><td>Cisco Catalyst 9300 — IOS-XE 17.15 CR</td></tr>
+  <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/b_1715_9400_cr.pdf" target="_blank">b_1715_9400_cr.pdf</a></td><td>17 MB</td><td>cisco_iosxe</td><td>Cisco Catalyst 9400 — IOS-XE 17.15 CR</td></tr>
+  <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/b_1715_9500_cr.pdf" target="_blank">b_1715_9500_cr.pdf</a></td><td>17 MB</td><td>cisco_iosxe</td><td>Cisco Catalyst 9500 — IOS-XE 17.15 CR</td></tr>
+  <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/b_1715_9600_cr.pdf" target="_blank">b_1715_9600_cr.pdf</a></td><td>16 MB</td><td>cisco_iosxe</td><td>Cisco Catalyst 9600 — IOS-XE 17.15 CR</td></tr>
+  <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/CLIRefFabricEngine_8.10_CRG.pdf" target="_blank">CLIRefFabricEngine_8.10_CRG.pdf</a></td><td>9.3 MB</td><td>extreme_voss</td><td>Extreme Networks Fabric Engine 8.10 CLI Reference</td></tr>
+  <tr><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/EXOS_User_Guide_32.5.pdf" target="_blank">EXOS_User_Guide_32.5.pdf</a></td><td>18 MB</td><td>extreme_exos</td><td>Extreme Networks ExtremeXOS / Switch Engine 32.5 User Guide</td></tr>
+</table>
+</section>
+
+<!-- PG_DUMP -->
+<section id="d3-pgdump">
+<h2>pg_dump Backup Process</h2>
+<p>The Railway PostgreSQL public URL was obtained from Railway → PostgreSQL → Connect tab. pg_dump is not bundled with macOS — installed via Homebrew libpq.</p>
+<h3>Installation</h3>
+<pre><code>brew install libpq
+# Binary at: /opt/homebrew/opt/libpq/bin/pg_dump</code></pre>
+<h3>Backup Command</h3>
+<pre><code>/opt/homebrew/opt/libpq/bin/pg_dump \
+  "postgresql://postgres:&lt;PASSWORD&gt;@&lt;HOST&gt;:&lt;PORT&gt;/railway" \
+  --no-owner --no-acl -Fc \
+  -f data/backups/railway_$(date +%Y%m%d_%H%M).dump</code></pre>
+<h3>Restore Command</h3>
+<pre><code>/opt/homebrew/opt/libpq/bin/pg_restore \
+  -d "postgresql://postgres:&lt;NEW_PASSWORD&gt;@&lt;HOST&gt;:&lt;PORT&gt;/railway" \
+  --no-owner -Fc data/backups/railway_20260402_1340.dump</code></pre>
+<table>
+  <tr><th>Backup File</th><th>Date</th><th>Size</th><th>Contents</th></tr>
+  <tr><td><code>data/backups/railway_20260402_1340.dump</code></td><td>2026-04-02 13:40</td><td>7.7 MB</td><td>515 seed rows + 3,629 new + 3,921 merged (4,144 total embedded)</td></tr>
+</table>
+<div class="box warn"><p><strong>Note:</strong> <code>data/backups/</code> is gitignored — backup files are local only. Never commit pg_dump files to Git (they contain full DB data including any sensitive content). The backup eliminates the need to re-run the 14-minute seed + embedding generation on any new Railway project — just restore from dump.</p></div>
+<p><strong>Pending:</strong> A fresh pg_dump with the new credentials (post password rotation) is still outstanding. Run it with the new public URL from Railway → PostgreSQL → Connect tab.</p>
+</section>
+
+<!-- RAILWAY PASSWORD ROTATION -->
+<section id="d3-railway">
+<h2>Railway — Password Rotation &amp; Reconnect</h2>
+<p>The PostgreSQL password appeared in this conversation. It was rotated immediately.</p>
+<div class="step"><div class="sn">1</div><div class="sb"><strong>Regenerate password</strong><br>Railway Dashboard → PostgreSQL → <strong>Config tab</strong> → Regenerate. Railway generates a new password.</div></div>
+<div class="step"><div class="sn">2</div><div class="sb"><strong>Get new public URL</strong><br>Railway Dashboard → PostgreSQL → Connect tab → Public URL (format: <code>postgresql://postgres:&lt;NEW_PASSWORD&gt;@interchange.proxy.rlwy.net:&lt;PORT&gt;/railway</code>)</div></div>
+<div class="step"><div class="sn">3</div><div class="sb"><strong>Update app service</strong><br>Railway Dashboard → cisco-en-cli-agent → Variables tab → <code>DATABASE_URL</code> → paste new public URL → Save. Railway triggers automatic redeploy.</div></div>
+<div class="step"><div class="sn">4</div><div class="sb"><strong>Verify reconnect</strong><br>App live → DB Browser → confirmed 4,144 embedded | 515 verified. <span class="badge g">Connected</span></div></div>
+<div class="box warn"><p><strong>Note on internal vs public URL:</strong> Railway's internal URL (<code>postgres.railway.internal</code>) is only reachable within Railway's private network. The public URL (<code>interchange.proxy.rlwy.net</code>) works from both inside Railway and from local Mac. Either works for the app's DATABASE_URL — internal is slightly more efficient but public is more portable.</p></div>
+<div class="box warn"><p><strong>Color coding in DB Browser:</strong> 4,144 rows show as embedded (blue/green), 515 as verified (green). The embedding progress bar/colors reflect rows that have pgvector embeddings vs. rows that have been manually verified. Most new bulk-seeded rows are embedded but not yet verified — expected. Verification is Sprint 1.</p></div>
+</section>
+
+<!-- EVE-NG SPRINT 13 -->
+<section id="d3-eve-ng">
+<h2>Sprint 13 — Push E2E Design to EVE-NG Lab</h2>
+<p>Khursheed asked: <em>"On my Git you will see there is an eve-ng agent we had deployed. It extracted the topology from EVE-NG and was able to pull all the switch parameters and do traceroute, ping etc. Also push commands. Can you tell me, if we can use that agent, or a modified version of it, to push a design that we create on this application for e2e network design, into EVE-NG?"</em></p>
+<p>Full architectural analysis was run against the <a href="https://github.com/khursheedkhanaiforgood-ai/eve-ng-lab-platform" target="_blank">eve-ng-lab-platform</a> repository. Verdict: <strong>~70% reuse of existing agent, feasible as Sprint 13.</strong></p>
+<h3>What the EVE-NG Agent Already Does</h3>
+<table>
+  <tr><th>Capability</th><th>How</th><th>Reusable?</th></tr>
+  <tr><td>Push commands to any device</td><td>WebSocket → Telnet → Cisco IOS extractor</td><td><span class="badge g">Yes — as-is</span></td></tr>
+  <tr><td>Fetch lab topology (nodes + links)</td><td>EVE-NG REST API: <code>/api/labs/{path}/nodes</code> + <code>/topology</code></td><td><span class="badge g">Yes — as-is</span></td></tr>
+  <tr><td>Config snapshots, run history</td><td>PostgreSQL (separate DB from CLI agent)</td><td><span class="badge g">Yes — as-is</span></td></tr>
+  <tr><td>JWT auth, multi-user</td><td>FastAPI JWT</td><td><span class="badge g">Yes — reuse token</span></td></tr>
+  <tr><td>Extreme EXOS / VOSS / NX-OS Telnet</td><td>Not built — only Cisco IOS + VPCS</td><td><span class="badge y">Needs new extractors</span></td></tr>
+  <tr><td>Device role → EVE-NG name mapping</td><td>Not built</td><td><span class="badge y">Needs UI + mapping layer</span></td></tr>
+</table>
+<h3>Proposed Sprint 13 Flow</h3>
+<div class="topo">E2E Wizard generates design (per-OS CLI commands, device roles)
+     ↓
+"🚀 Push to EVE-NG Lab" button appears in E2E Wizard output
+     ↓
+User selects target lab (fetched from EVE-NG topology API)
+User maps: "Core Router" → Core-1  |  "Access Switch" → Site_1-SW1
+     ↓
+cisco-en-cli-agent → POST eve-ng-lab-platform/api/runs/{id}/push-commands
+     ↓
+eve-ng-lab-platform agent → WebSocket → Telnet → each device (in sequence)
+     ↓
+Per-command ✅/❌ result shown in E2E Wizard
+Config snapshot saved to eve-ng-lab-platform DB</div>
+<h3>Work Required for Sprint 13</h3>
+<ol>
+  <li><strong>New Telnet extractors</strong> in <code>eve-ng-lab-platform/agent/extractor/</code>: <code>extreme_exos.py</code>, <code>extreme_voss.py</code>, <code>cisco_nxos.py</code> — same pattern as existing <code>cisco_ios.py</code></li>
+  <li><strong>API bridge</strong> in cisco-en-cli-agent: JWT login to eve-ng-lab-platform, POST push-commands with device name + commands list</li>
+  <li><strong>Device mapping UI</strong> in E2E Wizard output: lab selector dropdown + role-to-device-name mapper</li>
+</ol>
+</section>
+
+<!-- SPRINT BACKLOG -->
+<section id="d3-sprints">
+<h2>Full Sprint Backlog (as of April 2, 2026)</h2>
+<table>
+  <tr><th>Sprint</th><th>Title</th><th>Status</th></tr>
+  <tr><td>0</td><td>DB Completeness Dashboard</td><td><span class="badge g">Done</span></td></tr>
+  <tr><td>1</td><td>Verification Workflow — admin review queue, ✅/❌ per row</td><td><span class="badge r">Not Built</span></td></tr>
+  <tr><td>2</td><td>Standards &amp; References Tab — RFC/IEEE per bin, clickable links</td><td><span class="badge r">Not Built</span></td></tr>
+  <tr><td>3</td><td>Tutorial Mode — sidebar toggle, RFC/concept appended to responses</td><td><span class="badge r">Not Built</span></td></tr>
+  <tr><td>4</td><td>Download Everything — CSV/PDF/HTML per response</td><td><span class="badge r">Not Built</span></td></tr>
+  <tr><td>5</td><td>Tier 3 Web Search — auto-crawl on Tier 2 miss, user-approved insert</td><td><span class="badge r">Not Built</span></td></tr>
+  <tr><td>6</td><td>Save E2E Wizard as .cli script</td><td><span class="badge b">Merged into Sprint 11</span></td></tr>
+  <tr><td>7</td><td>Voyage AI Embedding Migration + semantic UPSERT merge (at 12K rows)</td><td><span class="badge r">Not Built</span></td></tr>
+  <tr><td>8</td><td>UI Banner Polish (low priority)</td><td><span class="badge r">Not Built</span></td></tr>
+  <tr><td>9</td><td>OS Version Numbers in all outputs + version_notes DB column</td><td><span class="badge r">Not Built</span></td></tr>
+  <tr><td>10</td><td>E2E Wizard Chat Mode</td><td><span class="badge r">Not Built</span></td></tr>
+  <tr><td>11</td><td>Save Queries &amp; Designs — saved_items DB table, 📌 tab, downloads (PDF/CSV/JSON/.cli/ZIP), hybrid file tracking (DB metadata + GitHub API push)</td><td><span class="badge r">Not Built</span></td></tr>
+  <tr><td>12</td><td>Crawler Auto-Detection — infer os_col from URL/title keywords (extractor detection done; URL keyword inference remaining)</td><td><span class="badge y">Partial</span></td></tr>
+  <tr><td>13</td><td>Push E2E Design to EVE-NG Lab — API bridge + device mapping UI + new Telnet extractors for Extreme/NX-OS</td><td><span class="badge r">Not Built</span></td></tr>
+</table>
+</section>
+
+<!-- PENDING -->
+<section id="d3-pending">
+<h2>Pending Items — Start of Next Session</h2>
+<ol>
+  <li><strong>Fresh pg_dump</strong> with new credentials — get new public URL from Railway → PostgreSQL → Connect tab, run backup command</li>
+  <li><strong>Sandbox tests T1–T8</strong> on live Railway URL — none have been run yet against production</li>
+  <li><strong>Verify DB Browser color coding</strong> — 4,144 embedded rows show in dashboard; confirm bins and OS fill rates look correct</li>
+  <li><strong>Gap analysis</strong> — enumerate Cisco IOS-XE command families vs current rows → define delta to 12K target</li>
+  <li><strong>Sprint 1</strong> — Verification Workflow (highest user-facing value after data is seeded)</li>
+  <li><strong>Sprint 9</strong> — OS Version Numbers (SE team asked for this)</li>
+  <li><strong>Sprint 11</strong> — Save Queries &amp; Designs (Khursheed requested, SE team will use daily)</li>
+  <li><strong>Sprint 13</strong> — EVE-NG Push integration (architectural design complete, implementation next)</li>
+  <li><strong>End-of-session HTML</strong> — update this file and push to GitHub Pages after each session</li>
+</ol>
+<hr>
+<p style="font-size:12px;color:var(--mut);">© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | April 2, 2026 | <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent" target="_blank">GitHub</a> | Railway: cisco-en-cli-agent-production-fbf7.up.railway.app</p>
+</section>
+
+</main>
+</div>
+<!-- ══════════════════════════════════════════════════════════════ END DAY 3 ══ -->
+
 <script>
 // Tab switching
 function switchTab(day, btn) {
@@ -955,6 +1305,7 @@ function switchTab(day, btn) {
   document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById('nav-day1').style.display = 'none';
   document.getElementById('nav-day2').style.display = 'none';
+  document.getElementById('nav-day3').style.display = 'none';
   document.getElementById('tab-' + day).classList.add('active');
   document.getElementById('nav-' + day).style.display = 'block';
   btn.classList.add('active');
