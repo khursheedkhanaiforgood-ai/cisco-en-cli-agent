@@ -454,75 +454,72 @@ def render_config_translator():
             for w in result.warnings:
                 st.warning(w)
 
-        # ── Side-by-side topology ─────────────────────────────────
+        # ── Full translated script (primary review view) ──────────
         st.markdown("---")
-        st.markdown("### 6. Topology — Before & After")
-        topo_col1, topo_col2 = st.columns(2)
+        st.markdown("### 6. Translated Configuration")
+        st.caption("Full script ready to review and download. Expand sections below for side-by-side detail.")
+        st.code(result.full_script, language="text")
 
-        with topo_col1:
-            st.markdown("**🔵 Before (Cisco)**")
-            st.code(st.session_state[_SK_TOPO_BEFORE], language=None)
+        # ── Topology before & after (collapsed) ───────────────────
+        with st.expander("🗺 Topology — Before & After", expanded=False):
+            topo_col1, topo_col2 = st.columns(2)
+            with topo_col1:
+                st.markdown("**🔵 Before (Cisco)**")
+                st.code(st.session_state[_SK_TOPO_BEFORE], language=None)
+            with topo_col2:
+                st.markdown(f"**🟢 After ({tgt_info['version']})**")
+                after_topo_nodes = extract_topology(parse_config(result.full_script))
+                after_topo = render_ascii_topology(
+                    after_topo_nodes,
+                    label=f"Translated Config ({tgt_info['version']})"
+                ) if after_topo_nodes else "(topology not parseable from EXOS output)"
+                st.code(after_topo, language=None)
 
-        with topo_col2:
-            st.markdown(f"**🟢 After ({tgt_info['version']})**")
-            # Build EXOS topology from translated script (re-parse for display)
-            after_topo_nodes = extract_topology(parse_config(result.full_script))
-            after_topo = render_ascii_topology(
-                after_topo_nodes,
-                label=f"Translated Config ({tgt_info['version']})"
-            ) if after_topo_nodes else result.full_script[:800]
-            st.code(after_topo, language=None)
+        # ── Section-by-section detail (all collapsed by default) ──
+        with st.expander("📋 Section-by-Section Detail (click to expand)", expanded=False):
+            for ts in result.sections:
+                sec_label = f"`{ts.original.section_type.upper()}` — {ts.original.header}"
+                rag_badge = f"🔍 {ts.rag_hits} RAG" if ts.rag_hits else ""
+                caveat_badge = "⚠ caveat" if ts.has_caveats else ""
+                noeq_badge = "❌ no equiv" if ts.has_no_equivalent else ""
+                badges = "  ·  ".join(b for b in [rag_badge, caveat_badge, noeq_badge] if b)
 
-        # ── Translated config — section by section ────────────────
-        st.markdown("---")
-        st.markdown("### 7. Translated Configuration")
-
-        for ts in result.sections:
-            sec_label = f"`{ts.original.section_type.upper()}` — {ts.original.header}"
-            rag_badge = f"🔍 {ts.rag_hits} RAG hits" if ts.rag_hits else ""
-            caveat_badge = "⚠ has caveats" if ts.has_caveats else ""
-            noeq_badge = "❌ no equivalent" if ts.has_no_equivalent else ""
-            badges = "  ·  ".join(b for b in [rag_badge, caveat_badge, noeq_badge] if b)
-
-            with st.expander(f"{sec_label}  {badges}", expanded=ts.has_no_equivalent or ts.has_caveats):
-                # Original on left, translated on right
-                orig_col, trans_col = st.columns(2)
-                with orig_col:
-                    st.markdown(
-                        "<span style='font-size:11px;color:#8b949e;'>Original (Cisco)</span>",
-                        unsafe_allow_html=True,
-                    )
-                    st.code(ts.original.raw_text, language="text")
-
-                with trans_col:
-                    st.markdown(
-                        f"<span style='font-size:11px;color:#8b949e;'>Translated ({tgt_info['version']})</span>",
-                        unsafe_allow_html=True,
-                    )
-                    # Render each line with status badge
-                    lines_html = []
-                    for tl in ts.translated_lines:
-                        if not tl.text.strip():
-                            lines_html.append("<div style='height:6px'></div>")
-                            continue
-                        badge_html = _status_badge(tl.status)
-                        colour = {
-                            "verified":      "#7ee787",
-                            "unverified":    "#d29922",
-                            "caveat":        "#ff8800",
-                            "no_equivalent": "#f85149",
-                            "comment":       "#555",
-                        }.get(tl.status, "#c9d1d9")
-                        lines_html.append(
-                            f"<div style='font-family:SF Mono,Consolas,monospace;font-size:12px;"
-                            f"color:{colour};margin:1px 0;padding:2px 4px;'>"
-                            f"{tl.text}&nbsp;&nbsp;{badge_html}</div>"
+                with st.expander(f"{sec_label}  {badges}", expanded=False):
+                    orig_col, trans_col = st.columns(2)
+                    with orig_col:
+                        st.markdown(
+                            "<span style='font-size:11px;color:#8b949e;'>Original (Cisco)</span>",
+                            unsafe_allow_html=True,
                         )
-                    st.markdown(
-                        f"<div style='background:#0d1117;border:1px solid #30363d;"
-                        f"border-radius:6px;padding:10px;'>{''.join(lines_html)}</div>",
-                        unsafe_allow_html=True,
-                    )
+                        st.code(ts.original.raw_text, language="text")
+                    with trans_col:
+                        st.markdown(
+                            f"<span style='font-size:11px;color:#8b949e;'>Translated ({tgt_info['version']})</span>",
+                            unsafe_allow_html=True,
+                        )
+                        lines_html = []
+                        for tl in ts.translated_lines:
+                            if not tl.text.strip():
+                                lines_html.append("<div style='height:6px'></div>")
+                                continue
+                            badge_html = _status_badge(tl.status)
+                            colour = {
+                                "verified":      "#7ee787",
+                                "unverified":    "#d29922",
+                                "caveat":        "#ff8800",
+                                "no_equivalent": "#f85149",
+                                "comment":       "#555",
+                            }.get(tl.status, "#c9d1d9")
+                            lines_html.append(
+                                f"<div style='font-family:SF Mono,Consolas,monospace;font-size:12px;"
+                                f"color:{colour};margin:1px 0;padding:2px 4px;'>"
+                                f"{tl.text}&nbsp;&nbsp;{badge_html}</div>"
+                            )
+                        st.markdown(
+                            f"<div style='background:#0d1117;border:1px solid #30363d;"
+                            f"border-radius:6px;padding:10px;'>{''.join(lines_html)}</div>",
+                            unsafe_allow_html=True,
+                        )
 
         # ── Intent Verification ───────────────────────────────────
         if verify_list:
@@ -619,7 +616,7 @@ def render_config_translator():
         st.markdown("---")
         st.markdown("### 9. Download")
 
-        dl1, dl2, dl3 = st.columns(3)
+        dl1, dl2, dl3, dl4 = st.columns(4)
 
         with dl1:
             st.download_button(
@@ -631,6 +628,15 @@ def render_config_translator():
             )
 
         with dl2:
+            st.download_button(
+                label="⬇ Download .txt",
+                data=result.full_script,
+                file_name=f"translated_{st.session_state[_SK_TGT_OS]}.txt",
+                mime="text/plain",
+                use_container_width=True,
+            )
+
+        with dl3:
             # Intent verification report as text
             if verify_list:
                 report_lines = [
@@ -651,7 +657,7 @@ def render_config_translator():
                     use_container_width=True,
                 )
 
-        with dl3:
+        with dl4:
             # ZIP: script + report + original
             zip_buf = io.BytesIO()
             with zipfile.ZipFile(zip_buf, "w") as zf:
