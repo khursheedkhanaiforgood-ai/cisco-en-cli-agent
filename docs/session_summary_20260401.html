@@ -115,6 +115,8 @@ h3 a:hover,li a:hover,td a:hover{color:#58a6ff;}
     <a href="#d3-pdfs">Source PDFs in Repo</a>
     <a href="#d3-pgdump">pg_dump Backup</a>
     <a href="#d3-railway">Railway Password Rotation</a>
+    <div class="section-label">&#x1F512; Security</div>
+    <a href="#d3-security">Tier-1 Threat Assessment</a>
     <div class="section-label">Roadmap</div>
     <a href="#d3-eve-ng">Sprint 13 — EVE-NG Push</a>
     <a href="#d3-sprints">Full Sprint Backlog</a>
@@ -1215,6 +1217,57 @@ By tag:
 <div class="box warn"><p><strong>Color coding in DB Browser:</strong> 4,144 rows show as embedded (blue/green), 515 as verified (green). The embedding progress bar/colors reflect rows that have pgvector embeddings vs. rows that have been manually verified. Most new bulk-seeded rows are embedded but not yet verified — expected. Verification is Sprint 1.</p></div>
 </section>
 
+<!-- TIER-1 SECURITY ASSESSMENT -->
+<section id="d3-security">
+<h2>&#x1F512; Tier-1 Threat Assessment — April 2, 2026</h2>
+<p>A formal Tier-1 security assessment was conducted against the CISCO-EN CLI Mapping Agent, aligned with <strong>US DoD RMF (NIST SP 800-37 / NIST SP 800-53 Rev 5)</strong>, <strong>CISA Zero Trust Maturity Model v2</strong>, <strong>CIS Controls v8</strong>, and <strong>OWASP Top 10 2021</strong>. The full audit-ready HTML report (redacted, password-protected) is published to GitHub Pages.</p>
+
+<div class="box red"><p>&#x26A0; <strong>Verdict: DO NOT DEPLOY to external network</strong> until T-001, T-002, T-004, and T-007 are resolved. Application is classified as an internal SE team productivity tool handling non-classified network CLI reference data.</p></div>
+
+<h3>Finding Summary — 18 Findings Total</h3>
+<table>
+  <tr><th>Severity</th><th>Count</th><th>IDs</th></tr>
+  <tr><td><span class="badge r">CRITICAL</span></td><td>3</td><td>T-001 GitHub PAT · T-002 Plaintext Passwords · T-004 SQL Injection</td></tr>
+  <tr><td><span class="badge" style="background:rgba(255,136,0,.15);color:#ff8800;">HIGH</span></td><td>7</td><td>T-003 Brute-Force · T-005 SQL Injection (PDF) · T-006 SSRF · T-007 CORS/XSRF · T-008 Session Expiry · T-009 RBAC · T-010 Audit Logging</td></tr>
+  <tr><td><span class="badge y">MEDIUM</span></td><td>6</td><td>T-011 Passwords in Comments · T-012 Unencrypted Backup · T-013 PDF DoS · T-014 Supply Chain · T-015 CVE Scanning · T-016 TLS</td></tr>
+  <tr><td><span class="badge g">LOW</span></td><td>2</td><td>T-017 Stored XSS · T-018 DB URL in Logs</td></tr>
+</table>
+
+<h3>Remediation Timeline</h3>
+<table>
+  <tr><th>When</th><th>Action</th></tr>
+  <tr><td><span class="badge r">Tonight</span></td><td>T-001: Revoke GitHub PAT at github.com/settings/tokens — re-issue fine-grained PAT with minimum scope</td></tr>
+  <tr><td><span class="badge" style="background:rgba(255,136,0,.15);color:#ff8800;">48 hours</span></td><td>T-002: bcrypt password hashing in auth.py &nbsp;·&nbsp; T-004: Parameterized queries in search.py &nbsp;·&nbsp; T-007: Re-enable CORS + XSRF in .streamlit/config.toml</td></tr>
+  <tr><td><span class="badge y">1 week</span></td><td>T-003 brute-force lockout &nbsp;·&nbsp; T-005 os_col allowlist &nbsp;·&nbsp; T-006 SSRF domain allowlist &nbsp;·&nbsp; T-009 RBAC on data ingest &nbsp;·&nbsp; T-013 PDF size limits &nbsp;·&nbsp; T-017 html.escape()</td></tr>
+  <tr><td><span class="badge g">2 weeks</span></td><td>T-008 session expiry &nbsp;·&nbsp; T-010 audit logging &nbsp;·&nbsp; T-012 encrypted backup &nbsp;·&nbsp; T-014 HuggingFace pin &nbsp;·&nbsp; T-015 pip-audit &nbsp;·&nbsp; T-016 sslmode=verify-full</td></tr>
+</table>
+
+<h3>Git History Clean — Completed April 2, 2026</h3>
+<ul>
+  <li>Passwords <code>Extreme01!!</code> and <code>dhaka1234</code> scrubbed from all 42 commits using <code>git-filter-repo</code> — replaced with <code>REDACTED_PASS</code></li>
+  <li>GitHub PAT <code>ghp_gLforg5V...</code> removed from all 42 commits — force-pushed to GitHub</li>
+  <li>Verified: 0 occurrences of either password or token remaining in full git history</li>
+</ul>
+
+<h3>Security Assessment Report</h3>
+<p>Full audit-ready HTML report published with: 18 findings, NIST/CISA/OWASP references, auditor evidence guide, remediation status tracker, and compliance statement. All credentials shown as <code style="background:#2d1515;color:#ff4444;border:1px solid rgba(255,68,68,.3);">[REDACTED]</code>.</p>
+<p>
+  <strong>Live report:</strong>
+  <a href="https://khursheedkhanaiforgood-ai.github.io/cisco-en-cli-agent/security_assessment_20260402.html" target="_blank">
+    khursheedkhanaiforgood-ai.github.io/cisco-en-cli-agent/security_assessment_20260402.html
+  </a>
+  &nbsp;&#x1F512; Password protected (authorized personnel only)
+</p>
+<p>
+  <strong>GitHub source:</strong>
+  <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/docs/security_assessment_20260402.html" target="_blank">
+    github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/docs/security_assessment_20260402.html
+  </a>
+  &nbsp;(commit 9cf3776)
+</p>
+<div class="box"><p>Classification: <strong>INTERNAL — SENSITIVE — RESTRICTED DISTRIBUTION</strong>. Not for public release. Not for external distribution. Do not forward without authorization.</p></div>
+</section>
+
 <!-- EVE-NG SPRINT 13 -->
 <section id="d3-eve-ng">
 <h2>Sprint 13 — Push E2E Design to EVE-NG Lab</h2>
@@ -1277,16 +1330,26 @@ Config snapshot saved to eve-ng-lab-platform DB</div>
 <!-- PENDING -->
 <section id="d3-pending">
 <h2>Pending Items — Start of Next Session</h2>
+<h3>&#x1F512; Security (in order)</h3>
+<ol>
+  <li><span class="badge r">IMMEDIATE</span> <strong>Revoke GitHub PAT</strong> at github.com/settings/tokens → re-issue fine-grained PAT with minimum scope → update .env + Mac Keychain</li>
+  <li><span class="badge" style="background:rgba(255,136,0,.15);color:#ff8800;">48 hrs</span> <strong>T-002</strong> — bcrypt password hashing: <code>src/ui/components/auth.py</code> line 87 — replace plaintext comparison with <code>bcrypt.checkpw()</code>, rotate all 3 user passwords</li>
+  <li><span class="badge" style="background:rgba(255,136,0,.15);color:#ff8800;">48 hrs</span> <strong>T-004</strong> — SQL injection: <code>src/rag/search.py</code> lines 78–103 — validate os_filter against allowlist, replace f-string SQL with parameterized queries</li>
+  <li><span class="badge" style="background:rgba(255,136,0,.15);color:#ff8800;">48 hrs</span> <strong>T-007</strong> — Re-enable CORS + XSRF: remove <code>enableCORS = false</code> and <code>enableXsrfProtection = false</code> from <code>.streamlit/config.toml</code></li>
+  <li><span class="badge y">1 week</span> T-003 brute-force lockout · T-005 os_col allowlist · T-006 SSRF domain allowlist · T-009 RBAC on ingest · T-013 PDF size limits · T-017 html.escape()</li>
+  <li><span class="badge g">2 weeks</span> T-008 session expiry · T-010 audit logging · T-012 encrypted backup · T-014 HuggingFace pin · T-015 pip-audit · T-016 sslmode=verify-full</li>
+</ol>
+<h3>Infrastructure</h3>
 <ol>
   <li><strong>Fresh pg_dump</strong> with new credentials — get new public URL from Railway → PostgreSQL → Connect tab, run backup command</li>
-  <li><strong>Sandbox tests T1–T8</strong> on live Railway URL — none have been run yet against production</li>
-  <li><strong>Verify DB Browser color coding</strong> — 4,144 embedded rows show in dashboard; confirm bins and OS fill rates look correct</li>
-  <li><strong>Gap analysis</strong> — enumerate Cisco IOS-XE command families vs current rows → define delta to 12K target</li>
+  <li><strong>User guide writeup</strong> — Khursheed to provide 3-section text for AI Query landing tab placeholder</li>
+</ol>
+<h3>Feature Sprints (after security fixes)</h3>
+<ol>
   <li><strong>Sprint 1</strong> — Verification Workflow (highest user-facing value after data is seeded)</li>
   <li><strong>Sprint 9</strong> — OS Version Numbers (SE team asked for this)</li>
   <li><strong>Sprint 11</strong> — Save Queries &amp; Designs (Khursheed requested, SE team will use daily)</li>
   <li><strong>Sprint 13</strong> — EVE-NG Push integration (architectural design complete, implementation next)</li>
-  <li><strong>End-of-session HTML</strong> — update this file and push to GitHub Pages after each session</li>
 </ol>
 <hr>
 <p style="font-size:12px;color:var(--mut);">© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | April 2, 2026 | <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent" target="_blank">GitHub</a> | Railway: cisco-en-cli-agent-production-fbf7.up.railway.app</p>
