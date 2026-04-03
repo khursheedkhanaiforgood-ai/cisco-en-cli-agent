@@ -213,17 +213,27 @@ def _render_db_overview():
             with get_session() as session:
                 log_rows = session.execute(_t("""
                     SELECT created_at, username, source, query_text,
-                           tag_filter, results_count, response_time_ms
+                           os_filter, tag_filter, results_count, response_time_ms
                     FROM query_log
                     ORDER BY created_at DESC
                     LIMIT 200
                 """)).fetchall()
             if log_rows:
                 log_df = pd.DataFrame(log_rows, columns=[
-                    "Time", "User", "Source", "Query",
-                    "Bin", "Results", "ms"
+                    "Time", "User", "Source", "Query/File",
+                    "OS Pair", "Bin", "Sections/Results", "ms"
                 ])
                 log_df["Time"] = pd.to_datetime(log_df["Time"]).dt.strftime("%m-%d %H:%M")
+                # Colour-code by source
+                source_icon = {
+                    "config_translator": "⚙️",
+                    "ai_query": "🤖",
+                    "e2e_wizard": "🏗️",
+                    "bin_tab": "🗄️",
+                }
+                log_df["Source"] = log_df["Source"].apply(
+                    lambda s: f"{source_icon.get(s, '')} {s}" if s else ""
+                )
                 st.dataframe(log_df, use_container_width=True, height=300)
                 csv = log_df.to_csv(index=False)
                 st.download_button("⬇️ Export query log", csv,

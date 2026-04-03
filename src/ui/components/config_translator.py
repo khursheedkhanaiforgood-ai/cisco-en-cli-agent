@@ -14,6 +14,7 @@ Renders:
 import io
 import zipfile
 import tempfile
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -120,6 +121,38 @@ def _confidence_colour(pct: float) -> str:
     if pct >= 90:   return "#3fb950"
     if pct >= 70:   return "#d29922"
     return "#f85149"
+
+
+def _log_translation(
+    source_os: str,
+    target_os: str,
+    sections: int,
+    avg_confidence: float,
+    elapsed_ms: int,
+    filename: str = "",
+):
+    """Log a Config Translator session to query_log."""
+    try:
+        from src.database.models import QueryLog
+        from src.database.connection import get_session
+        from src.ui.components.auth import get_current_user
+
+        label = filename or f"{source_os} → {target_os}"
+        user = get_current_user()
+        username = user["username"] if user else "anonymous"
+        with get_session() as session:
+            session.add(QueryLog(
+                query_text=label,
+                tag_filter=None,
+                os_filter=f"{source_os} → {target_os}",
+                results_count=sections,
+                top_similarity=round(avg_confidence / 100, 4),
+                response_time_ms=elapsed_ms,
+                username=username,
+                source="config_translator",
+            ))
+    except Exception as _e:
+        pass   # never block UI for logging failures
 
 
 # ── Main render ───────────────────────────────────────────────────────────────
@@ -368,6 +401,7 @@ def render_config_translator():
                 pr = st.session_state[_SK_PARSE]
                 tgt_key = st.session_state[_SK_TGT_OS]
                 progress_bar = st.progress(0, text="Starting translation…")
+                _t_start = time.perf_counter()
 
                 def _on_progress(step, total, msg):
                     pct = int((step / max(total, 1)) * 80)
@@ -396,6 +430,24 @@ def render_config_translator():
                     verify_results.append(vr)
 
                 progress_bar.progress(100, text="Done.")
+
+                _elapsed_ms = int((time.perf_counter() - _t_start) * 1000)
+                _avg_conf = (
+                    sum(v.overall_confidence for v in verify_results) / len(verify_results)
+                    if verify_results else 0.0
+                )
+                _filename = (
+                    st.session_state.get("ct_uploader") and
+                    getattr(st.session_state.get("ct_uploader"), "name", "")
+                ) or ""
+                _log_translation(
+                    source_os=result.source_os,
+                    target_os=result.target_os,
+                    sections=result.stats.get("sections_translated", 0),
+                    avg_confidence=_avg_conf,
+                    elapsed_ms=_elapsed_ms,
+                    filename=_filename,
+                )
 
                 st.session_state[_SK_RESULT]  = result
                 st.session_state[_SK_INTENTS] = intent_maps
