@@ -337,6 +337,17 @@ def render_config_translator():
                         unsafe_allow_html=True,
                     )
 
+        # ── Download extracted config ─────────────────────────────
+        raw_text = st.session_state[_SK_RAW]
+        if raw_text:
+            st.download_button(
+                label="⬇ Download Extracted Config (.txt)",
+                data=raw_text,
+                file_name="extracted_config.txt",
+                mime="text/plain",
+                help="Download the plain-text CLI extracted from your uploaded file.",
+            )
+
         # ── Translate button ──────────────────────────────────────
         st.markdown("---")
         st.markdown("### 4. Translate")
@@ -497,51 +508,54 @@ padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:24px;fl
                 ) if after_topo_nodes else "(topology not parseable from EXOS output)"
                 st.code(after_topo, language=None)
 
-        # ── Section-by-section detail (all collapsed by default) ──
-        with st.expander("📋 Section-by-Section Detail (click to expand)", expanded=False):
-            for ts in result.sections:
-                sec_label = f"`{ts.original.section_type.upper()}` — {ts.original.header}"
-                rag_badge = f"🔍 {ts.rag_hits} RAG" if ts.rag_hits else ""
-                caveat_badge = "⚠ caveat" if ts.has_caveats else ""
-                noeq_badge = "❌ no equiv" if ts.has_no_equivalent else ""
-                badges = "  ·  ".join(b for b in [rag_badge, caveat_badge, noeq_badge] if b)
+        # ── Section-by-section side-by-side diff ─────────────────
+        st.markdown("---")
+        st.markdown("### 7. Section-by-Section: Cisco → EXOS")
+        st.caption("Each section shows original Cisco on the left and translated EXOS on the right.")
 
-                with st.expander(f"{sec_label}  {badges}", expanded=False):
-                    orig_col, trans_col = st.columns(2)
-                    with orig_col:
-                        st.markdown(
-                            "<span style='font-size:11px;color:#8b949e;'>Original (Cisco)</span>",
-                            unsafe_allow_html=True,
+        for ts in result.sections:
+            sec_label = f"`{ts.original.section_type.upper()}` — {ts.original.header}"
+            rag_badge = f"🔍 {ts.rag_hits} RAG" if ts.rag_hits else ""
+            caveat_badge = "⚠ caveat" if ts.has_caveats else ""
+            noeq_badge = "❌ no equiv" if ts.has_no_equivalent else ""
+            badges = "  ·  ".join(b for b in [rag_badge, caveat_badge, noeq_badge] if b)
+
+            with st.expander(f"{sec_label}  {badges}", expanded=False):
+                orig_col, trans_col = st.columns(2)
+                with orig_col:
+                    st.markdown(
+                        "<span style='font-size:11px;color:#8b949e;'>Original (Cisco)</span>",
+                        unsafe_allow_html=True,
+                    )
+                    st.code(ts.original.raw_text, language="text")
+                with trans_col:
+                    st.markdown(
+                        f"<span style='font-size:11px;color:#8b949e;'>Translated ({tgt_info['version']})</span>",
+                        unsafe_allow_html=True,
+                    )
+                    lines_html = []
+                    for tl in ts.translated_lines:
+                        if not tl.text.strip():
+                            lines_html.append("<div style='height:6px'></div>")
+                            continue
+                        badge_html = _status_badge(tl.status)
+                        colour = {
+                            "verified":      "#7ee787",
+                            "unverified":    "#d29922",
+                            "caveat":        "#ff8800",
+                            "no_equivalent": "#f85149",
+                            "comment":       "#8b949e",
+                        }.get(tl.status, "#c9d1d9")
+                        lines_html.append(
+                            f"<div style='font-family:SF Mono,Consolas,monospace;font-size:12px;"
+                            f"color:{colour};margin:1px 0;padding:2px 4px;'>"
+                            f"{tl.text}&nbsp;&nbsp;{badge_html}</div>"
                         )
-                        st.code(ts.original.raw_text, language="text")
-                    with trans_col:
-                        st.markdown(
-                            f"<span style='font-size:11px;color:#8b949e;'>Translated ({tgt_info['version']})</span>",
-                            unsafe_allow_html=True,
-                        )
-                        lines_html = []
-                        for tl in ts.translated_lines:
-                            if not tl.text.strip():
-                                lines_html.append("<div style='height:6px'></div>")
-                                continue
-                            badge_html = _status_badge(tl.status)
-                            colour = {
-                                "verified":      "#7ee787",
-                                "unverified":    "#d29922",
-                                "caveat":        "#ff8800",
-                                "no_equivalent": "#f85149",
-                                "comment":       "#555",
-                            }.get(tl.status, "#c9d1d9")
-                            lines_html.append(
-                                f"<div style='font-family:SF Mono,Consolas,monospace;font-size:12px;"
-                                f"color:{colour};margin:1px 0;padding:2px 4px;'>"
-                                f"{tl.text}&nbsp;&nbsp;{badge_html}</div>"
-                            )
-                        st.markdown(
-                            f"<div style='background:#0d1117;border:1px solid #30363d;"
-                            f"border-radius:6px;padding:10px;'>{''.join(lines_html)}</div>",
-                            unsafe_allow_html=True,
-                        )
+                    st.markdown(
+                        f"<div style='background:#0d1117;border:1px solid #30363d;"
+                        f"border-radius:6px;padding:10px;'>{''.join(lines_html)}</div>",
+                        unsafe_allow_html=True,
+                    )
 
         # ── Intent Verification ───────────────────────────────────
         if verify_list:
