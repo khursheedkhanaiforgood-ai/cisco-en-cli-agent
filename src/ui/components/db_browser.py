@@ -198,7 +198,6 @@ def render_db_browser():
                     LIMIT 200
                 """)).fetchall()
             if log_rows:
-                import pandas as pd
                 log_df = pd.DataFrame(log_rows, columns=[
                     "Time", "User", "Source", "Query",
                     "Bin", "Results", "ms"
