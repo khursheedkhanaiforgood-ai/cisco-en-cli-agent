@@ -28,12 +28,19 @@ When Cisco and EXOS differ architecturally, insert a caveat comment immediately 
 Never silently drop a feature. If you cannot translate it, state it.
 
 ### 4. No-equivalent marker
-When a Cisco feature has no functional equivalent on EXOS, output:
+Use this ONLY when a Cisco feature has **no functional equivalent at all** on EXOS:
 ```
 # NO EQUIVALENT on ExtremeXOS: <original Cisco command>
 # REASON: <one sentence explaining why>
 # RECOMMENDATION: <closest alternative or manual step required>
 ```
+**DO NOT** use this marker just because EXOS uses different syntax (e.g. flat vs sub-mode).
+**DO NOT** use this marker when you have already provided a working EXOS translation above.
+Syntactic differences belong in a `# CAVEAT:` comment, not a `# NO EQUIVALENT` marker.
+Examples of correct usage:
+- Cisco `spanning-tree portfast` → EXOS has `auto-edge` equivalent → use CAVEAT, not NO EQUIVALENT
+- Cisco `vlan 10 / name DATA` → EXOS has `create vlan DATA tag 10` → translate it, no NO EQUIVALENT
+- Cisco `crypto pki` → EXOS has no PKI CA → use NO EQUIVALENT
 
 ### 5. NX-OS feature prerequisites
 `feature <protocol>` lines are Cisco NX-OS prerequisites, not translatable commands. Note them:
