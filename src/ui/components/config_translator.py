@@ -539,52 +539,51 @@ padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:24px;fl
             for w in result.warnings:
                 st.warning(w)
 
-        # ── Full translated script (primary review view) ──────────
+        # ── PRIMARY VIEW: Cisco | EXOS side-by-side ──────────────
         st.markdown("---")
-        st.markdown("### 6. Translated Configuration")
-        st.caption("Full script ready to review and download. Expand sections below for side-by-side detail.")
-        st.code(result.full_script, language="text")
+        st.markdown("### 6. Cisco → EXOS")
+        st.caption(
+            "Left: original Cisco config · Right: translated ExtremeXOS commands. "
+            "Expand **Annotated Detail** below for caveats, verification badges, and section-by-section diff."
+        )
 
-        # ── Topology before & after (collapsed) ───────────────────
-        with st.expander("🗺 Topology — Before & After", expanded=False):
-            topo_col1, topo_col2 = st.columns(2)
-            with topo_col1:
-                st.markdown("**🔵 Before (Cisco)**")
-                st.code(st.session_state[_SK_TOPO_BEFORE], language=None)
-            with topo_col2:
-                st.markdown(f"**🟢 After ({tgt_info['version']})**")
-                after_topo_nodes = extract_topology(parse_config(result.full_script))
-                after_topo = render_ascii_topology(
-                    after_topo_nodes,
-                    label=f"Translated Config ({tgt_info['version']})"
-                ) if after_topo_nodes else "(topology not parseable from EXOS output)"
-                st.code(after_topo, language=None)
+        cisco_col, exos_col = st.columns(2)
+        with cisco_col:
+            st.markdown(
+                "<div style='font-size:12px;font-weight:600;color:#8b949e;"
+                "margin-bottom:4px;'>🔵 Original (Cisco)</div>",
+                unsafe_allow_html=True,
+            )
+            st.code(st.session_state[_SK_RAW], language="text")
 
-        # ── Section-by-section side-by-side diff ─────────────────
-        st.markdown("---")
-        st.markdown("### 7. Section-by-Section: Cisco → EXOS")
-        st.caption("Each section shows original Cisco on the left and translated EXOS on the right.")
+        with exos_col:
+            st.markdown(
+                f"<div style='font-size:12px;font-weight:600;color:#3fb950;"
+                f"margin-bottom:4px;'>🟢 Translated ({tgt_info['version']})</div>",
+                unsafe_allow_html=True,
+            )
+            st.code(result.clean_script, language="text")
 
-        for ts in result.sections:
-            sec_label = f"`{ts.original.section_type.upper()}` — {ts.original.header}"
-            rag_badge = f"🔍 {ts.rag_hits} RAG" if ts.rag_hits else ""
-            caveat_badge = "⚠ caveat" if ts.has_caveats else ""
-            noeq_badge = "❌ no equiv" if ts.has_no_equivalent else ""
-            badges = "  ·  ".join(b for b in [rag_badge, caveat_badge, noeq_badge] if b)
+        # ── Annotated detail (collapsed) ─────────────────────────
+        with st.expander("📋 Annotated Detail — caveats, no-equivalents & section diff", expanded=False):
+            st.caption("Each section: original Cisco (left) · annotated EXOS with badges (right).")
 
-            with st.expander(f"{sec_label}  {badges}", expanded=False):
-                orig_col, trans_col = st.columns(2)
-                with orig_col:
-                    st.markdown(
-                        "<span style='font-size:11px;color:#8b949e;'>Original (Cisco)</span>",
-                        unsafe_allow_html=True,
-                    )
+            for ts in result.sections:
+                sec_label = f"`{ts.original.section_type.upper()}` — {ts.original.header}"
+                rag_badge = f"🔍 {ts.rag_hits} RAG" if ts.rag_hits else ""
+                caveat_badge = "⚠ caveat" if ts.has_caveats else ""
+                noeq_badge = "❌ no equiv" if ts.has_no_equivalent else ""
+                badges = "  ·  ".join(b for b in [rag_badge, caveat_badge, noeq_badge] if b)
+
+                st.markdown(
+                    f"**{sec_label}**"
+                    + (f"  <span style='font-size:11px;color:#8b949e;'>{badges}</span>" if badges else ""),
+                    unsafe_allow_html=True,
+                )
+                orig_col2, trans_col2 = st.columns(2)
+                with orig_col2:
                     st.code(ts.original.raw_text, language="text")
-                with trans_col:
-                    st.markdown(
-                        f"<span style='font-size:11px;color:#8b949e;'>Translated ({tgt_info['version']})</span>",
-                        unsafe_allow_html=True,
-                    )
+                with trans_col2:
                     lines_html = []
                     for tl in ts.translated_lines:
                         if not tl.text.strip():
@@ -605,9 +604,24 @@ padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:24px;fl
                         )
                     st.markdown(
                         f"<div style='background:#0d1117;border:1px solid #30363d;"
-                        f"border-radius:6px;padding:10px;'>{''.join(lines_html)}</div>",
+                        f"border-radius:6px;padding:10px;margin-bottom:12px;'>{''.join(lines_html)}</div>",
                         unsafe_allow_html=True,
                     )
+
+        # ── Topology before & after (collapsed) ───────────────────
+        with st.expander("🗺 Topology — Before & After", expanded=False):
+            topo_col1, topo_col2 = st.columns(2)
+            with topo_col1:
+                st.markdown("**🔵 Before (Cisco)**")
+                st.code(st.session_state[_SK_TOPO_BEFORE], language=None)
+            with topo_col2:
+                st.markdown(f"**🟢 After ({tgt_info['version']})**")
+                after_topo_nodes = extract_topology(parse_config(result.full_script))
+                after_topo = render_ascii_topology(
+                    after_topo_nodes,
+                    label=f"Translated Config ({tgt_info['version']})"
+                ) if after_topo_nodes else "(topology not parseable from EXOS output)"
+                st.code(after_topo, language=None)
 
         # ── Intent Verification ───────────────────────────────────
         if verify_list:
@@ -674,20 +688,22 @@ padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:24px;fl
 
         with dl1:
             st.download_button(
-                label="⬇ Download .xos Script",
-                data=result.full_script,
+                label="⬇ Download .xos (clean)",
+                data=result.clean_script,
                 file_name=f"translated_{st.session_state[_SK_TGT_OS]}.xos",
                 mime="text/plain",
                 use_container_width=True,
+                help="Commands only — no annotation comments.",
             )
 
         with dl2:
             st.download_button(
-                label="⬇ Download .txt",
-                data=result.full_script,
+                label="⬇ Download .txt (clean)",
+                data=result.clean_script,
                 file_name=f"translated_{st.session_state[_SK_TGT_OS]}.txt",
                 mime="text/plain",
                 use_container_width=True,
+                help="Commands only — no annotation comments.",
             )
 
         with dl3:
@@ -712,10 +728,11 @@ padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:24px;fl
                 )
 
         with dl4:
-            # ZIP: script + report + original
+            # ZIP: clean script + annotated script + report + original
             zip_buf = io.BytesIO()
             with zipfile.ZipFile(zip_buf, "w") as zf:
-                zf.writestr(f"translated_{st.session_state[_SK_TGT_OS]}.xos", result.full_script)
+                zf.writestr(f"translated_{st.session_state[_SK_TGT_OS]}_clean.xos", result.clean_script)
+                zf.writestr(f"translated_{st.session_state[_SK_TGT_OS]}_annotated.xos", result.full_script)
                 zf.writestr("original_config.txt", st.session_state[_SK_RAW])
                 if verify_list:
                     zf.writestr("intent_verification_report.txt", report_text)
