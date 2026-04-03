@@ -219,6 +219,22 @@ div[data-testid="stRadio"] > label::before {
   font-size: 9px;
 }
 
+/* ── Print / PDF: override dark code blocks to white ── */
+@media print {
+  .stCode, .stCode pre, .stCode code,
+  div[data-testid="stCode"], div[data-testid="stCode"] pre {
+    background: #f6f8fa !important;
+    color: #24292f !important;
+    border: 1px solid #d0d7de !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  pre {
+    background: #f6f8fa !important;
+    color: #24292f !important;
+  }
+}
+
 /* Primary button pulse ring */
 div[data-testid="stButton"] > button[kind="primary"] {
   border: 1px solid #7b2fff !important;

@@ -581,13 +581,7 @@ padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:24px;fl
                 "margin-bottom:4px;'>🔵 Original (Cisco — CLI only)</div>",
                 unsafe_allow_html=True,
             )
-            st.markdown(
-                f"<pre style='background:#161b22;border:1px solid #30363d;border-radius:6px;"
-                f"padding:12px;font-size:12px;color:#c9d1d9;font-family:SF Mono,Consolas,monospace;"
-                f"max-height:600px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;'>"
-                f"{_cisco_cli}</pre>",
-                unsafe_allow_html=True,
-            )
+            st.code(_cisco_cli, language="text")
 
         with exos_col:
             st.markdown(
@@ -595,13 +589,7 @@ padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:24px;fl
                 f"margin-bottom:4px;'>🟢 Translated ({tgt_info['version']})</div>",
                 unsafe_allow_html=True,
             )
-            st.markdown(
-                f"<pre style='background:#0d2818;border:1px solid #2ea043;border-radius:6px;"
-                f"padding:12px;font-size:12px;color:#aff5b4;font-family:SF Mono,Consolas,monospace;"
-                f"max-height:600px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;'>"
-                f"{result.clean_script}</pre>",
-                unsafe_allow_html=True,
-            )
+            st.code(result.clean_script, language="text")
 
         # ── Annotated detail (collapsed) ─────────────────────────
         with st.expander("📋 Annotated Detail — caveats, no-equivalents & section diff", expanded=False):
