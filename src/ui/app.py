@@ -39,9 +39,13 @@ if not render_login_gate():
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Extreme_Networks_logo.svg/320px-Extreme_Networks_logo.svg.png", width=180)
-    st.markdown("## CISCO ↔ EN CLI Mapping")
-    st.markdown("*Translate CLI commands across 6 network OSes*")
+    st.markdown("""
+<div style="padding:10px 0 6px 0;">
+  <div style="font-size:18px;font-weight:700;color:#7b2fff;letter-spacing:.5px;">⚡ Extreme Networks</div>
+  <div style="font-size:15px;font-weight:600;color:#e6edf3;margin-top:2px;">CISCO ↔ EN CLI Mapping</div>
+  <div style="font-size:12px;color:#8b949e;margin-top:2px;">Translate CLI commands across 6 network OSes</div>
+</div>
+""", unsafe_allow_html=True)
     st.divider()
 
     st.markdown("### OS Coverage")
