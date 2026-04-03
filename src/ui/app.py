@@ -11,9 +11,8 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-from src.config import FUNCTIONAL_TAGS, TAG_LABELS, TAG_DESCRIPTIONS
+from src.config import FUNCTIONAL_TAGS, TAG_LABELS
 from src.ui.components.query_box import render_query_box
-from src.ui.components.bin_tabs import render_bin_tab
 from src.ui.components.db_browser import render_db_browser
 from src.ui.components.e2e_wizard import render_e2e_wizard
 from src.ui.components.config_translator import render_config_translator
@@ -146,34 +145,26 @@ st.title("🔀 CISCO ↔ Extreme Networks CLI Mapping Agent")
 st.markdown("*The New Rosetta Stone — Translate CLI commands across 6 network OSes | AI-powered E2E design*")
 
 # Top-level tabs
-tab_labels = (
-    ["🤖 AI Query", "⚙️ Config Translator", "🏗️ E2E Design Wizard"]
-    + [f"{TAG_LABELS[t]} {t}" for t in FUNCTIONAL_TAGS]
-    + ["🗄️ DB Browser", "📥 Add Data"]
-)
+tab_labels = [
+    "🤖 AI Query",
+    "⚙️ Config Translator",
+    "🏗️ E2E Design Wizard",
+    "🗄️ DB Browser",
+    "📥 Add Data",
+]
 top_tabs = st.tabs(tab_labels)
 
-# Tab 0 — AI Query
 with top_tabs[0]:
     render_query_box()
 
-# Tab 1 — Config Translator (E2E blueprint translation)
 with top_tabs[1]:
     render_config_translator()
 
-# Tab 2 — E2E Design Wizard (Lead Agent / SBA)
 with top_tabs[2]:
     render_e2e_wizard()
 
-# Tabs 3-11 — Functional Bins
-for i, tag in enumerate(FUNCTIONAL_TAGS):
-    with top_tabs[i + 3]:
-        render_bin_tab(tag)
-
-# Tab 11 — DB Browser
-with top_tabs[-2]:
+with top_tabs[3]:
     render_db_browser()
 
-# Tab 12 — Add Data (upload + crawler approval)
-with top_tabs[-1]:
+with top_tabs[4]:
     render_data_ingest()
