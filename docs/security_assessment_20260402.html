@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tier-1 Threat Assessment — CISCO-EN CLI Mapping Agent</title>
+<style>
+:root{--bg:#0d1117;--sur:#161b22;--brd:#30363d;--acc:#58a6ff;--grn:#3fb950;--yel:#d29922;--red:#f85149;--pur:#bc8cff;--txt:#e6edf3;--mut:#8b949e;--cod:#1f2937;--crit:#ff4444;--high:#ff8800;--med:#d29922;--low:#3fb950;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:#1a0a0a;border-bottom:2px solid var(--crit);padding:10px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-title{color:var(--crit);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.topbar-meta{color:var(--mut);font-size:11px;}
+.body-wrap{display:flex;flex:1;}
+nav{width:260px;min-width:260px;background:var(--sur);border-right:1px solid var(--brd);padding:20px 0;position:sticky;top:49px;height:calc(100vh - 49px);overflow-y:auto;}
+nav h2{color:var(--acc);font-size:11px;text-transform:uppercase;letter-spacing:1.2px;padding:0 18px 10px;border-bottom:1px solid var(--brd);margin-bottom:10px;}
+nav a{display:block;padding:6px 18px;color:var(--mut);text-decoration:none;font-size:12.5px;border-left:3px solid transparent;transition:all .15s;}
+nav a:hover,nav a.active{color:var(--acc);border-left-color:var(--acc);background:rgba(88,166,255,.06);}
+nav .section-label{padding:10px 18px 4px;color:var(--mut);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-top:6px;}
+nav .crit-link{color:var(--crit) !important;}
+nav .high-link{color:var(--high) !important;}
+main{flex:1;padding:36px 48px;max-width:1060px;}
+h1{font-size:22px;font-weight:700;color:var(--crit);margin-bottom:4px;}
+.sub{color:var(--mut);font-size:13px;margin-bottom:28px;}
+h2{font-size:17px;font-weight:600;color:var(--txt);margin:38px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--brd);scroll-margin-top:60px;}
+h3{font-size:14px;font-weight:600;color:var(--acc);margin:18px 0 8px;}
+p{font-size:13.5px;line-height:1.75;color:#c9d1d9;margin-bottom:10px;}
+ul,ol{padding-left:20px;margin-bottom:12px;}
+li{font-size:13.5px;line-height:1.75;color:#c9d1d9;margin-bottom:3px;}
+code{background:var(--cod);color:#79c0ff;padding:2px 6px;border-radius:4px;font-family:'SF Mono',Consolas,monospace;font-size:12px;}
+pre{background:var(--cod);border:1px solid var(--brd);border-radius:8px;padding:14px;overflow-x:auto;margin:10px 0 14px;}
+pre code{background:none;padding:0;color:#e6edf3;font-size:12.5px;line-height:1.6;}
+table{width:100%;border-collapse:collapse;margin:12px 0 18px;font-size:13px;}
+th{background:var(--sur);color:var(--acc);text-align:left;padding:9px 11px;border:1px solid var(--brd);}
+td{padding:7px 11px;border:1px solid var(--brd);color:#c9d1d9;vertical-align:top;}
+tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:.5px;}
+.crit{background:rgba(255,68,68,.18);color:var(--crit);border:1px solid rgba(255,68,68,.3);}
+.high{background:rgba(255,136,0,.18);color:var(--high);border:1px solid rgba(255,136,0,.3);}
+.med{background:rgba(210,153,34,.18);color:var(--med);border:1px solid rgba(210,153,34,.3);}
+.low{background:rgba(63,185,80,.18);color:var(--low);border:1px solid rgba(63,185,80,.3);}
+.gap{background:rgba(255,68,68,.12);color:var(--crit);}
+.partial{background:rgba(210,153,34,.12);color:var(--med);}
+.done{background:rgba(63,185,80,.12);color:var(--low);}
+.pending{background:rgba(188,140,255,.12);color:var(--pur);}
+.box{border-left:3px solid var(--acc);background:rgba(88,166,255,.07);padding:12px 16px;margin:14px 0;border-radius:0 6px 6px 0;}
+.box.warn{border-left-color:var(--yel);background:rgba(210,153,34,.07);}
+.box.danger{border-left-color:var(--crit);background:rgba(255,68,68,.07);}
+.box.ok{border-left-color:var(--grn);background:rgba(63,185,80,.07);}
+.box p{margin:0;font-size:13px;}
+.finding{border:1px solid var(--brd);border-radius:8px;padding:18px;margin-bottom:16px;background:var(--sur);}
+.finding.crit-card{border-left:4px solid var(--crit);}
+.finding.high-card{border-left:4px solid var(--high);}
+.finding.med-card{border-left:4px solid var(--med);}
+.finding.low-card{border-left:4px solid var(--low);}
+.finding h3{margin-top:0;color:var(--txt);font-size:14px;}
+.finding-meta{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 12px;}
+.frow{display:grid;grid-template-columns:140px 1fr;gap:4px 12px;margin-bottom:8px;font-size:13px;}
+.frow .lbl{color:var(--mut);font-weight:600;}
+.frow .val{color:#c9d1d9;}
+a{color:var(--acc);text-decoration:none;}
+a:hover{text-decoration:underline;}
+hr{border:none;border-top:1px solid var(--brd);margin:28px 0;}
+.redacted{background:#2d1515;color:var(--crit);border:1px solid rgba(255,68,68,.3);padding:2px 8px;border-radius:4px;font-family:'SF Mono',Consolas,monospace;font-size:12px;letter-spacing:.5px;}
+.timeline-bar{display:flex;gap:0;margin:20px 0;border-radius:6px;overflow:hidden;border:1px solid var(--brd);}
+.tl-item{flex:1;padding:10px 14px;text-align:center;font-size:12px;}
+.tl-item .tl-time{font-weight:700;font-size:13px;display:block;margin-bottom:3px;}
+.tl-item .tl-ids{color:var(--mut);font-size:11px;}
+.tl-imm{background:rgba(255,68,68,.2);color:var(--crit);}
+.tl-48{background:rgba(255,136,0,.15);color:var(--high);}
+.tl-1w{background:rgba(210,153,34,.15);color:var(--med);}
+.tl-2w{background:rgba(63,185,80,.1);color:var(--grn);}
+.cover-stamp{border:2px solid var(--crit);border-radius:6px;padding:12px 24px;display:inline-block;text-align:center;margin:16px 0;}
+.cover-stamp .cs-top{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);}
+.cover-stamp .cs-main{font-size:20px;font-weight:700;color:var(--crit);letter-spacing:1px;}
+.cover-stamp .cs-bot{font-size:11px;color:var(--mut);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">&#x26A0; CISCO-EN CLI Agent &mdash; Security Assessment &mdash; INTERNAL USE ONLY</span>
+  <span class="topbar-meta">Assessment Date: April 2, 2026 &nbsp;|&nbsp; Framework: NIST SP 800-53 Rev 5 &middot; CISA ZT &middot; CIS v8 &middot; OWASP Top 10</span>
+</div>
+
+<div class="body-wrap">
+
+<nav>
+  <h2>Navigation</h2>
+  <div class="section-label">Overview</div>
+  <a href="#cover">Cover &amp; Classification</a>
+  <a href="#executive">Executive Summary</a>
+  <a href="#architecture">Architecture Overview</a>
+  <a href="#framework">Compliance Framework</a>
+  <a href="#timeline">Remediation Timeline</a>
+  <div class="section-label">&#x1F534; Critical Findings</div>
+  <a href="#T-001" class="crit-link">T-001 &mdash; GitHub PAT Exposure</a>
+  <a href="#T-002" class="crit-link">T-002 &mdash; Plaintext Passwords</a>
+  <a href="#T-004" class="crit-link">T-004 &mdash; SQL Injection</a>
+  <div class="section-label">&#x1F7E0; High Findings</div>
+  <a href="#T-003" class="high-link">T-003 &mdash; Brute-Force</a>
+  <a href="#T-005" class="high-link">T-005 &mdash; SQL Injection (PDF)</a>
+  <a href="#T-006" class="high-link">T-006 &mdash; SSRF Crawler</a>
+  <a href="#T-007" class="high-link">T-007 &mdash; CORS/XSRF Disabled</a>
+  <a href="#T-008" class="high-link">T-008 &mdash; No Session Expiry</a>
+  <a href="#T-009" class="high-link">T-009 &mdash; No RBAC on Ingest</a>
+  <a href="#T-010" class="high-link">T-010 &mdash; No Audit Logging</a>
+  <div class="section-label">&#x1F7E1; Medium / Low</div>
+  <a href="#medium">T-011 through T-016</a>
+  <a href="#low">T-017 &amp; T-018</a>
+  <div class="section-label">Audit Guidance</div>
+  <a href="#auditor">Auditor Evidence Guide</a>
+  <a href="#status">Remediation Status</a>
+  <a href="#references">References</a>
+</nav>
+
+<main>
+
+<!-- COVER -->
+<section id="cover">
+  <div style="margin-bottom:24px;">
+    <div class="cover-stamp">
+      <div class="cs-top">Classification</div>
+      <div class="cs-main">INTERNAL &mdash; SENSITIVE</div>
+      <div class="cs-bot">Not for external distribution &middot; Redacted copy for audit purposes</div>
+    </div>
+  </div>
+  <h1>Tier-1 Threat Assessment</h1>
+  <div class="sub">CISCO &#x2194; Extreme Networks CLI Mapping Agent &nbsp;|&nbsp; April 2, 2026 &nbsp;|&nbsp; Khursheed Khan &mdash; Extreme Networks SA Team</div>
+  <table>
+    <tr><th>Item</th><th>Detail</th></tr>
+    <tr><td>Application</td><td>CISCO-EN CLI Mapping Agent &mdash; internal SE productivity tool</td></tr>
+    <tr><td>Repository</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent" target="_blank">github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent</a></td></tr>
+    <tr><td>Deployment</td><td>Railway PaaS &mdash; <code>cisco-en-cli-agent-production-fbf7.up.railway.app</code></td></tr>
+    <tr><td>Assessment framework</td><td>NIST SP 800-53 Rev 5 &middot; NIST SP 800-37 Rev 2 (RMF) &middot; CISA Zero Trust Maturity Model v2 &middot; CIS Controls v8 &middot; OWASP Top 10 2021</td></tr>
+    <tr><td>Data classification</td><td>Non-classified &mdash; public CLI reference data, SE team credentials, usage logs</td></tr>
+    <tr><td>Total findings</td><td><span class="badge crit">3 Critical</span> &nbsp;<span class="badge high">7 High</span> &nbsp;<span class="badge med">5 Medium</span> &nbsp;<span class="badge low">2 Low</span></td></tr>
+    <tr><td>Overall posture</td><td><span class="badge crit">DO NOT DEPLOY externally until Critical + High resolved</span></td></tr>
+    <tr><td>Assessed by</td><td>Claude Sonnet 4.6 (Anthropic) &mdash; AI-assisted security review</td></tr>
+    <tr><td>Document version</td><td>1.0 &mdash; Initial assessment</td></tr>
+  </table>
+  <div class="box danger"><p><strong>Note on redactions:</strong> All credentials, tokens, passwords, and internal hostnames referenced in findings have been redacted in this document as <span class="redacted">[REDACTED]</span>. The unredacted working notes are stored in the assessor's secure memory system. This document is safe to share with auditors.</p></div>
+</section>
+
+<!-- EXECUTIVE SUMMARY -->
+<section id="executive">
+  <h2>Executive Summary</h2>
+  <p>This Tier-1 threat assessment was conducted on April 2, 2026 against the CISCO-EN CLI Mapping Agent, an internal Streamlit web application deployed on Railway PaaS. The application provides AI-powered CLI command translation across six network operating systems (Cisco IOS, IOS-XE, NX-OS; Extreme EXOS, VOSS, SLX-OS) and is intended for use by the Extreme Networks SA team during customer engagements.</p>
+  <p>The assessment identified <strong>18 findings</strong> across four severity levels. Three Critical findings require immediate remediation before the application is considered safe for continued operation. Seven High findings must be resolved within two weeks. The application is currently suitable for <em>controlled internal use only</em> by trusted SE team members with the understanding that the identified gaps exist.</p>
+
+  <h3>Key Risks at a Glance</h3>
+  <table>
+    <tr><th>Risk Area</th><th>Finding</th><th>Severity</th><th>Status</th></tr>
+    <tr><td>Secrets management</td><td>Live credential exposed in repository remote URL</td><td><span class="badge crit">Critical</span></td><td><span class="badge pending">Pending revocation</span></td></tr>
+    <tr><td>Authentication</td><td>Passwords stored and compared in plaintext</td><td><span class="badge crit">Critical</span></td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>Injection</td><td>SQL injection via f-string query construction</td><td><span class="badge crit">Critical</span></td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>Web security</td><td>CORS and XSRF protections disabled</td><td><span class="badge high">High</span></td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>SSRF</td><td>Web crawler accepts unrestricted URLs</td><td><span class="badge high">High</span></td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>Access control</td><td>No RBAC on data ingest — any user can upload</td><td><span class="badge high">High</span></td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>Audit trail</td><td>No security event logging</td><td><span class="badge high">High</span></td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>Passwords scrubbed from Git</td><td>Plaintext passwords removed from all 42 commits</td><td>&mdash;</td><td><span class="badge done">&#10003; Completed 2026-04-02</span></td></tr>
+  </table>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <h2>Architecture Overview</h2>
+  <p>Understanding the threat surface requires a clear picture of the system components and their trust boundaries.</p>
+  <pre><code>
+  ┌─────────────────────────────────────────────────────────────────┐
+  │                     Railway PaaS (Production)                   │
+  │                                                                 │
+  │   ┌──────────────────────┐      ┌──────────────────────────┐   │
+  │   │  Streamlit App       │      │  PostgreSQL + pgvector   │   │
+  │   │  (Python 3.11)       │◄────►│  (Railway managed)       │   │
+  │   │                      │      │  Public URL: :30251      │   │
+  │   │  Auth: APP_USERS env │      │  Internal: .railway.int  │   │
+  │   └──────────┬───────────┘      └──────────────────────────┘   │
+  │              │                                                   │
+  └──────────────┼───────────────────────────────────────────────── ┘
+                 │ HTTPS
+        ┌────────┴────────┐
+        │   SE Team       │          ┌───────────────────────┐
+        │   Browsers      │          │  External APIs        │
+        └─────────────────┘          │  • Anthropic Claude   │
+                                     │  • HuggingFace (model)│
+  ┌─────────────────────┐           │  • GitHub (repo)      │
+  │  Developer Mac      │           └───────────────────────┘
+  │  • Local .env       │
+  │  • pg_dump backups  │
+  │  • git push → GitHub│
+  └─────────────────────┘
+  </code></pre>
+  <h3>Trust Boundaries</h3>
+  <table>
+    <tr><th>Component</th><th>Trust Level</th><th>Notes</th></tr>
+    <tr><td>SE Team browsers</td><td>Low-Medium</td><td>Authenticated users — internal team, but shared credentials risk</td></tr>
+    <tr><td>Railway app container</td><td>Medium</td><td>PaaS managed — no direct OS access; env vars visible to Railway team</td></tr>
+    <tr><td>Railway PostgreSQL</td><td>Medium</td><td>Publicly reachable URL; protected by password only (no IP allowlist)</td></tr>
+    <tr><td>Anthropic Claude API</td><td>High</td><td>SOC 2 Type II; API key in Railway env var</td></tr>
+    <tr><td>HuggingFace</td><td>Low-Medium</td><td>Public CDN; model downloaded at runtime — supply chain risk</td></tr>
+    <tr><td>GitHub repo</td><td>Medium</td><td>Public repo — all code visible; secrets must never appear in history</td></tr>
+    <tr><td>Developer Mac</td><td>High</td><td>Single point of failure for local backups; FileVault recommended</td></tr>
+  </table>
+</section>
+
+<!-- FRAMEWORK -->
+<section id="framework">
+  <h2>Compliance Framework Mapping</h2>
+  <p>This assessment maps findings to three authoritative frameworks. All references link to official documentation.</p>
+  <table>
+    <tr><th>Framework</th><th>Scope Applied</th><th>Reference</th></tr>
+    <tr><td>NIST SP 800-53 Rev 5</td><td>Moderate baseline controls — AC, AU, IA, SC, SI, SA, CP, RA families</td><td><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">csrc.nist.gov &rarr; SP 800-53 Rev 5</a></td></tr>
+    <tr><td>NIST SP 800-37 Rev 2</td><td>Risk Management Framework — categorize, select, implement, assess, authorize, monitor</td><td><a href="https://csrc.nist.gov/publications/detail/sp/800-37/rev-2/final" target="_blank">csrc.nist.gov &rarr; SP 800-37 Rev 2</a></td></tr>
+    <tr><td>CISA Zero Trust Maturity Model v2</td><td>Identity, Device, Network, Application, Data pillars</td><td><a href="https://www.cisa.gov/zero-trust-maturity-model" target="_blank">cisa.gov &rarr; Zero Trust Maturity Model</a></td></tr>
+    <tr><td>CIS Controls v8</td><td>Implementation Group 1 (IG1) minimum; IG2 where applicable</td><td><a href="https://www.cisecurity.org/controls/v8" target="_blank">cisecurity.org &rarr; CIS Controls v8</a></td></tr>
+    <tr><td>OWASP Top 10 (2021)</td><td>Web application vulnerability classes A01&ndash;A10</td><td><a href="https://owasp.org/Top10/" target="_blank">owasp.org &rarr; Top 10 2021</a></td></tr>
+    <tr><td>DoD RMF</td><td>NIST SP 800-37 as implemented by DoDI 8510.01</td><td><a href="https://dodcio.defense.gov/RMF/" target="_blank">dodcio.defense.gov &rarr; RMF</a></td></tr>
+  </table>
+</section>
+
+<!-- TIMELINE BAR -->
+<section id="timeline">
+  <h2>Remediation Timeline</h2>
+  <div class="timeline-bar">
+    <div class="tl-item tl-imm"><span class="tl-time">Tonight</span><span class="tl-ids">T-001</span><span class="tl-ids">Revoke PAT</span></div>
+    <div class="tl-item tl-48"><span class="tl-time">48 Hours</span><span class="tl-ids">T-002 · T-004</span><span class="tl-ids">T-007 · T-011</span></div>
+    <div class="tl-item tl-1w"><span class="tl-time">1 Week</span><span class="tl-ids">T-003 · T-005</span><span class="tl-ids">T-006 · T-009 · T-013 · T-017</span></div>
+    <div class="tl-item tl-2w"><span class="tl-time">2 Weeks</span><span class="tl-ids">T-008 · T-010</span><span class="tl-ids">T-012 · T-014 · T-015 · T-016</span></div>
+  </div>
+</section>
+
+<hr>
+<h2 style="color:var(--crit);">&#x1F534; Critical Findings</h2>
+
+<!-- T-001 -->
+<div class="finding crit-card" id="T-001">
+  <div class="finding-meta">
+    <span class="badge crit">CRITICAL</span>
+    <span class="badge" style="background:rgba(255,68,68,.1);color:var(--crit);">T-001</span>
+    <span style="color:var(--mut);font-size:12px;">Secrets Management</span>
+    <span style="color:var(--mut);font-size:12px;">&#128196; .env &mdash; git remote config</span>
+  </div>
+  <h3>Live Credential Exposed in Repository Remote URL</h3>
+  <div class="frow"><span class="lbl">Description</span><span class="val">A live GitHub Personal Access Token was embedded in the git remote URL as a credential helper shortcut. While the remote URL itself was not committed as a file, git-filter-repo detected it in the repository's packed-refs and remote configuration. The token had broad repository access scope.</span></div>
+  <div class="frow"><span class="lbl">Evidence</span><span class="val">Remote URL format: <code>https://<span class="redacted">[REDACTED_TOKEN]</span>@github.com/[org]/[repo].git</code></span></div>
+  <div class="frow"><span class="lbl">NIST 800-53</span><span class="val"><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">IA-5 (Authenticator Management)</a> &middot; <a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">SC-28 (Protection of Information at Rest)</a></span></div>
+  <div class="frow"><span class="lbl">CISA Control</span><span class="val"><a href="https://www.cisa.gov/zero-trust-maturity-model" target="_blank">ZT Identity Pillar — Credential Management</a> &middot; <a href="https://www.cisecurity.org/controls/v8" target="_blank">CIS Control 16 (Application Software Security)</a></span></div>
+  <div class="frow"><span class="lbl">Status</span><span class="val"><span class="badge pending">Pending — PAT revocation scheduled 2026-04-03 post team debrief</span></span></div>
+  <div class="frow"><span class="lbl">Completed</span><span class="val"><span class="badge done">&#10003; Token removed from all 42 git commits via git-filter-repo (2026-04-02). Force-pushed to GitHub.</span></span></div>
+  <div class="frow"><span class="lbl">Remediation</span><span class="val">1. Revoke token at github.com/settings/tokens<br>2. Generate new fine-grained PAT with <em>repo-only</em> scope<br>3. Store in .env (gitignored) only — never embed in remote URL<br>4. Add <code>git-secrets</code> or <code>detect-secrets</code> pre-commit hook</span></div>
+  <div class="frow"><span class="lbl">Auditor evidence</span><span class="val">Token revocation log from GitHub &middot; New PAT scope screenshot &middot; pre-commit hook configuration &middot; git log showing clean remote URL</span></div>
+  <div class="frow"><span class="lbl">Timeline</span><span class="val"><span class="badge crit">Tonight / 2026-04-03 morning</span></span></div>
+</div>
+
+<!-- T-002 -->
+<div class="finding crit-card" id="T-002">
+  <div class="finding-meta">
+    <span class="badge crit">CRITICAL</span>
+    <span class="badge" style="background:rgba(255,68,68,.1);color:var(--crit);">T-002</span>
+    <span style="color:var(--mut);font-size:12px;">Authentication</span>
+    <span style="color:var(--mut);font-size:12px;">&#128196; src/ui/components/auth.py:87</span>
+  </div>
+  <h3>Plaintext Password Storage and Comparison</h3>
+  <div class="frow"><span class="lbl">Description</span><span class="val">Passwords stored in the <code>APP_USERS</code> Railway environment variable are compared using direct string equality (<code>==</code>). A <code>_hash()</code> function using SHA-256 exists in the file but is never called. Any party with access to Railway environment variables (team members, Railway support, dashboard screenshots) can read all passwords in cleartext. Additionally, example passwords appeared in source code comments in a public GitHub repository (now redacted).</span></div>
+  <div class="frow"><span class="lbl">Evidence</span><span class="val"><code>users[username]["password"] == password</code> at auth.py:87. Docstring example contained literal credentials <span class="redacted">[REDACTED]</span> — visible in public repo until 2026-04-02.</span></div>
+  <div class="frow"><span class="lbl">NIST 800-53</span><span class="val"><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">IA-5(1) — Password-Based Authentication (stored credentials must be salted and hashed)</a></span></div>
+  <div class="frow"><span class="lbl">CISA Control</span><span class="val"><a href="https://www.cisecurity.org/controls/v8" target="_blank">CIS Control 5 (Account Management)</a> &middot; <a href="https://www.cisa.gov/zero-trust-maturity-model" target="_blank">CISA ZT Identity Pillar</a></span></div>
+  <div class="frow"><span class="lbl">Status</span><span class="val"><span class="badge gap">Open — plaintext comparison still in code</span> &nbsp; <span class="badge done">&#10003; Source comments scrubbed from git history 2026-04-02</span></span></div>
+  <div class="frow"><span class="lbl">Remediation</span><span class="val">1. <code>pip install bcrypt</code><br>2. Pre-hash all passwords: <code>bcrypt.hashpw(pw.encode(), bcrypt.gensalt()).decode()</code><br>3. Store hashed values in APP_USERS Railway env var<br>4. Replace <code>==</code> comparison with <code>bcrypt.checkpw()</code><br>5. Rotate all three user passwords</span></div>
+  <div class="frow"><span class="lbl">Auditor evidence</span><span class="val">Code review showing bcrypt implementation &middot; Railway env var screenshot showing <code>$2b$12$...</code> hash format (not plaintext) &middot; Confirm no plaintext passwords in git history via <code>git log -p | grep -i password</code></span></div>
+  <div class="frow"><span class="lbl">Timeline</span><span class="val"><span class="badge high">48 hours</span></span></div>
+</div>
+
+<!-- T-004 -->
+<div class="finding crit-card" id="T-004">
+  <div class="finding-meta">
+    <span class="badge crit">CRITICAL</span>
+    <span class="badge" style="background:rgba(255,68,68,.1);color:var(--crit);">T-004</span>
+    <span style="color:var(--mut);font-size:12px;">Injection</span>
+    <span style="color:var(--mut);font-size:12px;">&#128196; src/rag/search.py:78-103</span>
+  </div>
+  <h3>SQL Injection via f-String Query Construction</h3>
+  <div class="frow"><span class="lbl">Description</span><span class="val">The <code>_semantic_search()</code> function builds SQL queries using Python f-string interpolation. The <code>os_filter</code> parameter is interpolated directly as a column name without server-side allowlist validation. While the Streamlit UI constrains values via a selectbox, Streamlit URL parameters and session state can be manipulated by a determined attacker to inject arbitrary SQL.</span></div>
+  <div class="frow"><span class="lbl">Evidence</span><span class="val"><code>conditions.append(f"{os_filter} != ''")</code> — column name injected directly.<br><code>conditions.append(f"tag = '{tag_filter}'")</code> — string value injected without parameterization.</span></div>
+  <div class="frow"><span class="lbl">OWASP</span><span class="val"><a href="https://owasp.org/Top10/A03_2021-Injection/" target="_blank">OWASP A03:2021 — Injection</a></span></div>
+  <div class="frow"><span class="lbl">NIST 800-53</span><span class="val"><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">SI-10 — Information Input Validation</a></span></div>
+  <div class="frow"><span class="lbl">Status</span><span class="val"><span class="badge gap">Open</span></span></div>
+  <div class="frow"><span class="lbl">Remediation</span><span class="val">1. Validate <code>os_filter</code> against <code>OS_COLUMNS</code> allowlist at function entry — raise <code>ValueError</code> if not in list<br>2. Validate <code>tag_filter</code> against <code>FUNCTIONAL_TAGS</code> allowlist<br>3. Use SQLAlchemy ORM column objects instead of raw <code>text()</code> with string interpolation<br>4. Run SAST scan (<code>bandit -r src/</code>) to catch remaining injection points</span></div>
+  <div class="frow"><span class="lbl">Auditor evidence</span><span class="val">SAST scan output showing zero SQL injection findings &middot; Code review showing parameterized queries &middot; Unit test demonstrating injection attempt is rejected</span></div>
+  <div class="frow"><span class="lbl">Timeline</span><span class="val"><span class="badge high">48 hours</span></span></div>
+</div>
+
+<hr>
+<h2 style="color:var(--high);">&#x1F7E0; High Findings</h2>
+
+<!-- T-003 -->
+<div class="finding high-card" id="T-003">
+  <div class="finding-meta"><span class="badge high">HIGH</span><span class="badge" style="background:rgba(255,136,0,.1);color:var(--high);">T-003</span><span style="color:var(--mut);font-size:12px;">Authentication &mdash; auth.py</span></div>
+  <h3>No Brute-Force Protection or Account Lockout</h3>
+  <div class="frow"><span class="lbl">NIST 800-53</span><span class="val"><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">AC-7 (Unsuccessful Logon Attempts)</a> &middot; AU-2 &middot; SI-4</span></div>
+  <div class="frow"><span class="lbl">Remediation</span><span class="val">Track failed attempts per username in session state with TTL. Lock after 5 failures for 15 minutes. Log all auth events.</span></div>
+  <div class="frow"><span class="lbl">Status / Timeline</span><span class="val"><span class="badge gap">Open</span> &nbsp; <span class="badge med">1 week</span></span></div>
+</div>
+
+<!-- T-005 -->
+<div class="finding high-card" id="T-005">
+  <div class="finding-meta"><span class="badge high">HIGH</span><span class="badge" style="background:rgba(255,136,0,.1);color:var(--high);">T-005</span><span style="color:var(--mut);font-size:12px;">Injection &mdash; pdf_extractor.py</span></div>
+  <h3>SQL Injection via Dynamic Column Name in PDF Extractor</h3>
+  <div class="frow"><span class="lbl">Evidence</span><span class="val"><code>text(f"UPDATE cli_mappings SET {os_col} = :cmd WHERE id = :id")</code> — <code>os_col</code> interpolated as column name.</span></div>
+  <div class="frow"><span class="lbl">NIST 800-53</span><span class="val"><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">SI-10 (Information Input Validation)</a></span></div>
+  <div class="frow"><span class="lbl">Remediation</span><span class="val">Validate <code>os_col</code> against <code>OS_COLUMNS</code> allowlist at every function entry point that uses it in SQL. Selectbox is not sufficient — server-side validation required.</span></div>
+  <div class="frow"><span class="lbl">Status / Timeline</span><span class="val"><span class="badge partial">Partial (selectbox limits UI, not server)</span> &nbsp; <span class="badge med">1 week</span></span></div>
+</div>
+
+<!-- T-006 -->
+<div class="finding high-card" id="T-006">
+  <div class="finding-meta"><span class="badge high">HIGH</span><span class="badge" style="background:rgba(255,136,0,.1);color:var(--high);">T-006</span><span style="color:var(--mut);font-size:12px;">SSRF &mdash; web_crawler.py</span></div>
+  <h3>Server-Side Request Forgery (SSRF) via Unrestricted Web Crawler</h3>
+  <div class="frow"><span class="lbl">Description</span><span class="val">The web crawler accepts any URL from authenticated users with no domain allowlist, no SSRF protection, and no block on cloud metadata endpoints (e.g., <code>169.254.169.254</code>). An authenticated user could use this to probe Railway's internal network or access cloud provider metadata.</span></div>
+  <div class="frow"><span class="lbl">OWASP</span><span class="val"><a href="https://owasp.org/Top10/A10_2021-Server-Side_Request_Forgery_%28SSRF%29/" target="_blank">OWASP A10:2021 — Server-Side Request Forgery</a></span></div>
+  <div class="frow"><span class="lbl">NIST 800-53</span><span class="val"><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">SC-7 (Boundary Protection)</a> &middot; SI-10</span></div>
+  <div class="frow"><span class="lbl">Remediation</span><span class="val">1. Domain allowlist: <code>*.cisco.com</code>, <code>*.extremenetworks.com</code>, <code>documentation.extremenetworks.com</code><br>2. Block RFC 1918 (10.x, 172.16-31.x, 192.168.x), 127.x, 169.254.x, ::1<br>3. Restrict crawler tab to admin/superadmin roles only</span></div>
+  <div class="frow"><span class="lbl">Status / Timeline</span><span class="val"><span class="badge gap">Open</span> &nbsp; <span class="badge med">1 week</span></span></div>
+</div>
+
+<!-- T-007 -->
+<div class="finding high-card" id="T-007">
+  <div class="finding-meta"><span class="badge high">HIGH</span><span class="badge" style="background:rgba(255,136,0,.1);color:var(--high);">T-007</span><span style="color:var(--mut);font-size:12px;">Web Security &mdash; .streamlit/config.toml</span></div>
+  <h3>CORS and XSRF Protection Explicitly Disabled</h3>
+  <div class="frow"><span class="lbl">Evidence</span><span class="val"><code>enableCORS = false</code> and <code>enableXsrfProtection = false</code> in <code>.streamlit/config.toml</code></span></div>
+  <div class="frow"><span class="lbl">NIST 800-53</span><span class="val"><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">SC-23 (Session Authenticity)</a> &middot; SI-3</span></div>
+  <div class="frow"><span class="lbl">Remediation</span><span class="val">Remove both lines or set to <code>true</code>. If cross-origin integration is needed, configure an explicit origin allowlist rather than disabling entirely.</span></div>
+  <div class="frow"><span class="lbl">Status / Timeline</span><span class="val"><span class="badge gap">Open</span> &nbsp; <span class="badge high">48 hours</span></span></div>
+</div>
+
+<!-- T-008 -->
+<div class="finding high-card" id="T-008">
+  <div class="finding-meta"><span class="badge high">HIGH</span><span class="badge" style="background:rgba(255,136,0,.1);color:var(--high);">T-008</span><span style="color:var(--mut);font-size:12px;">Session Management &mdash; auth.py</span></div>
+  <h3>No Session Expiry or Idle Timeout</h3>
+  <div class="frow"><span class="lbl">Description</span><span class="val">Authentication state is stored in <code>st.session_state</code> with no expiry. A session persists indefinitely — an unattended authenticated browser can be used by anyone.</span></div>
+  <div class="frow"><span class="lbl">NIST 800-53</span><span class="val"><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">AC-12 (Session Termination)</a> &middot; IA-11 (Re-authentication)</span></div>
+  <div class="frow"><span class="lbl">Remediation</span><span class="val">Store login timestamp in session state. Enforce 30-minute idle timeout and 8-hour absolute timeout. Re-authenticate for sensitive operations.</span></div>
+  <div class="frow"><span class="lbl">Status / Timeline</span><span class="val"><span class="badge gap">Open</span> &nbsp; <span class="badge med">2 weeks</span></span></div>
+</div>
+
+<!-- T-009 -->
+<div class="finding high-card" id="T-009">
+  <div class="finding-meta"><span class="badge high">HIGH</span><span class="badge" style="background:rgba(255,136,0,.1);color:var(--high);">T-009</span><span style="color:var(--mut);font-size:12px;">Access Control &mdash; data_ingest.py</span></div>
+  <h3>No Role-Based Access Control on Data Ingest</h3>
+  <div class="frow"><span class="lbl">Description</span><span class="val">The "Add Data" tab (PDF upload, CSV upload, web crawler) has no RBAC check. Any authenticated user — regardless of role — can insert data into the database and invoke the web crawler.</span></div>
+  <div class="frow"><span class="lbl">NIST 800-53</span><span class="val"><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">AC-3 (Access Enforcement)</a> &middot; AC-6 (Least Privilege)</span></div>
+  <div class="frow"><span class="lbl">Remediation</span><span class="val">Wrap <code>render_data_ingest()</code> with <code>is_admin()</code> check. Define role matrix: <code>user</code> = query only, <code>admin</code> = query + upload, <code>superadmin</code> = full access.</span></div>
+  <div class="frow"><span class="lbl">Status / Timeline</span><span class="val"><span class="badge gap">Open</span> &nbsp; <span class="badge med">1 week</span></span></div>
+</div>
+
+<!-- T-010 -->
+<div class="finding high-card" id="T-010">
+  <div class="finding-meta"><span class="badge high">HIGH</span><span class="badge" style="background:rgba(255,136,0,.1);color:var(--high);">T-010</span><span style="color:var(--mut);font-size:12px;">Audit Logging &mdash; all components</span></div>
+  <h3>No Security Event Logging or Audit Trail</h3>
+  <div class="frow"><span class="lbl">Description</span><span class="val">The application logs operational events but has no security-relevant logging: no login success/failure events, no data modification audit trail, no admin action log. There is no SIEM integration and no log integrity protection.</span></div>
+  <div class="frow"><span class="lbl">NIST 800-53</span><span class="val"><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">AU-2 (Event Logging)</a> &middot; AU-3 &middot; AU-6 &middot; AU-9</span></div>
+  <div class="frow"><span class="lbl">CISA</span><span class="val"><a href="https://www.cisecurity.org/controls/v8" target="_blank">CIS Control 8 (Audit Log Management)</a></span></div>
+  <div class="frow"><span class="lbl">Remediation</span><span class="val">1. Log all login attempts (success/failure) with timestamp, username, source IP<br>2. Log all data modifications (insert/update/delete) with username<br>3. Ship logs to Railway log drain or external SIEM<br>4. Implement append-only log integrity</span></div>
+  <div class="frow"><span class="lbl">Status / Timeline</span><span class="val"><span class="badge gap">Open</span> &nbsp; <span class="badge med">2 weeks</span></span></div>
+</div>
+
+<hr>
+<h2 style="color:var(--med);" id="medium">&#x1F7E1; Medium Findings</h2>
+
+<table>
+  <tr><th>ID</th><th>Finding</th><th>NIST 800-53</th><th>Status</th><th>Timeline</th></tr>
+  <tr>
+    <td id="T-011"><strong>T-011</strong></td>
+    <td>Passwords in public source code comments — <span class="redacted">[REDACTED]</span> visible in auth.py docstring</td>
+    <td><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">IA-5, SA-11</a></td>
+    <td><span class="badge done">&#10003; Scrubbed from all 42 commits 2026-04-02. Replace with CHANGE_ME placeholders.</span></td>
+    <td><span class="badge done">Done</span></td>
+  </tr>
+  <tr>
+    <td id="T-012"><strong>T-012</strong></td>
+    <td>pg_dump backup unencrypted and local-only (Mac). Single point of failure.</td>
+    <td><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">CP-9, SC-28, CP-6</a></td>
+    <td><span class="badge gap">Open</span> — encrypt with GPG/age; copy to cloud storage (iCloud/S3)</td>
+    <td><span class="badge med">2 weeks</span></td>
+  </tr>
+  <tr>
+    <td id="T-013"><strong>T-013</strong></td>
+    <td>PDF processing DoS — no file size limit (Streamlit default 200MB); <code>max_pages</code> defaults to 0 (unlimited)</td>
+    <td><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">SC-5, SI-10</a></td>
+    <td><span class="badge partial">Partial</span> — slider exists but default is unlimited</td>
+    <td><span class="badge med">1 week</span></td>
+  </tr>
+  <tr>
+    <td id="T-014"><strong>T-014</strong></td>
+    <td>HuggingFace embedding model downloaded at runtime — supply chain risk if model is poisoned</td>
+    <td><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">SA-12, SI-7</a></td>
+    <td><span class="badge gap">Open</span> — pin by commit hash; pre-bundle in container</td>
+    <td><span class="badge med">2 weeks</span></td>
+  </tr>
+  <tr>
+    <td id="T-015"><strong>T-015</strong></td>
+    <td>No dependency CVE scanning — no pip-audit, no Dependabot. torch, pdfplumber, psycopg2-binary unscanned.</td>
+    <td><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">RA-5, SI-2, SA-11</a></td>
+    <td><span class="badge gap">Open</span> — run <code>pip-audit</code>; add to CI</td>
+    <td><span class="badge med">2 weeks</span></td>
+  </tr>
+  <tr>
+    <td id="T-016"><strong>T-016</strong></td>
+    <td>Database TLS verification not enforced — <code>sslmode</code> not set in connection string</td>
+    <td><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">SC-8, SC-23</a></td>
+    <td><span class="badge partial">Partial</span> — Railway likely uses TLS but app does not verify</td>
+    <td><span class="badge med">2 weeks</span></td>
+  </tr>
+</table>
+
+<hr>
+<h2 style="color:var(--low);" id="low">&#x1F7E2; Low Findings</h2>
+
+<table>
+  <tr><th>ID</th><th>Finding</th><th>NIST 800-53</th><th>Remediation</th><th>Timeline</th></tr>
+  <tr>
+    <td id="T-017"><strong>T-017</strong></td>
+    <td>Potential stored XSS via <code>unsafe_allow_html=True</code> — username rendered in HTML without escaping</td>
+    <td><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">SI-10</a></td>
+    <td>Apply <code>html.escape()</code> on all dynamic values rendered in unsafe HTML context</td>
+    <td><span class="badge low">1 week</span></td>
+  </tr>
+  <tr>
+    <td id="T-018"><strong>T-018</strong></td>
+    <td>DB connection URL fragments (host:port/db) logged at INFO level — information disclosure</td>
+    <td><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">AU-3, SI-11</a></td>
+    <td>Log "Database initialized successfully" only — no URL components</td>
+    <td><span class="badge low">Low priority</span></td>
+  </tr>
+</table>
+
+<hr>
+
+<!-- AUDITOR GUIDE -->
+<section id="auditor">
+  <h2>Auditor Evidence Guide</h2>
+  <p>For each control, an auditor conducting a NIST RMF assessment will expect evidence in three categories:</p>
+  <table>
+    <tr><th>Evidence Type</th><th>What to Provide</th><th>Where to Find It</th></tr>
+    <tr><td><strong>Policy</strong></td><td>Written statement of the control (1–2 paragraphs). Does not need to be elaborate for an internal tool.</td><td>Draft a one-page Security Policy document referencing NIST 800-53 controls</td></tr>
+    <tr><td><strong>Technical</strong></td><td>Code/configuration showing the control is implemented</td><td>GitHub repo links, Railway config screenshots, <code>bandit</code>/<code>pip-audit</code> scan outputs</td></tr>
+    <tr><td><strong>Operational</strong></td><td>Runtime evidence — logs, screenshots, test results showing the control works</td><td>Railway log drain exports, test run results, screenshots of login lockout behavior</td></tr>
+  </table>
+
+  <h3>Compliance Statement (suggested language for auditor)</h3>
+  <div class="box">
+    <p><em>"This application is classified as an internal SE team productivity tool handling non-classified network CLI reference data. It does not process PII, financial data, classified, or CUI information. Security controls are implemented in accordance with NIST SP 800-53 Rev 5 moderate baseline. Identified deviations are documented in the accompanying threat assessment (v1.0, 2026-04-02) with remediation timelines assigned. The application is authorized for controlled internal use pending resolution of Critical and High findings."</em></p>
+  </div>
+
+  <h3>Recommended Tools for Evidence Generation</h3>
+  <table>
+    <tr><th>Tool</th><th>Purpose</th><th>Command</th></tr>
+    <tr><td><a href="https://bandit.readthedocs.io/" target="_blank">bandit</a></td><td>Python SAST — finds injection, hardcoded secrets, insecure functions</td><td><code>pip install bandit &amp;&amp; bandit -r src/ -f html -o bandit_report.html</code></td></tr>
+    <tr><td><a href="https://pypi.org/project/pip-audit/" target="_blank">pip-audit</a></td><td>Dependency CVE scanning</td><td><code>pip install pip-audit &amp;&amp; pip-audit</code></td></tr>
+    <tr><td><a href="https://github.com/Yelp/detect-secrets" target="_blank">detect-secrets</a></td><td>Pre-commit hook to prevent secret commits</td><td><code>pip install detect-secrets &amp;&amp; detect-secrets scan</code></td></tr>
+    <tr><td><a href="https://github.com/trufflesecurity/trufflehog" target="_blank">trufflehog</a></td><td>Git history secret scanner</td><td><code>trufflehog git file://.</code></td></tr>
+    <tr><td><a href="https://owasp.org/www-project-zap/" target="_blank">OWASP ZAP</a></td><td>Dynamic web application scanning</td><td>Point at Railway URL — run active scan</td></tr>
+  </table>
+</section>
+
+<!-- STATUS TRACKER -->
+<section id="status">
+  <h2>Remediation Status Tracker</h2>
+  <table>
+    <tr><th>ID</th><th>Finding</th><th>Severity</th><th>Owner</th><th>Target Date</th><th>Status</th></tr>
+    <tr><td>T-001</td><td>Revoke GitHub PAT</td><td><span class="badge crit">Critical</span></td><td>Khursheed</td><td>2026-04-03</td><td><span class="badge pending">Pending</span></td></tr>
+    <tr><td>T-002</td><td>Implement bcrypt password hashing</td><td><span class="badge crit">Critical</span></td><td>Dev</td><td>2026-04-04</td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>T-004</td><td>Parameterize SQL queries + allowlist</td><td><span class="badge crit">Critical</span></td><td>Dev</td><td>2026-04-04</td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>T-007</td><td>Re-enable CORS + XSRF in config.toml</td><td><span class="badge high">High</span></td><td>Dev</td><td>2026-04-04</td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>T-011</td><td>Remove plaintext passwords from source comments</td><td><span class="badge med">Medium</span></td><td>Dev</td><td>2026-04-02</td><td><span class="badge done">&#10003; Done</span></td></tr>
+    <tr><td>T-003</td><td>Brute-force / account lockout</td><td><span class="badge high">High</span></td><td>Dev</td><td>2026-04-09</td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>T-005</td><td>os_col server-side allowlist validation</td><td><span class="badge high">High</span></td><td>Dev</td><td>2026-04-09</td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>T-006</td><td>SSRF — crawler domain allowlist</td><td><span class="badge high">High</span></td><td>Dev</td><td>2026-04-09</td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>T-009</td><td>RBAC on data ingest tab</td><td><span class="badge high">High</span></td><td>Dev</td><td>2026-04-09</td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>T-013</td><td>PDF file size + page limits</td><td><span class="badge med">Medium</span></td><td>Dev</td><td>2026-04-09</td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>T-017</td><td>html.escape() on username in HTML</td><td><span class="badge low">Low</span></td><td>Dev</td><td>2026-04-09</td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>T-008</td><td>Session expiry + idle timeout</td><td><span class="badge high">High</span></td><td>Dev</td><td>2026-04-16</td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>T-010</td><td>Security audit logging</td><td><span class="badge high">High</span></td><td>Dev</td><td>2026-04-16</td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>T-012</td><td>Encrypted offsite backup</td><td><span class="badge med">Medium</span></td><td>Khursheed</td><td>2026-04-16</td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>T-014</td><td>Pin HuggingFace model by hash</td><td><span class="badge med">Medium</span></td><td>Dev</td><td>2026-04-16</td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>T-015</td><td>pip-audit + Dependabot in CI</td><td><span class="badge med">Medium</span></td><td>Dev</td><td>2026-04-16</td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>T-016</td><td>sslmode=verify-full on DB connection</td><td><span class="badge med">Medium</span></td><td>Dev</td><td>2026-04-16</td><td><span class="badge gap">Open</span></td></tr>
+    <tr><td>T-018</td><td>Remove DB URL from logs</td><td><span class="badge low">Low</span></td><td>Dev</td><td>Backlog</td><td><span class="badge gap">Open</span></td></tr>
+  </table>
+</section>
+
+<!-- REFERENCES -->
+<section id="references">
+  <h2>References &amp; Source Documents</h2>
+  <h3>Regulatory &amp; Framework References</h3>
+  <table>
+    <tr><th>Document</th><th>Relevance</th><th>Link</th></tr>
+    <tr><td>NIST SP 800-53 Rev 5</td><td>Primary control catalogue — all findings mapped here</td><td><a href="https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final" target="_blank">csrc.nist.gov</a></td></tr>
+    <tr><td>NIST SP 800-37 Rev 2</td><td>RMF — Categorize, Select, Implement, Assess, Authorize, Monitor</td><td><a href="https://csrc.nist.gov/publications/detail/sp/800-37/rev-2/final" target="_blank">csrc.nist.gov</a></td></tr>
+    <tr><td>NIST SP 800-63B</td><td>Digital identity guidelines — password hashing, MFA requirements</td><td><a href="https://pages.nist.gov/800-63-3/sp800-63b.html" target="_blank">pages.nist.gov</a></td></tr>
+    <tr><td>CISA Zero Trust Maturity Model v2</td><td>Identity, Device, Network, Application, Data pillars</td><td><a href="https://www.cisa.gov/zero-trust-maturity-model" target="_blank">cisa.gov</a></td></tr>
+    <tr><td>CISA Known Exploited Vulnerabilities Catalog</td><td>Check dependencies against active exploits</td><td><a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" target="_blank">cisa.gov/kev</a></td></tr>
+    <tr><td>DoD RMF (DoDI 8510.01)</td><td>DoD implementation of NIST RMF</td><td><a href="https://dodcio.defense.gov/RMF/" target="_blank">dodcio.defense.gov</a></td></tr>
+    <tr><td>CIS Controls v8</td><td>Prioritized security controls — IG1 minimum baseline</td><td><a href="https://www.cisecurity.org/controls/v8" target="_blank">cisecurity.org</a></td></tr>
+    <tr><td>OWASP Top 10 2021</td><td>Web application vulnerability classes</td><td><a href="https://owasp.org/Top10/" target="_blank">owasp.org</a></td></tr>
+    <tr><td>OWASP A03:2021 Injection</td><td>SQL injection — T-004, T-005</td><td><a href="https://owasp.org/Top10/A03_2021-Injection/" target="_blank">owasp.org</a></td></tr>
+    <tr><td>OWASP A10:2021 SSRF</td><td>Server-side request forgery — T-006</td><td><a href="https://owasp.org/Top10/A10_2021-Server-Side_Request_Forgery_%28SSRF%29/" target="_blank">owasp.org</a></td></tr>
+    <tr><td>OWASP Authentication Cheat Sheet</td><td>Brute-force protection, session management — T-002, T-003, T-008</td><td><a href="https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html" target="_blank">owasp.org</a></td></tr>
+  </table>
+
+  <h3>Application Source Files Assessed</h3>
+  <table>
+    <tr><th>File</th><th>Findings</th><th>GitHub Link</th></tr>
+    <tr><td>src/ui/components/auth.py</td><td>T-002, T-003, T-008, T-011, T-017</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/ui/components/auth.py" target="_blank">View on GitHub</a></td></tr>
+    <tr><td>src/rag/search.py</td><td>T-004</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/rag/search.py" target="_blank">View on GitHub</a></td></tr>
+    <tr><td>src/extractors/pdf_extractor.py</td><td>T-005, T-013</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/extractors/pdf_extractor.py" target="_blank">View on GitHub</a></td></tr>
+    <tr><td>src/extractors/web_crawler.py</td><td>T-006</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/extractors/web_crawler.py" target="_blank">View on GitHub</a></td></tr>
+    <tr><td>src/ui/components/data_ingest.py</td><td>T-009, T-013</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/ui/components/data_ingest.py" target="_blank">View on GitHub</a></td></tr>
+    <tr><td>src/database/connection.py</td><td>T-016, T-018</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/database/connection.py" target="_blank">View on GitHub</a></td></tr>
+    <tr><td>src/ui/app.py</td><td>T-017</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/src/ui/app.py" target="_blank">View on GitHub</a></td></tr>
+    <tr><td>.streamlit/config.toml</td><td>T-007</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/.streamlit/config.toml" target="_blank">View on GitHub</a></td></tr>
+    <tr><td>requirements.txt</td><td>T-014, T-015</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/requirements.txt" target="_blank">View on GitHub</a></td></tr>
+  </table>
+
+  <hr>
+  <p style="font-size:12px;color:var(--mut);text-align:center;">
+    CISCO-EN CLI Mapping Agent &mdash; Tier-1 Security Assessment v1.0 &mdash; April 2, 2026<br>
+    Prepared by Khursheed Khan &middot; Extreme Networks SA Team &middot; For internal use and audit purposes only<br>
+    All credentials, tokens, and hostnames redacted. &copy; 2026 Khursheed Khan. All rights reserved.
+  </p>
+</section>
+
+</main>
+</div>
+
+<script>
+var currentObserver = null;
+function setupObserver() {
+  if (currentObserver) currentObserver.disconnect();
+  var sections = document.querySelectorAll('section[id], div[id^="T-"]');
+  var navLinks = document.querySelectorAll('nav a');
+  currentObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(x) {
+      if (x.isIntersecting) {
+        navLinks.forEach(function(l){ l.classList.remove('active'); });
+        var a = document.querySelector('nav a[href="#' + x.target.id + '"]');
+        if (a) a.classList.add('active');
+      }
+    });
+  }, {threshold: 0.2, rootMargin: '-49px 0px 0px 0px'});
+  sections.forEach(function(s){ currentObserver.observe(s); });
+}
+setupObserver();
+</script>
+</body>
+</html>
