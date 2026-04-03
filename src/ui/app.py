@@ -16,6 +16,7 @@ from src.ui.components.query_box import render_query_box
 from src.ui.components.bin_tabs import render_bin_tab
 from src.ui.components.db_browser import render_db_browser
 from src.ui.components.e2e_wizard import render_e2e_wizard
+from src.ui.components.config_translator import render_config_translator
 from src.ui.components.rag_settings import init_rag_settings, render_rag_settings_panel
 from src.ui.components.data_ingest import render_data_ingest
 from src.ui.components.auth import render_login_gate, render_user_badge
@@ -146,7 +147,7 @@ st.markdown("*The New Rosetta Stone — Translate CLI commands across 6 network 
 
 # Top-level tabs
 tab_labels = (
-    ["🤖 AI Query", "🏗️ E2E Design Wizard"]
+    ["🤖 AI Query", "⚙️ Config Translator", "🏗️ E2E Design Wizard"]
     + [f"{TAG_LABELS[t]} {t}" for t in FUNCTIONAL_TAGS]
     + ["🗄️ DB Browser", "📥 Add Data"]
 )
@@ -156,13 +157,17 @@ top_tabs = st.tabs(tab_labels)
 with top_tabs[0]:
     render_query_box()
 
-# Tab 1 — E2E Design Wizard (Lead Agent / SBA)
+# Tab 1 — Config Translator (E2E blueprint translation)
 with top_tabs[1]:
+    render_config_translator()
+
+# Tab 2 — E2E Design Wizard (Lead Agent / SBA)
+with top_tabs[2]:
     render_e2e_wizard()
 
-# Tabs 2-10 — Functional Bins
+# Tabs 3-11 — Functional Bins
 for i, tag in enumerate(FUNCTIONAL_TAGS):
-    with top_tabs[i + 2]:
+    with top_tabs[i + 3]:
         render_bin_tab(tag)
 
 # Tab 11 — DB Browser
