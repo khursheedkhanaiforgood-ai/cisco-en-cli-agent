@@ -147,13 +147,32 @@ def _render_db_overview():
 
     # Search
     st.subheader("Search All Mappings")
+    st.markdown("""
+<div style='display:flex;gap:10px;margin:8px 0;flex-wrap:wrap;'>
+  <div style='background:#1c1c35;border:1px solid #7b2fff;border-radius:6px;
+              padding:6px 12px;font-size:12px;color:#c9d1d9;'>
+    <span style='color:#a78bfa;font-weight:700;'>▶ Step 1</span> &nbsp; Type a keyword or intent phrase
+  </div>
+  <div style='background:#1c2535;border:1px solid #3b82f6;border-radius:6px;
+              padding:6px 12px;font-size:12px;color:#c9d1d9;'>
+    <span style='color:#60a5fa;font-weight:700;'>▼ Step 2</span> &nbsp; Filter by functional bin (optional)
+  </div>
+  <div style='background:#1c2520;border:1px solid #22c55e;border-radius:6px;
+              padding:6px 12px;font-size:12px;color:#c9d1d9;'>
+    <span style='color:#4ade80;font-weight:700;'># Step 3</span> &nbsp; Set result limit — results appear instantly
+  </div>
+</div>
+""", unsafe_allow_html=True)
     col1, col2, col3 = st.columns([3, 1, 1])
     with col1:
-        search = st.text_input("Search", placeholder="keyword or intent...", label_visibility="collapsed")
+        st.markdown("<div style='font-size:12px;color:#a78bfa;font-weight:600;margin-bottom:4px;'>▶ Search keyword or intent</div>", unsafe_allow_html=True)
+        search = st.text_input("Search", placeholder="e.g. ospf, vlan trunk, port security ...", label_visibility="collapsed")
     with col2:
+        st.markdown("<div style='font-size:12px;color:#60a5fa;font-weight:600;margin-bottom:4px;'>▼ Bin filter</div>", unsafe_allow_html=True)
         from src.config import FUNCTIONAL_TAGS
         tag_filter = st.selectbox("Tag", ["All"] + FUNCTIONAL_TAGS, label_visibility="collapsed")
     with col3:
+        st.markdown("<div style='font-size:12px;color:#4ade80;font-weight:600;margin-bottom:4px;'># Max rows</div>", unsafe_allow_html=True)
         limit = st.selectbox("Limit", [50, 100, 200, 500], label_visibility="collapsed")
 
     if search:

@@ -10,8 +10,8 @@ def render_query_box():
         "across all 6 operating systems and explain the key differences."
     )
 
-    # ── Team User Guide (landing card) ───────────────────────────────────────
-    with st.expander("📖 Quick User Guide — Read Before You Start", expanded=True):
+    # ── Team User Guide (collapsed by default so input is visible immediately)
+    with st.expander("📖 Quick User Guide — Read Before You Start", expanded=False):
         st.markdown("""
 > ✏️ *User guide content coming soon — Khursheed will provide the writeup.*
 >
@@ -26,10 +26,35 @@ def render_query_box():
 > 🔹 **How to request new commands or report issues**
 > _(Channel, contact, feedback process)_
         """)
-    # ─────────────────────────────────────────────────────────────────────────
 
-    # Query input
-    col1, col2, col3 = st.columns([5, 1, 1])
+    # ── Step instructions ─────────────────────────────────────────────────────
+    st.markdown("""
+<div style='display:flex;gap:12px;margin:14px 0 8px 0;flex-wrap:wrap;'>
+  <div style='background:#1c1c35;border:1px solid #7b2fff;border-radius:6px;
+              padding:8px 14px;font-size:13px;color:#c9d1d9;flex:1;min-width:160px;'>
+    <span style='color:#a78bfa;font-weight:700;'>Step 1 &nbsp;💬</span><br>
+    Type your CLI question in plain English
+  </div>
+  <div style='background:#1c2535;border:1px solid #3b82f6;border-radius:6px;
+              padding:8px 14px;font-size:13px;color:#c9d1d9;flex:1;min-width:160px;'>
+    <span style='color:#60a5fa;font-weight:700;'>Step 2 &nbsp;🖥</span><br>
+    Optionally filter to one OS platform
+  </div>
+  <div style='background:#1c2520;border:1px solid #22c55e;border-radius:6px;
+              padding:8px 14px;font-size:13px;color:#c9d1d9;flex:1;min-width:160px;'>
+    <span style='color:#4ade80;font-weight:700;'>Step 3 &nbsp;🔍</span><br>
+    Click <strong>Search</strong> — results appear below
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+    # ── Query input row ───────────────────────────────────────────────────────
+    st.markdown(
+        "<div style='font-size:12px;color:#a78bfa;font-weight:600;"
+        "margin-bottom:4px;'>▶ Your question</div>",
+        unsafe_allow_html=True,
+    )
+    col1, col2, col3 = st.columns([5, 2, 2])
     with col1:
         user_query = st.text_input(
             "Your question",
@@ -37,12 +62,19 @@ def render_query_box():
             label_visibility="collapsed",
         )
     with col2:
+        st.markdown(
+            "<div style='font-size:12px;color:#60a5fa;font-weight:600;"
+            "margin-bottom:4px;'>▼ OS filter (optional)</div>",
+            unsafe_allow_html=True,
+        )
         os_filter = st.selectbox(
             "OS filter",
-            options=["All", "cisco_ios", "cisco_iosxe", "cisco_nxos", "extreme_exos", "extreme_voss", "extreme_slxos"],
+            options=["All OSes", "cisco_ios", "cisco_iosxe", "cisco_nxos",
+                     "extreme_exos", "extreme_voss", "extreme_slxos"],
             label_visibility="collapsed",
         )
     with col3:
+        st.markdown("<div style='margin-top:22px;'></div>", unsafe_allow_html=True)
         run = st.button("🔍 Search", use_container_width=True, type="primary")
 
     # Tag override (advanced)
@@ -55,7 +87,7 @@ def render_query_box():
     if run and user_query:
         _run_query(
             query=user_query,
-            os_filter=None if os_filter == "All" else os_filter,
+            os_filter=None if os_filter == "All OSes" else os_filter,
             tag_filter=None if tag_choice == "Auto-detect" else tag_choice,
         )
     elif run:

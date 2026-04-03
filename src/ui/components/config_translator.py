@@ -184,6 +184,7 @@ def render_config_translator():
     # ════════════════════════════════════════════════════════════════
     st.markdown("---")
     st.markdown("### 1. Select OS Pair")
+    st.caption("▼ Choose the source (Cisco) OS you are migrating FROM, and the Extreme target OS you are migrating TO.")
 
     col_src, col_arrow, col_tgt = st.columns([5, 1, 5])
 
@@ -237,6 +238,22 @@ def render_config_translator():
     # ════════════════════════════════════════════════════════════════
     st.markdown("---")
     st.markdown("### 2. Upload or Paste Configuration")
+    st.markdown("""
+<div style='display:flex;gap:10px;margin:8px 0 14px 0;flex-wrap:wrap;'>
+  <div style='background:#1c2520;border:1px solid #22c55e;border-radius:6px;
+              padding:6px 12px;font-size:12px;color:#c9d1d9;'>
+    <span style='color:#4ade80;font-weight:700;'>📂 Option A</span> &nbsp; Drag &amp; drop or browse a <code>.cfg .txt .conf .docx</code> file
+  </div>
+  <div style='background:#1c1c35;border:1px solid #7b2fff;border-radius:6px;
+              padding:6px 12px;font-size:12px;color:#c9d1d9;'>
+    <span style='color:#a78bfa;font-weight:700;'>▶ Option B</span> &nbsp; Switch to the <strong>Paste Config</strong> tab and paste CLI text directly
+  </div>
+  <div style='background:#1c2535;border:1px solid #3b82f6;border-radius:6px;
+              padding:6px 12px;font-size:12px;color:#c9d1d9;'>
+    <span style='color:#60a5fa;font-weight:700;'>🔍 Then</span> &nbsp; Click <strong>Analyse Config</strong> — translation button appears below
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
     tab_upload, tab_paste = st.tabs(["📂 Upload File (drag & drop)", "📋 Paste Config"])
 
