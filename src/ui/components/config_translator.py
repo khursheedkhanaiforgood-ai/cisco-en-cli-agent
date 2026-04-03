@@ -542,19 +542,35 @@ padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:24px;fl
         # ── PRIMARY VIEW: Cisco | EXOS side-by-side ──────────────
         st.markdown("---")
         st.markdown("### 6. Cisco → EXOS")
+
+        # Build CLI-only Cisco view (strips prose/narrative from the raw upload)
+        _cisco_cli = "\n\n".join(
+            sec.raw_text for sec in pr.sections
+            if sec.section_type not in ("prose", "comment") and sec.raw_text.strip()
+        )
+        _cisco_lines = len(_cisco_cli.splitlines())
+        _exos_lines  = len(result.clean_script.splitlines())
         st.caption(
-            "Left: original Cisco config · Right: translated ExtremeXOS commands. "
-            "Expand **Annotated Detail** below for caveats, verification badges, and section-by-section diff."
+            f"Left: Cisco CLI commands only (prose stripped) · {_cisco_lines} lines  |  "
+            f"Right: ExtremeXOS commands · {_exos_lines} lines  ·  "
+            f"EXOS is longer because flat syntax requires one command per VLAN per port "
+            f"and explicit `enable` statements Cisco handles implicitly."
         )
 
         cisco_col, exos_col = st.columns(2)
         with cisco_col:
             st.markdown(
                 "<div style='font-size:12px;font-weight:600;color:#8b949e;"
-                "margin-bottom:4px;'>🔵 Original (Cisco)</div>",
+                "margin-bottom:4px;'>🔵 Original (Cisco — CLI only)</div>",
                 unsafe_allow_html=True,
             )
-            st.code(st.session_state[_SK_RAW], language="text")
+            st.markdown(
+                f"<pre style='background:#161b22;border:1px solid #30363d;border-radius:6px;"
+                f"padding:12px;font-size:12px;color:#c9d1d9;font-family:SF Mono,Consolas,monospace;"
+                f"max-height:600px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;'>"
+                f"{_cisco_cli}</pre>",
+                unsafe_allow_html=True,
+            )
 
         with exos_col:
             st.markdown(
@@ -562,7 +578,13 @@ padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:24px;fl
                 f"margin-bottom:4px;'>🟢 Translated ({tgt_info['version']})</div>",
                 unsafe_allow_html=True,
             )
-            st.code(result.clean_script, language="text")
+            st.markdown(
+                f"<pre style='background:#0d2818;border:1px solid #2ea043;border-radius:6px;"
+                f"padding:12px;font-size:12px;color:#aff5b4;font-family:SF Mono,Consolas,monospace;"
+                f"max-height:600px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;'>"
+                f"{result.clean_script}</pre>",
+                unsafe_allow_html=True,
+            )
 
         # ── Annotated detail (collapsed) ─────────────────────────
         with st.expander("📋 Annotated Detail — caveats, no-equivalents & section diff", expanded=False):
@@ -623,43 +645,89 @@ padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:24px;fl
                 ) if after_topo_nodes else "(topology not parseable from EXOS output)"
                 st.code(after_topo, language=None)
 
-        # ── Intent Verification ───────────────────────────────────
+        # ── Intent Verification + Confidence Calculator ───────────
         if verify_list:
             st.markdown("---")
-            st.markdown("### 8. Intent Verification")
+            st.markdown("### 8. Confidence Calculator")
+            st.caption(
+                "Shows exactly what went into the score: "
+                "Overall = Σ(weight × score) / Σ(weight).  "
+                "Adjust weights and threshold in the **🎯 Translation Quality** sidebar panel."
+            )
 
             for vr, im in zip(verify_list, intent_maps):
                 conf_col = _confidence_colour(vr.overall_confidence)
-                pass_icon = "✅" if vr.pass_threshold else "⚠"
+                pass_icon = "✅ PASS" if vr.pass_threshold else "⚠ REVIEW"
+                threshold = vr.calibration.get("confidence_threshold", 70)
+                total_w   = sum(s.weight for s in vr.scores) or 1
+                weighted_sum = sum(s.weight * s.confidence for s in vr.scores)
+
                 st.markdown(
-                    f"**Device: {vr.device_name}** &nbsp; "
-                    f"<span style='font-size:20px;font-weight:700;color:{conf_col};'>"
-                    f"{vr.overall_confidence:.0f}%</span> &nbsp; "
-                    f"{pass_icon} {'PASS' if vr.pass_threshold else 'REVIEW REQUIRED'} "
-                    f"(threshold: {vr.calibration['confidence_threshold']}%)",
+                    f"**Device: {vr.device_name}**",
                     unsafe_allow_html=True,
                 )
 
-                # Intent table
-                table_rows = []
-                for score in vr.scores:
-                    icon = {
-                        "preserved": "✅", "review": "⚠",
-                        "partial": "⚠", "failed": "❌",
-                    }.get(score.status, "?")
-                    conf_c = _confidence_colour(score.confidence)
-                    table_rows.append(
-                        f"| {score.intent.id} | {score.intent.category} | "
-                        f"<span style='color:{conf_c};font-weight:600'>{score.confidence:.0f}%</span> | "
-                        f"{icon} {score.status.title()} | {score.note} |"
-                    )
-                if table_rows:
-                    st.markdown(
-                        "| ID | Category | Confidence | Status | Note |\n"
-                        "|----|----|----|----|----|\n" +
-                        "\n".join(table_rows),
-                        unsafe_allow_html=True,
-                    )
+                # ── Calculator table ──────────────────────────────
+                rows_html = []
+                for s in vr.scores:
+                    icon = {"preserved": "✅", "review": "⚠", "partial": "⚠", "failed": "❌"}.get(s.status, "?")
+                    c    = _confidence_colour(s.confidence)
+                    contrib = round(s.weight * s.confidence, 1)
+                    bar_w   = int(s.confidence)
+                    bar_col = c
+                    rows_html.append(f"""
+<tr>
+  <td style='padding:5px 8px;color:#8b949e;font-size:12px;white-space:nowrap;'>{s.intent.id}</td>
+  <td style='padding:5px 8px;color:#c9d1d9;font-size:12px;'>{s.intent.category}</td>
+  <td style='padding:5px 8px;color:#8b949e;font-size:12px;text-align:center;'>{s.weight:.1f}</td>
+  <td style='padding:5px 8px;'>
+    <div style='display:flex;align-items:center;gap:6px;'>
+      <div style='width:80px;background:#21262d;border-radius:3px;height:8px;'>
+        <div style='width:{bar_w}%;background:{bar_col};height:8px;border-radius:3px;'></div>
+      </div>
+      <span style='color:{c};font-weight:700;font-size:12px;'>{s.confidence:.0f}%</span>
+    </div>
+  </td>
+  <td style='padding:5px 8px;text-align:center;font-size:13px;'>{icon} <span style='font-size:11px;color:#8b949e;'>{s.status}</span></td>
+  <td style='padding:5px 8px;color:#8b949e;font-size:11px;'>{contrib:.1f} / {s.weight * 100:.0f}</td>
+  <td style='padding:5px 8px;color:#8b949e;font-size:11px;'>{s.note}</td>
+</tr>""")
+
+                # Totals row
+                rows_html.append(f"""
+<tr style='border-top:2px solid #30363d;'>
+  <td colspan='2' style='padding:6px 8px;color:#c9d1d9;font-size:12px;font-weight:700;'>TOTAL</td>
+  <td style='padding:6px 8px;color:#c9d1d9;font-size:12px;text-align:center;font-weight:700;'>{total_w:.1f}</td>
+  <td style='padding:6px 8px;'>
+    <div style='display:flex;align-items:center;gap:6px;'>
+      <div style='width:80px;background:#21262d;border-radius:3px;height:8px;'>
+        <div style='width:{int(vr.overall_confidence)}%;background:{conf_col};height:8px;border-radius:3px;'></div>
+      </div>
+      <span style='color:{conf_col};font-weight:800;font-size:14px;'>{vr.overall_confidence:.0f}%</span>
+    </div>
+  </td>
+  <td style='padding:6px 8px;text-align:center;font-size:13px;font-weight:700;color:{conf_col};'>{pass_icon}</td>
+  <td style='padding:6px 8px;color:#8b949e;font-size:11px;'>{weighted_sum:.1f} / {total_w * 100:.0f} &nbsp;·&nbsp; threshold {threshold}%</td>
+  <td style='padding:6px 8px;color:#8b949e;font-size:11px;'>Σ(w×score)/Σ(w)</td>
+</tr>""")
+
+                st.markdown(f"""
+<div style='overflow-x:auto;margin-bottom:16px;'>
+<table style='width:100%;border-collapse:collapse;background:#0d1117;border:1px solid #30363d;border-radius:6px;'>
+  <thead>
+    <tr style='background:#161b22;'>
+      <th style='padding:6px 8px;color:#8b949e;font-size:11px;text-align:left;font-weight:600;'>ID</th>
+      <th style='padding:6px 8px;color:#8b949e;font-size:11px;text-align:left;font-weight:600;'>Category</th>
+      <th style='padding:6px 8px;color:#8b949e;font-size:11px;text-align:center;font-weight:600;'>Weight</th>
+      <th style='padding:6px 8px;color:#8b949e;font-size:11px;text-align:left;font-weight:600;'>Score</th>
+      <th style='padding:6px 8px;color:#8b949e;font-size:11px;text-align:center;font-weight:600;'>Status</th>
+      <th style='padding:6px 8px;color:#8b949e;font-size:11px;text-align:left;font-weight:600;'>Contribution</th>
+      <th style='padding:6px 8px;color:#8b949e;font-size:11px;text-align:left;font-weight:600;'>Note</th>
+    </tr>
+  </thead>
+  <tbody>{''.join(rows_html)}</tbody>
+</table>
+</div>""", unsafe_allow_html=True)
 
             # ── Re-verify with updated sidebar settings ───────────
             st.caption(
