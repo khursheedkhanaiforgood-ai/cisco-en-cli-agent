@@ -7,12 +7,44 @@
 <style>
 :root{--bg:#0d1117;--sur:#161b22;--brd:#30363d;--acc:#58a6ff;--grn:#3fb950;--yel:#d29922;--red:#f85149;--pur:#bc8cff;--txt:#e6edf3;--mut:#8b949e;--cod:#1f2937;--crit:#ff4444;--high:#ff8800;--med:#d29922;--low:#3fb950;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;flex-direction:column;min-height:100vh;}
-.topbar{background:#1a0a0a;border-bottom:2px solid var(--crit);padding:10px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-.topbar-title{color:var(--crit);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;flex-direction:column;min-height:100vh;padding-bottom:44px;}
+
+/* ── Password gate overlay ─────────────────────────────────────────── */
+#gate{position:fixed;inset:0;background:#0d1117;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+#gate.hidden{display:none;}
+.gate-box{background:#161b22;border:2px solid var(--crit);border-radius:10px;padding:40px 48px;text-align:center;max-width:400px;width:90%;}
+.gate-stamp{border:2px solid var(--crit);border-radius:4px;display:inline-block;padding:6px 20px;margin-bottom:22px;}
+.gate-stamp .gs-main{font-size:16px;font-weight:700;color:var(--crit);letter-spacing:1.5px;text-transform:uppercase;}
+.gate-stamp .gs-sub{font-size:10px;color:var(--mut);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.gate-box h2{color:#e6edf3;font-size:16px;margin-bottom:6px;}
+.gate-box p{color:var(--mut);font-size:12px;margin-bottom:24px;}
+.gate-box input{width:100%;background:#0d1117;border:1px solid var(--brd);border-radius:6px;color:#e6edf3;font-size:14px;padding:9px 12px;margin-bottom:12px;outline:none;}
+.gate-box input:focus{border-color:var(--acc);}
+.gate-btn{width:100%;background:var(--crit);color:#fff;border:none;border-radius:6px;padding:10px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.5px;}
+.gate-btn:hover{background:#cc3333;}
+.gate-err{color:var(--crit);font-size:12px;margin-top:10px;min-height:18px;}
+.gate-notice{color:var(--mut);font-size:10px;margin-top:18px;line-height:1.6;border-top:1px solid var(--brd);padding-top:14px;}
+
+/* ── Classification banner (top, sticky) ───────────────────────────── */
+.classbar{background:#1a0000;border-bottom:3px solid var(--crit);padding:7px 20px;position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.classbar-center{flex:1;text-align:center;}
+.classbar-main{color:var(--crit);font-size:13px;font-weight:800;letter-spacing:2px;text-transform:uppercase;}
+.classbar-restrict{color:#ff9999;font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;margin-top:2px;}
+.classbar-side{color:var(--mut);font-size:10px;white-space:nowrap;text-align:right;}
+.classbar-icon{color:var(--crit);font-size:16px;flex-shrink:0;}
+
+/* ── Classification strip (bottom, fixed) ──────────────────────────── */
+.classbar-bottom{position:fixed;bottom:0;left:0;right:0;z-index:200;background:#1a0000;border-top:3px solid var(--crit);padding:5px 20px;display:flex;align-items:center;justify-content:space-between;}
+.classbar-bottom .cb-left{color:var(--crit);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+.classbar-bottom .cb-center{color:#ff9999;font-size:10px;font-weight:600;text-align:center;flex:1;letter-spacing:.8px;text-transform:uppercase;}
+.classbar-bottom .cb-right{color:var(--mut);font-size:10px;text-align:right;}
+
+/* ── App topbar (below classbar) ───────────────────────────────────── */
+.topbar{background:#110a00;border-bottom:1px solid #3d2200;padding:8px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:52px;z-index:100;}
+.topbar-title{color:#ff8800;font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;}
 .topbar-meta{color:var(--mut);font-size:11px;}
 .body-wrap{display:flex;flex:1;}
-nav{width:260px;min-width:260px;background:var(--sur);border-right:1px solid var(--brd);padding:20px 0;position:sticky;top:49px;height:calc(100vh - 49px);overflow-y:auto;}
+nav{width:260px;min-width:260px;background:var(--sur);border-right:1px solid var(--brd);padding:20px 0;position:sticky;top:104px;height:calc(100vh - 104px);overflow-y:auto;}
 nav h2{color:var(--acc);font-size:11px;text-transform:uppercase;letter-spacing:1.2px;padding:0 18px 10px;border-bottom:1px solid var(--brd);margin-bottom:10px;}
 nav a{display:block;padding:6px 18px;color:var(--mut);text-decoration:none;font-size:12.5px;border-left:3px solid transparent;transition:all .15s;}
 nav a:hover,nav a.active{color:var(--acc);border-left-color:var(--acc);background:rgba(88,166,255,.06);}
@@ -78,9 +110,52 @@ hr{border:none;border-top:1px solid var(--brd);margin:28px 0;}
 </head>
 <body>
 
+<!-- ═══════════════════════════════════════════════════════════════════
+     PASSWORD GATE — blocks document until credentials verified
+     Credential hash: SHA-256("admin:Extreme01!!")
+     ═══════════════════════════════════════════════════════════════════ -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-stamp">
+      <div class="gs-main">&#x1F512; INTERNAL &mdash; SENSITIVE</div>
+      <div class="gs-sub">Restricted Document &mdash; Authorized Access Only</div>
+    </div>
+    <h2>Security Assessment Portal</h2>
+    <p>This document contains sensitive security findings.<br>Access is restricted to authorized personnel only.</p>
+    <input type="text" id="g-user" placeholder="Username" autocomplete="username" />
+    <input type="password" id="g-pass" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkGate()" />
+    <button class="gate-btn" onclick="checkGate()">&#x1F513; Unlock Document</button>
+    <div class="gate-err" id="gate-err"></div>
+    <div class="gate-notice">
+      &#x26A0; Unauthorized access or distribution of this document is prohibited.<br>
+      Distribution restricted to: SE Team Lead &amp; Security Officers only.<br>
+      &copy; 2026 Khursheed Khan &middot; Extreme Networks SA Team
+    </div>
+  </div>
+</div>
+
+<!-- ── Top classification banner (sticky) ── -->
+<div class="classbar" id="classbar-top">
+  <span class="classbar-icon">&#x26A0;</span>
+  <div class="classbar-center">
+    <div class="classbar-main">&#x1F512; INTERNAL &mdash; SENSITIVE &mdash; RESTRICTED DISTRIBUTION</div>
+    <div class="classbar-restrict">NOT FOR PUBLIC RELEASE &nbsp;&bull;&nbsp; NOT FOR EXTERNAL DISTRIBUTION &nbsp;&bull;&nbsp; AUTHORIZED PERSONNEL ONLY &nbsp;&bull;&nbsp; DO NOT FORWARD &nbsp;&bull;&nbsp; DO NOT PRINT WITHOUT AUTHORIZATION</div>
+  </div>
+  <div class="classbar-side">CISCO-EN CLI Agent<br>Security Assessment &mdash; April 2, 2026</div>
+  <span class="classbar-icon">&#x26A0;</span>
+</div>
+
+<!-- ── App sub-header (sticky, below classbar) ── -->
 <div class="topbar">
-  <span class="topbar-title">&#x26A0; CISCO-EN CLI Agent &mdash; Security Assessment &mdash; INTERNAL USE ONLY</span>
-  <span class="topbar-meta">Assessment Date: April 2, 2026 &nbsp;|&nbsp; Framework: NIST SP 800-53 Rev 5 &middot; CISA ZT &middot; CIS v8 &middot; OWASP Top 10</span>
+  <span class="topbar-title">&#x1F6E1; Tier-1 Threat Assessment &mdash; CISCO-EN CLI Mapping Agent</span>
+  <span class="topbar-meta">Framework: NIST SP 800-53 Rev 5 &middot; CISA ZT &middot; CIS v8 &middot; OWASP Top 10 &nbsp;|&nbsp; April 2, 2026</span>
+</div>
+
+<!-- ── Bottom classification strip (fixed) ── -->
+<div class="classbar-bottom">
+  <span class="cb-left">&#x26A0; INTERNAL &mdash; SENSITIVE</span>
+  <span class="cb-center">RESTRICTED DISTRIBUTION &nbsp;&mdash;&nbsp; NOT FOR PUBLIC RELEASE &nbsp;&mdash;&nbsp; AUTHORIZED PERSONNEL ONLY &nbsp;&mdash;&nbsp; DO NOT FORWARD WITHOUT APPROVAL</span>
+  <span class="cb-right">&copy; 2026 Khursheed Khan &middot; Extreme Networks</span>
 </div>
 
 <div class="body-wrap">
@@ -548,10 +623,51 @@ function setupObserver() {
         if (a) a.classList.add('active');
       }
     });
-  }, {threshold: 0.2, rootMargin: '-49px 0px 0px 0px'});
+  }, {threshold: 0.2, rootMargin: '-104px 0px 0px 0px'});
   sections.forEach(function(s){ currentObserver.observe(s); });
 }
 setupObserver();
+</script>
+
+<!-- ── Password gate logic ──────────────────────────────────────────── -->
+<script>
+(function(){
+  // SHA-256 of "admin:Extreme01!!" — credentials never stored plaintext
+  var VALID_HASH = "36f234d0446547bcf31720b98772a8455d98395c56188dedbf00b6cef25f2fe9";
+  var SESSION_KEY = "sec_assess_auth_20260402";
+
+  async function sha256(msg) {
+    var buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(msg));
+    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,"0"); }).join("");
+  }
+
+  window.checkGate = async function() {
+    var u = document.getElementById("g-user").value.trim();
+    var p = document.getElementById("g-pass").value;
+    var errEl = document.getElementById("gate-err");
+    if (!u || !p) { errEl.textContent = "Please enter both username and password."; return; }
+    var hash = await sha256(u + ":" + p);
+    if (hash === VALID_HASH) {
+      sessionStorage.setItem(SESSION_KEY, "1");
+      document.getElementById("gate").classList.add("hidden");
+    } else {
+      errEl.textContent = "Invalid credentials. Access denied.";
+      document.getElementById("g-pass").value = "";
+      document.getElementById("g-pass").focus();
+    }
+  };
+
+  // Auto-unlock if already authenticated this session
+  if (sessionStorage.getItem(SESSION_KEY) === "1") {
+    document.getElementById("gate").classList.add("hidden");
+  } else {
+    // Focus username field on load
+    document.addEventListener("DOMContentLoaded", function(){
+      var u = document.getElementById("g-user");
+      if (u) u.focus();
+    });
+  }
+})();
 </script>
 </body>
 </html>
