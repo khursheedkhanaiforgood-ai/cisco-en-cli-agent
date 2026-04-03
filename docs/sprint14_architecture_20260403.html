@@ -139,6 +139,15 @@ hr{border:none;border-top:1px solid var(--brd);margin:28px 0;}
   <a href="#sprints">Sprint Sequence</a>
   <a href="#files">Files to Build</a>
   <a href="#defence">Architecture Defence</a>
+  <div class="sec">Primary Sources</div>
+  <a href="#ref-graph">Graph Theory</a>
+  <a href="#ref-info">Information Theory</a>
+  <a href="#ref-nlp">Semantic / NLP</a>
+  <a href="#ref-grammar">Formal Grammar</a>
+  <a href="#ref-translation">Translation Theory</a>
+  <a href="#ref-rag">RAG &amp; Vector Search</a>
+  <a href="#ref-standards">Network Standards</a>
+  <a href="#ref-vendor">Vendor Docs</a>
 </nav>
 
 <main>
@@ -775,6 +784,265 @@ GlobalCmd  → CiscoKeyword Args   <span class="comment">// no indentation</span
 
 <h3>4. Incremental, Testable Build</h3>
 <p>Each phase builds on verifiable foundations: the parser is testable in isolation (input: raw config string, output: typed section list). The translate agent is testable against the RAG DB. The intent agents are testable by comparing expected vs actual intent maps. The topology builder is visual and immediately auditable. No phase requires the next to be complete before it can be validated.</p>
+
+<hr>
+<p style="font-size:12px;color:var(--mut);">&copy; 2026 Khursheed Khan &middot; Extreme Networks SA Team &middot; CISCO-EN CLI Mapping Agent &middot; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent" target="_blank">GitHub</a> &middot; Sprint 14 Design Session &middot; April 3, 2026</p>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     PRIMARY SOURCES
+     ════════════════════════════════════════════════════════ -->
+
+<section id="ref-graph">
+<h2>Primary Sources — Graph Theory</h2>
+<p>The translation matrix (6-OS directed graph, 30 edges) is grounded in classical graph theory. The following texts are the authoritative references for completeness, directed graphs, and graph-theoretic algorithms used in the sprint sequence design.</p>
+<table>
+  <tr><th>#</th><th>Title &amp; Author</th><th>Relevance to This Architecture</th><th>Link</th></tr>
+  <tr>
+    <td>G1</td>
+    <td><strong>Graph Theory</strong> — Reinhard Diestel (Springer, 5th ed., 2017)</td>
+    <td>Foundational text. Complete directed graphs, edge traversal, reachability — directly models the OS translation matrix G = (V, E).</td>
+    <td><a href="https://diestel-graph-theory.com/" target="_blank">diestel-graph-theory.com</a></td>
+  </tr>
+  <tr>
+    <td>G2</td>
+    <td><strong>Graph Theory</strong> — Bondy &amp; Murty (Springer, 2008)</td>
+    <td>Directed graphs, tournament graphs, edge colouring — relevant to sprint sequencing (which edges to implement in which order for maximum coverage).</td>
+    <td><a href="https://www.springer.com/gp/book/9781846289699" target="_blank">Springer</a></td>
+  </tr>
+  <tr>
+    <td>G3</td>
+    <td><strong>Introduction to Algorithms (CLRS)</strong> — Cormen, Leiserson, Rivest, Stein (MIT Press, 4th ed., 2022)</td>
+    <td>Graph traversal (BFS/DFS) — used in the parser to walk config sections; topological sort — used to determine section translation order (e.g. VLANs before interfaces).</td>
+    <td><a href="https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/" target="_blank">MIT Press</a></td>
+  </tr>
+</table>
+</section>
+
+<section id="ref-info">
+<h2>Primary Sources — Information Theory</h2>
+<p>The confidence score is information-theoretic: it measures the ratio of preserved functional intents to total intents — directly analogous to information fidelity in a lossy channel.</p>
+<table>
+  <tr><th>#</th><th>Title &amp; Author</th><th>Relevance</th><th>Link</th></tr>
+  <tr>
+    <td>I1</td>
+    <td><strong>A Mathematical Theory of Communication</strong> — Claude E. Shannon (Bell System Technical Journal, 1948)</td>
+    <td>Foundational paper. Defines information content, entropy, channel capacity, and information loss. The confidence score <code>1 − |loss(T)| / |F(config)|</code> is a direct application of Shannon's fidelity measure.</td>
+    <td><a href="https://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf" target="_blank">PDF (Harvard)</a></td>
+  </tr>
+  <tr>
+    <td>I2</td>
+    <td><strong>Elements of Information Theory</strong> — Cover &amp; Thomas (Wiley, 2nd ed., 2006)</td>
+    <td>Chapter 2 (Entropy), Chapter 7 (Channel Capacity). The translation function T(u,v) is modelled as a noisy channel where "noise" = features with no equivalent on the target platform.</td>
+    <td><a href="https://www.wiley.com/en-us/Elements+of+Information+Theory%2C+2nd+Edition-p-9780471241959" target="_blank">Wiley</a></td>
+  </tr>
+  <tr>
+    <td>I3</td>
+    <td><strong>Information Theory, Inference, and Learning Algorithms</strong> — David MacKay (Cambridge UP, 2003, free online)</td>
+    <td>Practical treatment of information measures. Chapter 6 covers lossy compression — analogous to config translation where some features must be approximated or omitted.</td>
+    <td><a href="http://www.inference.org.uk/mackay/itila/" target="_blank">inference.org.uk (free)</a></td>
+  </tr>
+</table>
+</section>
+
+<section id="ref-nlp">
+<h2>Primary Sources — Semantic Similarity &amp; NLP</h2>
+<p>Intent extraction and verification operate in a 384-dimensional embedding space produced by <code>all-MiniLM-L6-v2</code>. The cosine similarity metric, sentence embeddings, and retrieval-augmented generation all have direct primary sources.</p>
+<table>
+  <tr><th>#</th><th>Title &amp; Author</th><th>Relevance</th><th>Link</th></tr>
+  <tr>
+    <td>N1</td>
+    <td><strong>Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks</strong> — Reimers &amp; Gurevych (EMNLP 2019)</td>
+    <td>Direct primary source for <code>all-MiniLM-L6-v2</code> — the embedding model used in this application. Defines the siamese network architecture that produces semantically meaningful sentence vectors for cosine similarity comparison.</td>
+    <td><a href="https://arxiv.org/abs/1908.10084" target="_blank">arXiv:1908.10084</a></td>
+  </tr>
+  <tr>
+    <td>N2</td>
+    <td><strong>Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks</strong> — Lewis et al. (NeurIPS 2020)</td>
+    <td>Foundational RAG paper. The application's entire RAG engine (vector search → context injection → LLM response) follows this architecture. The config translator extends RAG to the section/intent level.</td>
+    <td><a href="https://arxiv.org/abs/2005.11401" target="_blank">arXiv:2005.11401</a></td>
+  </tr>
+  <tr>
+    <td>N3</td>
+    <td><strong>BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding</strong> — Devlin et al. (NAACL 2019)</td>
+    <td>Underlying transformer architecture that <code>all-MiniLM-L6-v2</code> distils. Defines the contextual embedding that makes intent-level similarity meaningful — the same CLI command ("no shutdown") has different intent depending on context (interface vs vlan).</td>
+    <td><a href="https://arxiv.org/abs/1810.04805" target="_blank">arXiv:1810.04805</a></td>
+  </tr>
+  <tr>
+    <td>N4</td>
+    <td><strong>Efficient Estimation of Word Representations in Vector Space</strong> — Mikolov et al. (ICLR 2013)</td>
+    <td>Word2Vec — the seminal work showing that semantic meaning can be encoded as vector arithmetic. Establishes the mathematical basis for why cosine distance between embedding vectors measures semantic similarity.</td>
+    <td><a href="https://arxiv.org/abs/1301.3781" target="_blank">arXiv:1301.3781</a></td>
+  </tr>
+  <tr>
+    <td>N5</td>
+    <td><strong>Billion-scale similarity search with GPUs</strong> — Johnson, Douze &amp; Jégou (IEEE T-BD, 2019)</td>
+    <td>FAISS — the library underlying pgvector's IVFFlat index used in this application. Defines the inverted file index structure and approximate nearest-neighbour search at scale.</td>
+    <td><a href="https://arxiv.org/abs/1702.08734" target="_blank">arXiv:1702.08734</a></td>
+  </tr>
+</table>
+</section>
+
+<section id="ref-grammar">
+<h2>Primary Sources — Formal Grammar &amp; Parsing</h2>
+<p>The config parser implements a recogniser for the context-free grammar of Cisco IOS configuration syntax. These are the foundational texts.</p>
+<table>
+  <tr><th>#</th><th>Title &amp; Author</th><th>Relevance</th><th>Link</th></tr>
+  <tr>
+    <td>P1</td>
+    <td><strong>Introduction to Automata Theory, Languages, and Computation</strong> — Hopcroft, Motwani &amp; Ullman (Pearson, 3rd ed., 2006)</td>
+    <td>Defines context-free grammars (CFGs), pushdown automata, and the parsing algorithms underlying the hierarchical Cisco config parser. Chapter 5 covers CFG parsing directly applicable to indentation-based syntax.</td>
+    <td><a href="https://www.pearson.com/en-us/subject-catalog/p/introduction-to-automata-theory-languages-and-computation/P200000003551" target="_blank">Pearson</a></td>
+  </tr>
+  <tr>
+    <td>P2</td>
+    <td><strong>Compilers: Principles, Techniques, and Tools (Dragon Book)</strong> — Aho, Lam, Sethi &amp; Ullman (Pearson, 2nd ed., 2006)</td>
+    <td>The definitive reference for lexical analysis and top-down parsing — the exact approach used by the Cisco config parser (tokenise → classify → build AST of sections and sub-commands).</td>
+    <td><a href="https://www.pearson.com/en-us/subject-catalog/p/compilers-principles-techniques-and-tools/P200000003610" target="_blank">Pearson</a></td>
+  </tr>
+  <tr>
+    <td>P3</td>
+    <td><strong>Network Configuration Synthesis with Abstract Topologies</strong> — Beckett et al. (PLDI 2017)</td>
+    <td>Academic work directly in the network config translation space — synthesising correct configs from abstract topology specifications. Validates the architectural approach of parsing config into intent/topology abstractions before generating output.</td>
+    <td><a href="https://dl.acm.org/doi/10.1145/3062341.3062367" target="_blank">ACM DL</a></td>
+  </tr>
+  <tr>
+    <td>P4</td>
+    <td><strong>Propane: At the Interface Between Verified Route Policies and BGP</strong> — Beckett et al. (SIGCOMM 2016)</td>
+    <td>Formal verification of network configuration intent — directly supports the argument that intent-level verification (as opposed to syntactic matching) is the correct framework for validating config translations.</td>
+    <td><a href="https://dl.acm.org/doi/10.1145/2934872.2934905" target="_blank">ACM DL</a></td>
+  </tr>
+</table>
+</section>
+
+<section id="ref-translation">
+<h2>Primary Sources — Translation Theory</h2>
+<p>Khursheed's analogy — "like a book in English translated into Japanese" — has a formal theoretical grounding in translation studies. The intent verification agent operationalises dynamic equivalence theory in software.</p>
+<table>
+  <tr><th>#</th><th>Title &amp; Author</th><th>Relevance</th><th>Link</th></tr>
+  <tr>
+    <td>T1</td>
+    <td><strong>Toward a Science of Translating</strong> — Eugene A. Nida (Brill, 1964)</td>
+    <td>Foundational text of modern translation theory. Defines <em>dynamic equivalence</em>: a translation should produce in its audience the same effect the original produced in its audience. The Intent Verification Agent operationalises this — it asks "does the translated EXOS config do the same thing the Cisco config did?" rather than "are the commands the same?"</td>
+    <td><a href="https://brill.com/view/title/20867" target="_blank">Brill</a></td>
+  </tr>
+  <tr>
+    <td>T2</td>
+    <td><strong>A Linguistic Theory of Translation</strong> — J.C. Catford (Oxford UP, 1965)</td>
+    <td>Distinguishes <em>formal correspondence</em> (word-for-word) from <em>textual equivalence</em> (meaning-for-meaning). The architecture's strictness modes map directly: Strict = formal correspondence, Balanced = textual equivalence, Lenient = topic/function equivalence.</td>
+    <td><a href="https://global.oup.com/academic/product/a-linguistic-theory-of-translation-9780194370523" target="_blank">Oxford UP</a></td>
+  </tr>
+  <tr>
+    <td>T3</td>
+    <td><strong>In Other Words: A Coursebook on Translation</strong> — Mona Baker (Routledge, 3rd ed., 2018)</td>
+    <td>Covers equivalence at word, phrase, grammatical, textual, and pragmatic levels. Maps to the five intent categories: L2-Segmentation (word level) → Voice-Transport (pragmatic level) — different levels of abstraction require different verification strategies.</td>
+    <td><a href="https://www.routledge.com/In-Other-Words-A-Coursebook-on-Translation/Baker/p/book/9781138209855" target="_blank">Routledge</a></td>
+  </tr>
+</table>
+</section>
+
+<section id="ref-rag">
+<h2>Primary Sources — RAG, Vector Databases &amp; LLMs</h2>
+<table>
+  <tr><th>#</th><th>Title &amp; Author</th><th>Relevance</th><th>Link</th></tr>
+  <tr>
+    <td>R1</td>
+    <td><strong>pgvector: Open-source vector similarity search for Postgres</strong> — Andrew Kane (GitHub, 2021–present)</td>
+    <td>The vector database engine powering the RAG lookup in this application. IVFFlat index with cosine similarity — the same index is used for intent-level similarity search in the verifier agent.</td>
+    <td><a href="https://github.com/pgvector/pgvector" target="_blank">github.com/pgvector/pgvector</a></td>
+  </tr>
+  <tr>
+    <td>R2</td>
+    <td><strong>all-MiniLM-L6-v2 Model Card</strong> — Microsoft / sentence-transformers (HuggingFace, 2021)</td>
+    <td>The embedding model used in production. 384-dimensional vectors, trained on 1B sentence pairs. Defines the semantic space in which intent similarity is measured.</td>
+    <td><a href="https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2" target="_blank">HuggingFace</a></td>
+  </tr>
+  <tr>
+    <td>R3</td>
+    <td><strong>Evaluating Large Language Models Trained on Code (Codex)</strong> — Chen et al., OpenAI (2021)</td>
+    <td>Demonstrates LLM capability for code/config generation and transformation. Directly supports the architectural decision to use Claude for config translation rather than deterministic rule-based mapping.</td>
+    <td><a href="https://arxiv.org/abs/2107.03374" target="_blank">arXiv:2107.03374</a></td>
+  </tr>
+  <tr>
+    <td>R4</td>
+    <td><strong>Claude claude-sonnet-4-6 Model Documentation</strong> — Anthropic (2025)</td>
+    <td>The LLM powering all translation, intent extraction, and verification agents. 200K context window enables full running-config translation in a single call for most deployments.</td>
+    <td><a href="https://docs.anthropic.com/en/docs/about-claude/models" target="_blank">Anthropic Docs</a></td>
+  </tr>
+</table>
+</section>
+
+<section id="ref-standards">
+<h2>Primary Sources — Network Standards (IEEE / IETF)</h2>
+<p>The translation correctness of each feature mapping is anchored to these standards. When the intent verifier flags a caveat, it references the relevant standard to explain the architectural difference.</p>
+<table>
+  <tr><th>Standard</th><th>Title</th><th>Relevance to Translation</th><th>Link</th></tr>
+  <tr><td><strong>IEEE 802.1Q-2022</strong></td><td>Bridges and Bridged Networks (VLAN Bridging)</td><td>VLAN tagging — the common standard both Cisco and EXOS implement. Translation is deterministic: same tag ID, same trunk behaviour.</td><td><a href="https://standards.ieee.org/ieee/802.1Q/10536/" target="_blank">IEEE</a></td></tr>
+  <tr><td><strong>IEEE 802.1D / 802.1w / 802.1s</strong></td><td>Spanning Tree / RSTP / MSTP</td><td>portfast → auto-edge, bpduguard → bpdu-restrict translation anchored here. Both platforms implement 802.1w RSTP — functional equivalence is standards-grounded.</td><td><a href="https://standards.ieee.org/ieee/802.1D/3966/" target="_blank">IEEE</a></td></tr>
+  <tr><td><strong>IEEE 802.1AB-2016</strong></td><td>Link Layer Discovery Protocol (LLDP)</td><td>Voice VLAN caveat — Cisco uses CDP proprietary; EXOS uses LLDP-MED (802.1AB Annex F). The translation notes this standard gap explicitly.</td><td><a href="https://standards.ieee.org/ieee/802.1AB/6047/" target="_blank">IEEE</a></td></tr>
+  <tr><td><strong>IEEE 802.3ad / 802.1AX</strong></td><td>Link Aggregation (LACP)</td><td>Port-channel → sharing translation. Both implement 802.3ad LACP — translation is deterministic at the protocol level.</td><td><a href="https://standards.ieee.org/ieee/802.1AX/4955/" target="_blank">IEEE</a></td></tr>
+  <tr><td><strong>RFC 2328</strong></td><td>OSPFv2 — Moy (IETF, 1998)</td><td>OSPF translation: Cisco interface-based → EXOS VLAN-based. Both implement RFC 2328 — the protocol is identical, only the configuration model differs.</td><td><a href="https://www.rfc-editor.org/rfc/rfc2328" target="_blank">IETF</a></td></tr>
+  <tr><td><strong>RFC 4271</strong></td><td>BGP-4 — Rekhter et al. (IETF, 2006)</td><td>BGP translation across platforms. RFC 4271 compliance is common ground — translation focuses on config syntax differences, not protocol differences.</td><td><a href="https://www.rfc-editor.org/rfc/rfc4271" target="_blank">IETF</a></td></tr>
+  <tr><td><strong>RFC 2131</strong></td><td>Dynamic Host Configuration Protocol — Droms (IETF, 1997)</td><td>DHCP pool translation: Cisco <code>ip dhcp pool</code> → EXOS <code>configure dhcp-server</code>. Both implement RFC 2131 — caveat is the explicit enable step required in EXOS.</td><td><a href="https://www.rfc-editor.org/rfc/rfc2131" target="_blank">IETF</a></td></tr>
+  <tr><td><strong>RFC 5880</strong></td><td>Bidirectional Forwarding Detection (BFD)</td><td>BFD translation for fast failure detection — supported on both platforms, syntax differs.</td><td><a href="https://www.rfc-editor.org/rfc/rfc5880" target="_blank">IETF</a></td></tr>
+  <tr><td><strong>RFC 7348</strong></td><td>VXLAN — Mahalingam et al. (IETF, 2014)</td><td>Overlay translation — relevant for Sprint 15 (VOSS fabric constructs vs Cisco VXLAN). I-SID and VXLAN both provide Layer 2 extension but through entirely different mechanisms.</td><td><a href="https://www.rfc-editor.org/rfc/rfc7348" target="_blank">IETF</a></td></tr>
+</table>
+</section>
+
+<section id="ref-vendor">
+<h2>Primary Sources — Vendor Documentation</h2>
+<p>The translation syntax for every EXOS and VOSS output line is validated against these official reference documents, all already present in the project repository.</p>
+<table>
+  <tr><th>#</th><th>Document</th><th>Version</th><th>Location</th></tr>
+  <tr>
+    <td>V1</td>
+    <td><strong>ExtremeXOS / Switch Engine User Guide</strong></td>
+    <td>32.5</td>
+    <td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/EXOS_User_Guide_32.5.pdf" target="_blank">data/source_pdfs/EXOS_User_Guide_32.5.pdf</a> (18 MB, in repo)</td>
+  </tr>
+  <tr>
+    <td>V2</td>
+    <td><strong>Fabric Engine / VOSS CLI Reference Guide</strong></td>
+    <td>8.10</td>
+    <td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/CLIRefFabricEngine_8.10_CRG.pdf" target="_blank">data/source_pdfs/CLIRefFabricEngine_8.10_CRG.pdf</a> (9.3 MB, in repo)</td>
+  </tr>
+  <tr>
+    <td>V3</td>
+    <td><strong>Cisco IOS-XE 17.15 Command Reference — Catalyst 9200</strong></td>
+    <td>17.15</td>
+    <td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/b_1715_9200_cr.pdf" target="_blank">data/source_pdfs/b_1715_9200_cr.pdf</a> (15 MB, in repo)</td>
+  </tr>
+  <tr>
+    <td>V4</td>
+    <td><strong>Cisco IOS-XE 17.15 Command References — Catalyst 9300/9400/9500/9600</strong></td>
+    <td>17.15</td>
+    <td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/" target="_blank">data/source_pdfs/ (repo)</a></td>
+  </tr>
+  <tr>
+    <td>V5</td>
+    <td><strong>Cisco IOS-XE 17.15 IP Addressing Command Reference</strong></td>
+    <td>17.15</td>
+    <td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent/blob/main/data/source_pdfs/ipaddr-cr-book.pdf" target="_blank">data/source_pdfs/ipaddr-cr-book.pdf</a> (8.8 MB, in repo)</td>
+  </tr>
+  <tr>
+    <td>V6</td>
+    <td><strong>ExtremeXOS 33.x Release Notes &amp; CLI Reference</strong> (online)</td>
+    <td>33.x</td>
+    <td><a href="https://documentation.extremenetworks.com/exos_33.x/" target="_blank">documentation.extremenetworks.com/exos_33.x/</a></td>
+  </tr>
+  <tr>
+    <td>V7</td>
+    <td><strong>Fabric Engine 9.x Documentation</strong> (online)</td>
+    <td>9.x</td>
+    <td><a href="https://documentation.extremenetworks.com/fe_9.x/" target="_blank">documentation.extremenetworks.com/fe_9.x/</a></td>
+  </tr>
+  <tr>
+    <td>V8</td>
+    <td><strong>Cisco IOS-XE Configuration Guide</strong> (online)</td>
+    <td>17.x</td>
+    <td><a href="https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-xe-17/series.html" target="_blank">cisco.com — IOS-XE 17.x</a></td>
+  </tr>
+</table>
 
 <hr>
 <p style="font-size:12px;color:var(--mut);">&copy; 2026 Khursheed Khan &middot; Extreme Networks SA Team &middot; CISCO-EN CLI Mapping Agent &middot; <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent" target="_blank">GitHub</a> &middot; Sprint 14 Design Session &middot; April 3, 2026</p>
