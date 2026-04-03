@@ -98,6 +98,44 @@ with st.sidebar:
     render_user_badge()
     st.caption("Powered by Claude claude-sonnet-4-6 + pgvector")
 
+# ── BETA banner + copyright (all pages) ──────────────────────────────────────
+st.markdown("""
+<style>
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.15; }
+}
+.beta-banner {
+  background: linear-gradient(90deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+  border: 1px solid #f85149;
+  border-radius: 6px;
+  padding: 8px 20px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.beta-text {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  animation: blink 1.6s ease-in-out infinite;
+}
+.copyright-bar {
+  text-align: center;
+  color: #8b949e;
+  font-size: 11px;
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+</style>
+<div class="beta-banner">
+  <span class="beta-text">⚠ BETA &nbsp;·&nbsp; This application is under active development &nbsp;·&nbsp; For internal SE team use only &nbsp;·&nbsp; ⚠ BETA</span>
+</div>
+<div class="copyright-bar">
+  © 2026 Khursheed Khan · Extreme Networks SA Team · CISCO ↔ EN CLI Mapping Agent · All rights reserved
+</div>
+""", unsafe_allow_html=True)
+
 # ── Main content ──────────────────────────────────────────────────────────────
 st.title("🔀 CISCO ↔ Extreme Networks CLI Mapping Agent")
 st.markdown("*The New Rosetta Stone — Translate CLI commands across 6 network OSes | AI-powered E2E design*")

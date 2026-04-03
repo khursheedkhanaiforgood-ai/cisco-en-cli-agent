@@ -10,6 +10,24 @@ def render_query_box():
         "across all 6 operating systems and explain the key differences."
     )
 
+    # ── Team User Guide (landing card) ───────────────────────────────────────
+    with st.expander("📖 Quick User Guide — Read Before You Start", expanded=True):
+        st.markdown("""
+> ✏️ *User guide content coming soon — Khursheed will provide the writeup.*
+>
+> **Placeholder structure (3 sections):**
+>
+> 🔹 **What this tool does**
+> _(Brief description of the CLI Mapping Agent — purpose, scope, supported platforms)_
+>
+> 🔹 **How to use it**
+> _(Step-by-step: ask a question → review cross-OS table → use E2E Wizard for full designs)_
+>
+> 🔹 **How to request new commands or report issues**
+> _(Channel, contact, feedback process)_
+        """)
+    # ─────────────────────────────────────────────────────────────────────────
+
     # Query input
     col1, col2, col3 = st.columns([5, 1, 1])
     with col1:
