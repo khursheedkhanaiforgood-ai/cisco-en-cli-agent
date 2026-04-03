@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Config Translator — Input Template Guide</title>
+<style>
+:root{
+  --bg:#0d1117;--sur:#161b22;--brd:#30363d;
+  --acc:#58a6ff;--grn:#3fb950;--yel:#d29922;--red:#f85149;--pur:#bc8cff;
+  --txt:#e6edf3;--mut:#8b949e;--cod:#1f2937;
+  --cli-bg:#0d2818;--cli-border:#2ea043;--cli-text:#7ee787;
+  --prose-bg:#271d00;--prose-border:#7d5a00;--prose-text:#d29922;
+  --section-bg:#0d1b2e;--section-border:#1f4b8c;--section-text:#79c0ff;
+  --ignore-bg:#1c1c1c;--ignore-text:#555;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:#0d1b2e;border-bottom:2px solid var(--acc);padding:10px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-title{color:var(--acc);font-size:13px;font-weight:700;letter-spacing:.8px;}
+.topbar-meta{color:var(--mut);font-size:11px;}
+.body-wrap{display:flex;flex:1;}
+nav{width:260px;min-width:260px;background:var(--sur);border-right:1px solid var(--brd);padding:20px 0;position:sticky;top:48px;height:calc(100vh - 48px);overflow-y:auto;}
+nav h2{color:var(--acc);font-size:11px;text-transform:uppercase;letter-spacing:1.2px;padding:0 18px 10px;border-bottom:1px solid var(--brd);margin-bottom:10px;}
+nav a{display:block;padding:6px 18px;color:var(--mut);text-decoration:none;font-size:12.5px;border-left:3px solid transparent;transition:all .15s;}
+nav a:hover,nav a.active{color:var(--acc);border-left-color:var(--acc);background:rgba(88,166,255,.06);}
+nav .sec{padding:10px 18px 4px;color:var(--mut);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-top:6px;}
+main{flex:1;padding:36px 48px;max-width:1100px;}
+h1{font-size:22px;font-weight:700;color:var(--acc);margin-bottom:4px;}
+.sub{color:var(--mut);font-size:13px;margin-bottom:28px;}
+h2{font-size:17px;font-weight:600;color:var(--txt);margin:38px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--brd);scroll-margin-top:60px;}
+h3{font-size:14px;font-weight:600;color:var(--acc);margin:18px 0 8px;}
+p{font-size:13.5px;line-height:1.75;color:#c9d1d9;margin-bottom:10px;}
+ul,ol{padding-left:20px;margin-bottom:14px;}
+li{font-size:13.5px;line-height:1.8;color:#c9d1d9;}
+a{color:var(--acc);text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+/* ── Legend badges ── */
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin:18px 0 24px;}
+.leg{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:6px;font-size:12.5px;font-weight:600;}
+.leg-cli{background:var(--cli-bg);border:1px solid var(--cli-border);color:var(--cli-text);}
+.leg-section{background:var(--section-bg);border:1px solid var(--section-border);color:var(--section-text);}
+.leg-prose{background:var(--prose-bg);border:1px solid var(--prose-border);color:var(--prose-text);}
+.leg-ignore{background:var(--ignore-bg);border:1px solid #333;color:#666;}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.d-cli{background:var(--grn);}
+.d-sec{background:var(--acc);}
+.d-prose{background:var(--yel);}
+.d-ign{background:#444;}
+
+/* ── Annotated config viewer ── */
+.config-view{background:#0a0e14;border:1px solid var(--brd);border-radius:8px;overflow:hidden;margin:16px 0 24px;font-family:'SF Mono',Consolas,'Courier New',monospace;font-size:12.5px;line-height:1.65;}
+.config-view .cv-header{background:var(--sur);padding:8px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--brd);}
+.cv-header span{color:var(--mut);font-size:11px;font-family:-apple-system,sans-serif;}
+.cv-header strong{color:var(--txt);font-size:12px;font-family:-apple-system,sans-serif;}
+.config-line{display:flex;align-items:stretch;border-bottom:1px solid rgba(255,255,255,.02);}
+.config-line:last-child{border-bottom:none;}
+.ln{min-width:42px;padding:2px 10px;color:#3d444d;font-size:11px;background:#0a0e14;border-right:1px solid rgba(255,255,255,.04);text-align:right;user-select:none;flex-shrink:0;}
+.lc{flex:1;padding:2px 14px;white-space:pre;}
+.lc .label{font-family:-apple-system,sans-serif;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;margin-left:10px;vertical-align:middle;letter-spacing:.4px;}
+
+/* Line type colours */
+.t-cli .lc{background:rgba(13,40,24,.6);color:var(--cli-text);}
+.t-cli .ln{color:#2ea04380;}
+.t-section .lc{background:rgba(13,27,46,.7);color:var(--section-text);}
+.t-section .ln{color:#1f6feb80;}
+.t-prose .lc{background:rgba(39,29,0,.6);color:var(--prose-text);}
+.t-prose .ln{color:#7d5a0080;}
+.t-blank .lc{background:transparent;color:#333;}
+.t-ignore .lc{background:rgba(20,20,20,.3);color:#444;font-style:italic;}
+
+/* Labels */
+.lbl-cli{background:#163b20;color:var(--grn);border:1px solid #2ea04350;}
+.lbl-sec{background:#0d2045;color:#79c0ff;border:1px solid #1f6feb50;}
+.lbl-prose{background:#3d2900;color:#d29922;border:1px solid #7d5a0050;}
+.lbl-ign{background:#1c1c1c;color:#555;border:1px solid #33333350;}
+
+/* ── Rule cards ── */
+.rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0 24px;}
+.rule-card{border-radius:8px;padding:16px;border:1px solid var(--brd);}
+.rc-cli{background:var(--cli-bg);border-color:var(--cli-border);}
+.rc-sec{background:var(--section-bg);border-color:var(--section-border);}
+.rc-prose{background:var(--prose-bg);border-color:var(--prose-border);}
+.rc-ign{background:var(--ignore-bg);border-color:#333;}
+.rule-card h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+.rc-cli h4{color:var(--grn);}
+.rc-sec h4{color:var(--acc);}
+.rc-prose h4{color:var(--yel);}
+.rc-ign h4{color:#555;}
+.rule-card ul{padding-left:16px;margin:0;}
+.rule-card li{font-size:12px;line-height:1.7;color:#c9d1d9;}
+.rc-ign li{color:#555;}
+
+/* ── Template spec boxes ── */
+.spec-box{background:var(--sur);border:1px solid var(--brd);border-radius:8px;padding:18px 22px;margin:14px 0;}
+.spec-box h4{color:var(--acc);font-size:13px;font-weight:600;margin-bottom:10px;}
+.spec-box code{background:var(--cod);color:#79c0ff;padding:2px 6px;border-radius:4px;font-family:'SF Mono',Consolas,monospace;font-size:12px;}
+.spec-row{display:grid;grid-template-columns:200px 1fr;gap:6px 16px;margin-bottom:6px;font-size:13px;}
+.spec-row .sk{color:var(--mut);font-weight:600;}
+.spec-row .sv{color:#c9d1d9;}
+
+/* ── Download button ── */
+.dl-bar{display:flex;gap:12px;margin:20px 0;}
+.dl-btn{padding:9px 20px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.dl-primary{background:var(--acc);color:#000;}
+.dl-secondary{background:var(--sur);color:var(--txt);border:1px solid var(--brd);}
+.dl-btn:hover{opacity:.85;}
+
+/* ── Info/warn boxes ── */
+.box{border-left:3px solid var(--acc);background:rgba(88,166,255,.07);padding:11px 16px;margin:14px 0;border-radius:0 6px 6px 0;}
+.box.warn{border-left-color:var(--yel);background:rgba(210,153,34,.07);}
+.box.ok{border-left-color:var(--grn);background:rgba(63,185,80,.07);}
+.box p{margin:0;font-size:13px;color:#c9d1d9;}
+table{width:100%;border-collapse:collapse;margin:12px 0 18px;font-size:13px;}
+th{background:var(--sur);color:var(--acc);text-align:left;padding:8px 11px;border:1px solid var(--brd);}
+td{padding:7px 11px;border:1px solid var(--brd);color:#c9d1d9;vertical-align:top;}
+td code{background:var(--cod);color:#79c0ff;padding:2px 5px;border-radius:3px;font-size:11.5px;}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;}
+.g{background:rgba(63,185,80,.15);color:var(--grn);}
+.y{background:rgba(210,153,34,.15);color:var(--yel);}
+.r{background:rgba(248,81,73,.15);color:var(--red);}
+hr{border:none;border-top:1px solid var(--brd);margin:28px 0;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <strong class="topbar-title">⚙️ Config Translator — Input Template &amp; Annotation Guide</strong>
+  <span class="topbar-meta">CISCO-EN CLI Mapping Agent &nbsp;|&nbsp; Extreme Networks SA Team &nbsp;|&nbsp; ExtremeXOS 33.x &nbsp;|&nbsp; April 2026</span>
+</div>
+
+<div class="body-wrap">
+
+<nav>
+  <h2>Navigation</h2>
+  <div class="sec">Overview</div>
+  <a href="#how-it-works">How the Parser Works</a>
+  <a href="#legend">Colour Legend</a>
+  <a href="#rules">Parsing Rules</a>
+  <div class="sec">Annotated Example</div>
+  <a href="#annotated-access">Access Layer Config</a>
+  <a href="#annotated-core">Core/Distribution Config</a>
+  <div class="sec">Template</div>
+  <a href="#template-spec">Template Specification</a>
+  <a href="#supported-sections">Supported Sections</a>
+  <a href="#download">Download Template</a>
+  <div class="sec">Reference</div>
+  <a href="#caveats">Known Caveats (EXOS)</a>
+  <a href="#formats">Accepted File Formats</a>
+</nav>
+
+<main>
+
+<h1>⚙️ Config Translator — Input Template Guide</h1>
+<p class="sub">How to prepare a Cisco configuration file for the CISCO → ExtremeXOS translator. Annotated example based on a real campus network deployment.</p>
+
+<!-- ── HOW IT WORKS ── -->
+<section id="how-it-works">
+<h2>How the Parser Works</h2>
+<p>The Config Translator reads your uploaded file in two passes:</p>
+<ol>
+  <li><strong>Pass 1 — Extraction:</strong> Strips all prose/narrative text. Identifies and extracts only Cisco configuration blocks (CLI lines, section headers, comment annotations).</li>
+  <li><strong>Pass 2 — Translation:</strong> Sends each section to Claude, enriched with verified EXOS syntax from the RAG database. Produces a side-by-side Cisco ↔ EXOS blueprint with inline caveats.</li>
+</ol>
+<div class="box ok"><p>✅ You can include plain-English descriptions, section titles, and deployment notes in your file — the parser will read them for context labelling but will not attempt to translate them. See the annotated example below.</p></div>
+<div class="box warn"><p>⚠ Placeholder values like <code>&lt;YOUR_PASSWORD&gt;</code> will be carried through as-is. Replace them with real values, or leave as placeholders — the translator will flag them in the output.</p></div>
+</section>
+
+<!-- ── LEGEND ── -->
+<section id="legend">
+<h2>Colour Legend</h2>
+<div class="legend">
+  <div class="leg leg-cli"><div class="leg-dot d-cli"></div>CLI COMMAND — Parsed &amp; Translated</div>
+  <div class="leg leg-section"><div class="leg-dot d-sec"></div>SECTION MARKER (! ---) — Parsed for Labels</div>
+  <div class="leg leg-prose"><div class="leg-dot d-prose"></div>PROSE / CONTEXT TEXT — Read for Context Only</div>
+  <div class="leg leg-ignore"><div class="leg-dot d-ign"></div>BLANK / DELIMITER — Ignored</div>
+</div>
+</section>
+
+<!-- ── PARSING RULES ── -->
+<section id="rules">
+<h2>Parsing Rules</h2>
+<div class="rule-grid">
+  <div class="rule-card rc-cli">
+    <h4>✅ CLI Command — Translated</h4>
+    <ul>
+      <li>Lines starting with a Cisco keyword: <code>hostname</code>, <code>vlan</code>, <code>interface</code>, <code>ip</code>, <code>no</code>, <code>spanning-tree</code>, <code>switchport</code>, <code>router</code>, <code>ntp</code>, <code>snmp-server</code>, <code>aaa</code>, <code>line</code>, <code>service</code>, <code>logging</code>, etc.</li>
+      <li>Indented sub-commands (2-space or tab indent = sub-mode body)</li>
+      <li>Included verbatim in the translation prompt</li>
+    </ul>
+  </div>
+  <div class="rule-card rc-sec">
+    <h4>🏷 Section Marker — Label Only</h4>
+    <ul>
+      <li>Lines matching: <code>! ---</code> or <code>! ===</code> followed by a title</li>
+      <li>Used to name the section in the output blueprint</li>
+      <li>Example: <code>! --- VLAN DATABASE ---</code> → output section heading "VLAN DATABASE"</li>
+      <li>Plain <code>!</code> lines (no title) are treated as blank separators</li>
+    </ul>
+  </div>
+  <div class="rule-card rc-prose">
+    <h4>⚠ Prose / Context Text — Context Only</h4>
+    <ul>
+      <li>Plain English sentences not starting with a Cisco keyword</li>
+      <li>Numbered steps (e.g. "1. Access Layer Switch Configuration")</li>
+      <li>Paragraphs describing the network design intent</li>
+      <li>Used to infer device role (access / distribution / core) and name sections</li>
+      <li>Never sent to the translation engine</li>
+    </ul>
+  </div>
+  <div class="rule-card rc-ign">
+    <h4>— Blank / Delimiter — Ignored</h4>
+    <ul>
+      <li>Empty lines</li>
+      <li>Lone <code>!</code> delimiters (no text after)</li>
+      <li>Lines containing only whitespace</li>
+      <li>Used only to detect section boundaries</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- ── ANNOTATED: ACCESS LAYER ── -->
+<section id="annotated-access">
+<h2>Annotated Example — Access Layer Switch</h2>
+<p>Below is the exact content from the uploaded Word document, line-by-line, with each line classified as the parser will classify it.</p>
+
+<div class="config-view">
+  <div class="cv-header"><strong>Access-Switch-01 — from uploaded .docx</strong><span>Colour = how the parser classifies each line</span></div>
+
+  <div class="config-line t-prose"><div class="ln">1</div><div class="lc">Deploying a campus network typically follows a hierarchical model (Core,<span class="label lbl-prose">PROSE</span></div></div>
+  <div class="config-line t-prose"><div class="ln">2</div><div class="lc">Distribution, and Access layers). Below is a sample configuration for a<span class="label lbl-prose">PROSE</span></div></div>
+  <div class="config-line t-prose"><div class="ln">3</div><div class="lc">standard Cisco Catalyst Access Switch and a Core/Distribution Switch.<span class="label lbl-prose">PROSE</span></div></div>
+  <div class="config-line t-blank"><div class="ln">4</div><div class="lc"> </div></div>
+  <div class="config-line t-prose"><div class="ln">5</div><div class="lc">1. Access Layer Switch Configuration<span class="label lbl-prose">PROSE — device role label</span></div></div>
+  <div class="config-line t-prose"><div class="ln">6</div><div class="lc">The access layer connects end-user devices (PCs, phones, APs) to the network.<span class="label lbl-prose">PROSE</span></div></div>
+  <div class="config-line t-blank"><div class="ln">7</div><div class="lc"> </div></div>
+  <div class="config-line t-section"><div class="ln">8</div><div class="lc">! --- Basic Management ---<span class="label lbl-sec">SECTION MARKER</span></div></div>
+  <div class="config-line t-cli"><div class="ln">9</div><div class="lc">hostname Access-Switch-01<span class="label lbl-cli">CLI</span></div></div>
+  <div class="config-line t-cli"><div class="ln">10</div><div class="lc">enable secret &lt;your_password&gt;<span class="label lbl-cli">CLI</span></div></div>
+  <div class="config-line t-blank"><div class="ln">11</div><div class="lc">!</div></div>
+  <div class="config-line t-section"><div class="ln">12</div><div class="lc">! --- VLAN Database ---<span class="label lbl-sec">SECTION MARKER</span></div></div>
+  <div class="config-line t-cli"><div class="ln">13</div><div class="lc">vlan 10<span class="label lbl-cli">CLI</span></div></div>
+  <div class="config-line t-cli"><div class="ln">14</div><div class="lc"> name DATA<span class="label lbl-cli">CLI — sub-command (indented)</span></div></div>
+  <div class="config-line t-cli"><div class="ln">15</div><div class="lc">vlan 20<span class="label lbl-cli">CLI</span></div></div>
+  <div class="config-line t-cli"><div class="ln">16</div><div class="lc"> name VOICE<span class="label lbl-cli">CLI — sub-command (indented)</span></div></div>
+  <div class="config-line t-blank"><div class="ln">17</div><div class="lc">!</div></div>
+  <div class="config-line t-section"><div class="ln">18</div><div class="lc">! --- Layer 2 Access Port (PC + Phone) ---<span class="label lbl-sec">SECTION MARKER</span></div></div>
+  <div class="config-line t-cli"><div class="ln">19</div><div class="lc">interface GigabitEthernet1/0/1<span class="label lbl-cli">CLI — section header</span></div></div>
+  <div class="config-line t-cli"><div class="ln">20</div><div class="lc"> description PC_and_Phone_Port<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-cli"><div class="ln">21</div><div class="lc"> switchport mode access<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-cli"><div class="ln">22</div><div class="lc"> switchport access vlan 10<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-cli"><div class="ln">23</div><div class="lc"> switchport voice vlan 20<span class="label lbl-cli">CLI — sub-command ⚠ CAVEAT: no native EXOS equivalent</span></div></div>
+  <div class="config-line t-cli"><div class="ln">24</div><div class="lc"> spanning-tree portfast<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-cli"><div class="ln">25</div><div class="lc"> spanning-tree bpduguard enable<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-blank"><div class="ln">26</div><div class="lc">!</div></div>
+  <div class="config-line t-section"><div class="ln">27</div><div class="lc">! --- Uplink to Distribution (Trunk) ---<span class="label lbl-sec">SECTION MARKER</span></div></div>
+  <div class="config-line t-cli"><div class="ln">28</div><div class="lc">interface GigabitEthernet1/1/1<span class="label lbl-cli">CLI</span></div></div>
+  <div class="config-line t-cli"><div class="ln">29</div><div class="lc"> description UPLINK_TO_DISTRIBUTION<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-cli"><div class="ln">30</div><div class="lc"> switchport mode trunk<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-cli"><div class="ln">31</div><div class="lc"> switchport trunk allowed vlan 10,20<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-blank"><div class="ln">32</div><div class="lc">!</div></div>
+  <div class="config-line t-section"><div class="ln">33</div><div class="lc">! --- Management Interface ---<span class="label lbl-sec">SECTION MARKER</span></div></div>
+  <div class="config-line t-cli"><div class="ln">34</div><div class="lc">interface Vlan1<span class="label lbl-cli">CLI</span></div></div>
+  <div class="config-line t-cli"><div class="ln">35</div><div class="lc"> ip address 192.168.1.10 255.255.255.0<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-cli"><div class="ln">36</div><div class="lc"> no shutdown<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-blank"><div class="ln">37</div><div class="lc">!</div></div>
+  <div class="config-line t-cli"><div class="ln">38</div><div class="lc">ip default-gateway 192.168.1.1<span class="label lbl-cli">CLI — global command</span></div></div>
+</div>
+</section>
+
+<!-- ── ANNOTATED: CORE ── -->
+<section id="annotated-core">
+<h2>Annotated Example — Core / Distribution Layer Switch</h2>
+
+<div class="config-view">
+  <div class="cv-header"><strong>Core-Switch-01 — from uploaded .docx</strong><span>Colour = how the parser classifies each line</span></div>
+
+  <div class="config-line t-prose"><div class="ln">1</div><div class="lc">2. Core/Distribution Layer Configuration<span class="label lbl-prose">PROSE — device role label</span></div></div>
+  <div class="config-line t-prose"><div class="ln">2</div><div class="lc">This layer handles routing (Inter-VLAN) and high-speed backbone traffic.<span class="label lbl-prose">PROSE</span></div></div>
+  <div class="config-line t-blank"><div class="ln">3</div><div class="lc"> </div></div>
+  <div class="config-line t-section"><div class="ln">4</div><div class="lc">! --- Routing and Gateways ---<span class="label lbl-sec">SECTION MARKER</span></div></div>
+  <div class="config-line t-cli"><div class="ln">5</div><div class="lc">hostname Core-Switch-01<span class="label lbl-cli">CLI</span></div></div>
+  <div class="config-line t-cli"><div class="ln">6</div><div class="lc">ip routing<span class="label lbl-cli">CLI — enables L3 routing</span></div></div>
+  <div class="config-line t-blank"><div class="ln">7</div><div class="lc">!</div></div>
+  <div class="config-line t-section"><div class="ln">8</div><div class="lc">! --- Switch Virtual Interfaces (Gateways) ---<span class="label lbl-sec">SECTION MARKER</span></div></div>
+  <div class="config-line t-cli"><div class="ln">9</div><div class="lc">interface Vlan10<span class="label lbl-cli">CLI</span></div></div>
+  <div class="config-line t-cli"><div class="ln">10</div><div class="lc"> description DATA_GATEWAY<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-cli"><div class="ln">11</div><div class="lc"> ip address 10.10.10.1 255.255.255.0<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-blank"><div class="ln">12</div><div class="lc">!</div></div>
+  <div class="config-line t-cli"><div class="ln">13</div><div class="lc">interface Vlan20<span class="label lbl-cli">CLI</span></div></div>
+  <div class="config-line t-cli"><div class="ln">14</div><div class="lc"> description VOICE_GATEWAY<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-cli"><div class="ln">15</div><div class="lc"> ip address 10.10.20.1 255.255.255.0<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-blank"><div class="ln">16</div><div class="lc">!</div></div>
+  <div class="config-line t-section"><div class="ln">17</div><div class="lc">! --- DHCP Pool for Data VLAN ---<span class="label lbl-sec">SECTION MARKER</span></div></div>
+  <div class="config-line t-cli"><div class="ln">18</div><div class="lc">ip dhcp excluded-address 10.10.10.1 10.10.10.10<span class="label lbl-cli">CLI</span></div></div>
+  <div class="config-line t-cli"><div class="ln">19</div><div class="lc">ip dhcp pool DATA_POOL<span class="label lbl-cli">CLI</span></div></div>
+  <div class="config-line t-cli"><div class="ln">20</div><div class="lc"> network 10.10.10.0 255.255.255.0<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-cli"><div class="ln">21</div><div class="lc"> default-router 10.10.10.1<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-cli"><div class="ln">22</div><div class="lc"> dns-server 8.8.8.8<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-blank"><div class="ln">23</div><div class="lc">!</div></div>
+  <div class="config-line t-section"><div class="ln">24</div><div class="lc">! --- Downlink to Access Switch (Trunk) ---<span class="label lbl-sec">SECTION MARKER</span></div></div>
+  <div class="config-line t-cli"><div class="ln">25</div><div class="lc">interface GigabitEthernet1/0/1<span class="label lbl-cli">CLI</span></div></div>
+  <div class="config-line t-cli"><div class="ln">26</div><div class="lc"> description DOWNLINK_TO_ACCESS<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-cli"><div class="ln">27</div><div class="lc"> switchport mode trunk<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-cli"><div class="ln">28</div><div class="lc"> switchport trunk allowed vlan 10,20<span class="label lbl-cli">CLI — sub-command</span></div></div>
+  <div class="config-line t-blank"><div class="ln">29</div><div class="lc">!</div></div>
+  <div class="config-line t-prose"><div class="ln">30</div><div class="lc">Key Deployment Steps<span class="label lbl-prose">PROSE — ignored by translator</span></div></div>
+  <div class="config-line t-prose"><div class="ln">31</div><div class="lc">Initial Setup: Use configure terminal to enter global configuration mode.<span class="label lbl-prose">PROSE — ignored</span></div></div>
+  <div class="config-line t-prose"><div class="ln">32</div><div class="lc">Connectivity: Verify using show ip interface brief or show running-config.<span class="label lbl-prose">PROSE — ignored</span></div></div>
+  <div class="config-line t-prose"><div class="ln">33</div><div class="lc">Security: Implement enable secret and vty line passwords.<span class="label lbl-prose">PROSE — ignored</span></div></div>
+  <div class="config-line t-prose"><div class="ln">34</div><div class="lc">For modern deployments, Cisco recommends Catalyst Center (DNA Center)...<span class="label lbl-prose">PROSE — ignored</span></div></div>
+</div>
+
+<div class="box ok"><p>✅ <strong>Parser result for this document:</strong> 2 device configs detected | 8 sections extracted | 28 CLI commands ready for translation | 6 prose blocks identified and stripped | 0 parse errors.</p></div>
+</section>
+
+<!-- ── TEMPLATE SPEC ── -->
+<section id="template-spec">
+<h2>Template Specification</h2>
+<p>Follow these rules when preparing your config file. The closer your file matches this format, the more accurate the translation.</p>
+
+<div class="spec-box">
+  <h4>Required Format Rules</h4>
+  <div class="spec-row"><span class="sk">Section markers</span><span class="sv">Use <code>! --- SECTION NAME ---</code> before each logical block. The translator uses these as output headings.</span></div>
+  <div class="spec-row"><span class="sk">Device boundaries</span><span class="sv">Separate multiple device configs with <code>! ============</code> and a hostname line. Each device is translated independently.</span></div>
+  <div class="spec-row"><span class="sk">Indentation</span><span class="sv">Use 1 space indent for sub-mode commands (interface body, router body, etc.). Deeper nesting (e.g. BGP address-family) use 2 spaces.</span></div>
+  <div class="spec-row"><span class="sk">Placeholders</span><span class="sv">Use <code>&lt;UPPERCASE_NAME&gt;</code> for unfilled values. These are carried through and flagged in the output.</span></div>
+  <div class="spec-row"><span class="sk">Comments / intent</span><span class="sv">Use <code>! Your note here</code> (without ---) to annotate intent. These are shown in the output as context notes.</span></div>
+  <div class="spec-row"><span class="sk">Prose text</span><span class="sv">Optional. Include deployment notes or design context — the parser reads it for device role detection only.</span></div>
+</div>
+</section>
+
+<!-- ── SUPPORTED SECTIONS ── -->
+<section id="supported-sections">
+<h2>Supported Config Sections</h2>
+<table>
+  <tr><th>Section Type</th><th>Cisco Keywords</th><th>EXOS Translation</th><th>Status</th></tr>
+  <tr><td>Hostname / Global</td><td><code>hostname</code>, <code>enable secret</code>, <code>service</code></td><td><code>configure snmp sysName</code>, <code>configure banner</code></td><td><span class="badge g">Supported</span></td></tr>
+  <tr><td>VLAN Database</td><td><code>vlan &lt;id&gt;</code>, <code>name</code></td><td><code>create vlan &lt;name&gt; tag &lt;id&gt;</code></td><td><span class="badge g">Supported</span></td></tr>
+  <tr><td>Access Ports</td><td><code>switchport mode access</code>, <code>switchport access vlan</code></td><td><code>configure vlan &lt;name&gt; add ports &lt;p&gt; untagged</code></td><td><span class="badge g">Supported</span></td></tr>
+  <tr><td>Trunk Ports</td><td><code>switchport mode trunk</code>, <code>switchport trunk allowed vlan</code></td><td><code>configure vlan &lt;name&gt; add ports &lt;p&gt; tagged</code> × each VLAN</td><td><span class="badge g">Supported</span></td></tr>
+  <tr><td>SVI / L3 VLAN</td><td><code>interface Vlan&lt;id&gt;</code>, <code>ip address</code></td><td><code>configure vlan &lt;name&gt; ipaddress &lt;ip&gt;/&lt;prefix&gt;</code> + <code>enable ipforwarding</code></td><td><span class="badge g">Supported</span></td></tr>
+  <tr><td>Spanning Tree</td><td><code>spanning-tree portfast</code>, <code>bpduguard enable</code></td><td><code>enable stpd s0 auto-edge ports &lt;p&gt;</code>, <code>enable stpd s0 ports bpdu-restrict</code></td><td><span class="badge g">Supported</span></td></tr>
+  <tr><td>Default Gateway</td><td><code>ip default-gateway</code></td><td><code>configure iproute add default &lt;gw&gt;</code></td><td><span class="badge g">Supported</span></td></tr>
+  <tr><td>IP Routing</td><td><code>ip routing</code></td><td><code>enable ipforwarding</code></td><td><span class="badge g">Supported</span></td></tr>
+  <tr><td>DHCP Server</td><td><code>ip dhcp pool</code>, <code>ip dhcp excluded-address</code></td><td><code>configure dhcp-server</code> block</td><td><span class="badge g">Supported</span></td></tr>
+  <tr><td>Static Routes</td><td><code>ip route</code></td><td><code>configure iproute add</code></td><td><span class="badge g">Supported</span></td></tr>
+  <tr><td>Management (VTY)</td><td><code>line vty</code>, <code>transport input ssh</code></td><td><code>enable ssh2</code>, <code>configure ssh2</code></td><td><span class="badge g">Supported</span></td></tr>
+  <tr><td>NTP</td><td><code>ntp server</code></td><td><code>configure ntp server add</code></td><td><span class="badge g">Supported</span></td></tr>
+  <tr><td>SNMP</td><td><code>snmp-server community</code></td><td><code>configure snmp add community</code></td><td><span class="badge g">Supported</span></td></tr>
+  <tr><td>OSPF</td><td><code>router ospf</code>, <code>network ... area</code></td><td><code>configure ospf add vlan &lt;name&gt; area &lt;id&gt;</code></td><td><span class="badge g">Supported</span></td></tr>
+  <tr><td>Voice VLAN</td><td><code>switchport voice vlan</code></td><td>LLDP-MED policy required</td><td><span class="badge y">Caveat</span></td></tr>
+  <tr><td>Port-Channel / LAG</td><td><code>interface Port-channel</code>, <code>channel-group</code></td><td><code>enable sharing</code> / <code>configure sharing</code></td><td><span class="badge y">Partial</span></td></tr>
+  <tr><td>ACL</td><td><code>ip access-list</code></td><td><code>create access-list</code></td><td><span class="badge y">Partial</span></td></tr>
+  <tr><td>AAA / RADIUS / TACACS</td><td><code>aaa new-model</code>, <code>radius-server</code></td><td>EXOS AAA config block</td><td><span class="badge y">Partial</span></td></tr>
+  <tr><td>NX-OS Feature Lines</td><td><code>feature ospf</code>, <code>feature bgp</code></td><td>Noted as prerequisites — not translated</td><td><span class="badge y">Noted</span></td></tr>
+</table>
+</section>
+
+<!-- ── DOWNLOAD ── -->
+<section id="download">
+<h2>Download Template</h2>
+<p>Use this template as your starting point. Fill in your network parameters, save as <code>.cfg</code> or <code>.txt</code>, and upload to the Config Translator tab.</p>
+<div class="dl-bar">
+  <a class="dl-btn dl-primary" href="../data/templates/cisco_campus_config_template.cfg" download>⬇ Download .cfg Template</a>
+  <a class="dl-btn dl-secondary" href="config_translator_template.html" download>⬇ Download This Guide (HTML)</a>
+</div>
+<div class="box"><p>The template includes two device configs: an Access Layer switch and a Core/Distribution switch — covering VLANs, L2 access ports, trunks, L3 SVIs, DHCP, and management. Extend it by adding more <code>interface</code> or <code>router</code> blocks following the same pattern.</p></div>
+</section>
+
+<!-- ── KNOWN CAVEATS ── -->
+<section id="caveats">
+<h2>Known Caveats — Cisco → ExtremeXOS 33.x</h2>
+<p>These differences are automatically noted in the translated output as inline caveat comments.</p>
+<table>
+  <tr><th>Cisco Feature</th><th>EXOS Handling</th><th>Caveat Note in Output</th></tr>
+  <tr><td><code>switchport voice vlan &lt;id&gt;</code></td><td>No native voice VLAN concept. Use LLDP-MED media policy.</td><td><code># CAVEAT: Configure LLDP-MED policy for IP phone VLAN assignment</code></td></tr>
+  <tr><td><code>spanning-tree portfast</code></td><td><code>enable stpd s0 auto-edge ports &lt;p&gt;</code></td><td><code># Verified: ExtremeXOS 33.x — RSTP edge port</code></td></tr>
+  <tr><td><code>spanning-tree bpduguard enable</code></td><td><code>enable stpd s0 ports bpdu-restrict ports &lt;p&gt;</code></td><td><code># Verified: ExtremeXOS 33.x</code></td></tr>
+  <tr><td>Interface sub-mode syntax</td><td>Flat verb-noun syntax — no interface sub-mode in EXOS</td><td><code># EXOS is flat — each command references port/vlan by name</code></td></tr>
+  <tr><td><code>ip routing</code></td><td><code>enable ipforwarding</code> required per VLAN</td><td><code># CAVEAT: enable ipforwarding required for each L3 VLAN</code></td></tr>
+  <tr><td><code>ip dhcp pool</code></td><td>EXOS DHCP requires <code>configure dhcp-server</code> + <code>enable dhcp-server</code></td><td><code># CAVEAT: EXOS DHCP server must be explicitly enabled</code></td></tr>
+  <tr><td><code>switchport trunk native vlan &lt;id&gt;</code></td><td>EXOS: untagged port membership per VLAN</td><td><code># CAVEAT: Set native VLAN as untagged in EXOS port config</code></td></tr>
+  <tr><td>Port numbering (Gi1/0/1)</td><td>EXOS uses slot:port notation (e.g. 1:1) or simple port number</td><td><code># CAVEAT: Renumber ports per your EXOS hardware slot/port map</code></td></tr>
+  <tr><td><code>enable secret</code></td><td><code>configure account admin &lt;password&gt;</code></td><td><code># Verified: ExtremeXOS 33.x</code></td></tr>
+</table>
+</section>
+
+<!-- ── ACCEPTED FILE FORMATS ── -->
+<section id="formats">
+<h2>Accepted File Formats</h2>
+<table>
+  <tr><th>Format</th><th>Extension</th><th>Notes</th></tr>
+  <tr><td>Cisco running-config export</td><td><code>.cfg</code>, <code>.txt</code>, <code>.conf</code></td><td>Best format — pure CLI, no prose extraction needed</td></tr>
+  <tr><td>Word document</td><td><code>.docx</code></td><td>Prose and CLI blocks extracted automatically. Works for design documents mixed with config.</td></tr>
+  <tr><td>Plain text</td><td><code>.txt</code></td><td>Same as .cfg — any text file containing Cisco config lines</td></tr>
+  <tr><td>Paste (no file)</td><td>—</td><td>Paste directly into the text area in the Config Translator tab</td></tr>
+</table>
+<div class="box warn"><p>⚠ <strong>Not currently supported:</strong> PDF, Excel, binary formats. For PDF config exports, copy-paste the text into the translator text area.</p></div>
+
+<hr>
+<p style="font-size:12px;color:var(--mut);">© 2026 Khursheed Khan · Extreme Networks SA Team · CISCO-EN CLI Mapping Agent · <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent" target="_blank">GitHub</a></p>
+</section>
+
+</main>
+</div>
+
+<script>
+var links = document.querySelectorAll('nav a');
+var obs = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting){
+      links.forEach(function(l){l.classList.remove('active');});
+      var a = document.querySelector('nav a[href="#'+e.target.id+'"]');
+      if(a) a.classList.add('active');
+    }
+  });
+},{threshold:0.3,rootMargin:'-48px 0px 0px 0px'});
+document.querySelectorAll('section[id]').forEach(function(s){obs.observe(s);});
+</script>
+</body>
+</html>
