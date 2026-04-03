@@ -402,28 +402,50 @@ def render_config_translator():
         pr           = st.session_state[_SK_PARSE]
         tgt_info     = TARGET_OS_OPTIONS[st.session_state[_SK_TGT_OS]]
 
-        # ── Summary metrics ───────────────────────────────────────
+        # ── Quality Gate Banner ───────────────────────────────────
         st.markdown("---")
         st.markdown("### 5. Translation Results")
 
+        cal = st.session_state[_SK_CAL]
+        threshold = cal.get("confidence_threshold", 70)
+        strictness = cal.get("strictness", "balanced")
+        active_cats = cal.get("active_categories", [])
+
+        if verify_list:
+            avg_conf = sum(v.overall_confidence for v in verify_list) / len(verify_list)
+            conf_col = _confidence_colour(avg_conf)
+            pass_fail = avg_conf >= threshold
+            pass_icon = "✅ PASS" if pass_fail else "⚠ REVIEW REQUIRED"
+            pass_colour = "#238636" if pass_fail else "#9e6a03"
+
+            st.markdown(
+                f"""
+<div style='background:{pass_colour}22;border:1px solid {pass_colour};border-radius:8px;
+padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;'>
+  <div style='font-size:36px;font-weight:800;color:{conf_col};'>{avg_conf:.0f}%</div>
+  <div>
+    <div style='font-size:16px;font-weight:700;color:{pass_colour};'>{pass_icon}</div>
+    <div style='font-size:12px;color:#8b949e;'>Threshold: {threshold}% &nbsp;·&nbsp;
+    Strictness: {strictness.title()} &nbsp;·&nbsp;
+    {len(active_cats)} categories active</div>
+  </div>
+  <div style='margin-left:auto;font-size:12px;color:#8b949e;text-align:right;'>
+    ✅ {sum(1 for v in verify_list for s in v.scores if s.status=="preserved")} preserved &nbsp;
+    ⚠ {sum(1 for v in verify_list for s in v.scores if s.status in ("review","partial"))} review &nbsp;
+    ❌ {sum(1 for v in verify_list for s in v.scores if s.status=="failed")} failed
+  </div>
+</div>""",
+                unsafe_allow_html=True,
+            )
+        else:
+            avg_conf = 0
+
         s = result.stats
-        c1, c2, c3, c4, c5 = st.columns(5)
+        c1, c2, c3, c4 = st.columns(4)
         c1.metric("Sections Translated", s["sections_translated"])
         c2.metric("RAG Verified Lines",  s["lines_verified"])
         c3.metric("Caveats",             s["caveats"])
         c4.metric("No Equivalents",      s["no_equivalents"])
-
-        # Overall confidence (average across all devices)
-        if verify_list:
-            avg_conf = sum(v.overall_confidence for v in verify_list) / len(verify_list)
-            conf_col = _confidence_colour(avg_conf)
-            c5.markdown(
-                f"<div style='text-align:center'>"
-                f"<div style='font-size:12px;color:#8b949e;'>Blueprint Confidence</div>"
-                f"<div style='font-size:28px;font-weight:700;color:{conf_col};'>{avg_conf:.0f}%</div>"
-                f"</div>",
-                unsafe_allow_html=True,
-            )
 
         # ── Timing breakdown ──────────────────────────────────────
         with st.expander("⏱ Translation Timing Breakdown", expanded=False):
@@ -559,58 +581,24 @@ def render_config_translator():
                         unsafe_allow_html=True,
                     )
 
-            # ── Calibration panel ─────────────────────────────────
-            with st.expander("⚙️ Intent Verification Calibration", expanded=False):
-                cal = st.session_state[_SK_CAL]
-
-                new_threshold = st.slider(
-                    "Confidence threshold (%)",
-                    min_value=50, max_value=95,
-                    value=cal.get("confidence_threshold", 70),
-                    step=5,
-                    help="Intents scoring below this threshold are flagged as requiring review.",
-                )
-                new_strictness = st.radio(
-                    "Translation strictness",
-                    options=["strict", "balanced", "lenient"],
-                    index=["strict", "balanced", "lenient"].index(cal.get("strictness", "balanced")),
-                    horizontal=True,
-                    help=(
-                        "Strict: exact syntax match required. "
-                        "Balanced: functional equivalence counts. "
-                        "Lenient: topology/function preservation only."
-                    ),
-                )
-                st.markdown("**Active intent categories:**")
-                all_cats = list(DEFAULT_CALIBRATION["category_weights"].keys())
-                active_cats = cal.get("active_categories", all_cats)
-                new_cats = []
-                cols = st.columns(3)
-                for i, cat in enumerate(all_cats):
-                    with cols[i % 3]:
-                        if st.checkbox(cat, value=cat in active_cats, key=f"ct_cat_{cat}"):
-                            new_cats.append(cat)
-
-                if st.button("Apply Calibration & Re-verify", type="secondary"):
-                    st.session_state[_SK_CAL] = {
-                        **cal,
-                        "confidence_threshold": new_threshold,
-                        "strictness": new_strictness,
-                        "active_categories": new_cats,
-                    }
-                    # Re-run verification with new settings
-                    new_verify = []
-                    for im in intent_maps:
-                        tgt_info2 = TARGET_OS_OPTIONS[st.session_state[_SK_TGT_OS]]
-                        vr2 = verify_translation(
-                            intent_map=im,
-                            translated_script=result.full_script,
-                            target_version=tgt_info2["version"],
-                            calibration=st.session_state[_SK_CAL],
-                        )
-                        new_verify.append(vr2)
-                    st.session_state[_SK_VERIFY] = new_verify
-                    st.rerun()
+            # ── Re-verify with updated sidebar settings ───────────
+            st.caption(
+                "To adjust quality settings (threshold, strictness, categories), "
+                "use the **🎯 Translation Quality** panel in the sidebar, then click Re-verify below."
+            )
+            if st.button("🔄 Re-verify with current quality settings", type="secondary"):
+                new_verify = []
+                for im in intent_maps:
+                    tgt_info2 = TARGET_OS_OPTIONS[st.session_state[_SK_TGT_OS]]
+                    vr2 = verify_translation(
+                        intent_map=im,
+                        translated_script=result.full_script,
+                        target_version=tgt_info2["version"],
+                        calibration=st.session_state[_SK_CAL],
+                    )
+                    new_verify.append(vr2)
+                st.session_state[_SK_VERIFY] = new_verify
+                st.rerun()
 
         # ── Download buttons ──────────────────────────────────────
         st.markdown("---")

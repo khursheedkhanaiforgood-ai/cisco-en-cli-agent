@@ -17,11 +17,13 @@ from src.ui.components.db_browser import render_db_browser
 from src.ui.components.e2e_wizard import render_e2e_wizard
 from src.ui.components.config_translator import render_config_translator
 from src.ui.components.rag_settings import init_rag_settings, render_rag_settings_panel
+from src.ui.components.translation_quality import init_translation_quality, render_translation_quality_panel
 from src.ui.components.data_ingest import render_data_ingest
 from src.ui.components.auth import render_login_gate, render_user_badge
 
-# Initialise RAG session state defaults
+# Initialise RAG + Translation Quality session state defaults
 init_rag_settings()
+init_translation_quality()
 
 # Ensure DB schema exists on every startup (idempotent — skips if tables already exist)
 if "db_init_done" not in st.session_state:
@@ -98,6 +100,8 @@ with st.sidebar:
 
     st.divider()
     render_rag_settings_panel()
+    st.divider()
+    render_translation_quality_panel()
     st.divider()
     render_user_badge()
     st.caption("Powered by Claude claude-sonnet-4-6 + pgvector")
