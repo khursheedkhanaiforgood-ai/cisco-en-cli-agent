@@ -425,6 +425,30 @@ def render_config_translator():
                 unsafe_allow_html=True,
             )
 
+        # ── Timing breakdown ──────────────────────────────────────
+        with st.expander("⏱ Translation Timing Breakdown", expanded=False):
+            t_rag   = s.get("time_rag_s", 0)
+            t_claude = s.get("time_claude_s", 0)
+            n_calls  = s.get("time_claude_calls", 0)
+            per_call = s.get("time_claude_per_call_s", [])
+            t_total  = round(t_rag + t_claude, 2)
+
+            tc1, tc2, tc3, tc4 = st.columns(4)
+            tc1.metric("Total Time",      f"{t_total}s")
+            tc2.metric("RAG Lookups",     f"{t_rag}s")
+            tc3.metric("Claude API",      f"{t_claude}s")
+            tc4.metric("Claude Calls",    str(n_calls))
+
+            if per_call:
+                import pandas as pd
+                df_t = pd.DataFrame({
+                    "Section": [f"Section {i+1}" for i in range(len(per_call))],
+                    "Claude API (s)": per_call,
+                })
+                st.bar_chart(df_t.set_index("Section"))
+                st.caption("Each bar = one Claude API call (one config section). "
+                           "RAG lookups run in serial before translation begins.")
+
         # Warnings
         if result.warnings:
             for w in result.warnings:

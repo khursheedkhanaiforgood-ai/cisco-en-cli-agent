@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import logging
 import re
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
@@ -293,8 +294,9 @@ def _parse_translated_output(raw: str) -> list[TranslatedLine]:
     return lines
 
 
-def _call_claude(user_prompt: str) -> str:
-    """Call Claude API and return the text response."""
+def _call_claude(user_prompt: str) -> tuple[str, float]:
+    """Call Claude API and return (text response, elapsed_seconds)."""
+    t0 = time.perf_counter()
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     message = client.messages.create(
         model=CLAUDE_MODEL,
@@ -302,7 +304,8 @@ def _call_claude(user_prompt: str) -> str:
         system=_get_system_prompt(),
         messages=[{"role": "user", "content": user_prompt}],
     )
-    return message.content[0].text if message.content else ""
+    elapsed = round(time.perf_counter() - t0, 2)
+    return (message.content[0].text if message.content else ""), elapsed
 
 
 # ── Public API ────────────────────────────────────────────────────────────────
@@ -344,13 +347,16 @@ def translate_config(
 
     # ── RAG lookup for all sections (in batch for efficiency) ──────────────
     rag_map: dict[str, list[dict]] = {}
+    t_rag_start = time.perf_counter()
     for i, sec in enumerate(translatable):
         _progress(i, f"Looking up RAG database: {sec.header[:50]}…")
         hits = _rag_lookup(sec, target_col)
         rag_map[sec.header] = hits
+    t_rag_total = round(time.perf_counter() - t_rag_start, 2)
 
     # ── Decide: section-by-section or chunked ─────────────────────────────
     use_chunks = total > _CHUNK_SIZE
+    claude_call_times: list[float] = []
 
     if use_chunks:
         # Split into chunks of _CHUNK_SIZE sections
@@ -371,7 +377,8 @@ def translate_config(
                 source_os, ci, total_chunks,
             )
             try:
-                raw = _call_claude(prompt)
+                raw, elapsed = _call_claude(prompt)
+                claude_call_times.append(elapsed)
                 raw_outputs.append(raw)
             except Exception as e:
                 logger.error(f"Claude call failed for chunk {ci}: {e}")
@@ -405,7 +412,8 @@ def translate_config(
                 sec, hits, target_col, target_version, source_os
             )
             try:
-                raw = _call_claude(prompt)
+                raw, elapsed = _call_claude(prompt)
+                claude_call_times.append(elapsed)
             except Exception as e:
                 logger.error(f"Claude call failed for section '{sec.header}': {e}")
                 warnings.append(f"Section '{sec.header}' failed: {e}")
@@ -432,12 +440,18 @@ def translate_config(
 
     # ── Stats ──────────────────────────────────────────────────────────────
     all_lines = [l for ts in translated_sections for l in ts.translated_lines]
+    t_claude_total = round(sum(claude_call_times), 2)
     stats = {
         "sections_translated": len(translated_sections),
         "rag_hits_total": sum(ts.rag_hits for ts in translated_sections),
         "lines_verified": sum(1 for l in all_lines if l.status == "verified"),
         "lines_unverified": sum(1 for l in all_lines if l.status == "unverified"),
         "caveats": sum(1 for l in all_lines if l.status == "caveat"),
+        # ── Timing breakdown ──
+        "time_rag_s": t_rag_total,
+        "time_claude_s": t_claude_total,
+        "time_claude_calls": len(claude_call_times),
+        "time_claude_per_call_s": [round(t, 2) for t in claude_call_times],
         "no_equivalents": sum(1 for l in all_lines if l.status == "no_equivalent"),
         "warnings": len(warnings),
         "chunked": use_chunks,
