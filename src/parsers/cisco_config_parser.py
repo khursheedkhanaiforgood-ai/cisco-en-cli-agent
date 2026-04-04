@@ -617,6 +617,179 @@ def render_ascii_topology(nodes: list[TopologyNode], label: str = "Input Config"
     return "\n".join(lines)
 
 
+def extract_topology_from_exos(script: str) -> list[TopologyNode]:
+    """
+    Extract topology from a translated EXOS flat-syntax script.
+    Parses lines like:
+      configure snmp sysName "hostname"
+      create vlan NAME tag ID
+      configure vlan NAME ipaddress X.X.X.X/prefix
+      enable ipforwarding [vlan NAME]
+      configure iproute add default X
+      create dhcp-server pool NAME
+      configure dhcp-server pool NAME ipaddress X/prefix
+      configure dhcp-server pool NAME default-router X
+      configure vlan NAME add ports P [untagged|tagged]
+    Returns one TopologyNode per detected device (split on sysName).
+    """
+    # Build per-device buckets, split on sysName lines
+    devices_data: list[dict] = []
+    current: dict = _empty_device_data("unknown")
+
+    # First pass: collect all VLANs globally (shared across devices in same script)
+    vlan_map: dict[int, str] = {}   # id → name
+    for line in script.splitlines():
+        s = line.strip()
+        m = re.match(r"create\s+vlan\s+(\S+)\s+tag\s+(\d+)", s, re.IGNORECASE)
+        if m:
+            vlan_map[int(m.group(2))] = m.group(1)
+
+    # Second pass: build per-device nodes
+    dhcp_pool_context: str = ""
+    for line in script.splitlines():
+        s = line.strip()
+        if not s or s.startswith("#"):
+            continue
+
+        # Device boundary: sysName
+        m = re.match(r'configure\s+snmp\s+sysName\s+"?([^"]+)"?', s, re.IGNORECASE)
+        if m:
+            hostname = m.group(1).strip()
+            # If current device has content beyond "unknown", save it
+            if current["hostname"] != "unknown" or current["svis"] or current["routing_enabled"]:
+                devices_data.append(current)
+            current = _empty_device_data(hostname)
+            # Attach global vlan_map
+            current["vlans"] = [{"id": vid, "name": vname} for vid, vname in vlan_map.items()]
+            continue
+
+        # SVI: configure vlan NAME ipaddress X.X.X.X/prefix
+        m = re.match(r"configure\s+vlan\s+(\S+)\s+ipaddress\s+([\d\.]+)/(\d+)", s, re.IGNORECASE)
+        if m:
+            vname, ip, prefix = m.group(1), m.group(2), m.group(3)
+            vid = next((vid for vid, n in vlan_map.items() if n == vname), 0)
+            current["svis"].append({"vlan": vid, "vlan_name": vname, "ip": f"{ip}/{prefix}", "mask": ""})
+            continue
+
+        # IP forwarding (global or per-vlan)
+        if re.match(r"enable\s+ipforwarding\b", s, re.IGNORECASE):
+            current["routing_enabled"] = True
+            continue
+
+        # Default gateway
+        m = re.match(r"configure\s+iproute\s+add\s+default\s+([\d\.]+)", s, re.IGNORECASE)
+        if m:
+            current["default_gateway"] = m.group(1)
+            continue
+
+        # DHCP pool start
+        m = re.match(r"create\s+dhcp-server\s+pool\s+(\S+)", s, re.IGNORECASE)
+        if m:
+            dhcp_pool_context = m.group(1)
+            current["dhcp_pools"].append({"name": dhcp_pool_context, "network": "", "gateway": "", "dns": ""})
+            continue
+
+        # DHCP pool network
+        m = re.match(r"configure\s+dhcp-server\s+pool\s+(\S+)\s+ipaddress\s+([\d\.]+)/(\d+)", s, re.IGNORECASE)
+        if m:
+            pname, net, prefix = m.group(1), m.group(2), m.group(3)
+            for p in current["dhcp_pools"]:
+                if p["name"] == pname:
+                    p["network"] = net
+                    break
+            continue
+
+        # DHCP default-router
+        m = re.match(r"configure\s+dhcp-server\s+pool\s+(\S+)\s+default-router\s+([\d\.]+)", s, re.IGNORECASE)
+        if m:
+            pname, gw = m.group(1), m.group(2)
+            for p in current["dhcp_pools"]:
+                if p["name"] == pname:
+                    p["gateway"] = gw
+                    break
+            continue
+
+        # Port untagged (access)
+        m = re.match(r"configure\s+vlan\s+(\S+)\s+add\s+ports?\s+(\S+)\s+untagged", s, re.IGNORECASE)
+        if m:
+            vname, port = m.group(1), m.group(2)
+            vid = next((vid for vid, n in vlan_map.items() if n == vname), 0)
+            iface = _get_or_create_iface(current["interfaces"], port)
+            iface["mode"] = "access"
+            iface["access_vlan"] = vid
+            iface["access_vlan_name"] = vname
+            if port not in current["access_ports"]:
+                current["access_ports"].append(port)
+            continue
+
+        # Port tagged (trunk)
+        m = re.match(r"configure\s+vlan\s+(\S+)\s+add\s+ports?\s+(\S+)\s+tagged", s, re.IGNORECASE)
+        if m:
+            vname, port = m.group(1), m.group(2)
+            iface = _get_or_create_iface(current["interfaces"], port)
+            iface["mode"] = "trunk"
+            tv = iface.get("trunk_vlans_list", [])
+            tv.append(vname)
+            iface["trunk_vlans_list"] = tv
+            iface["trunk_vlans"] = ",".join(tv)
+            if port not in current["uplinks"]:
+                current["uplinks"].append(port)
+                # remove from access_ports if it was added there
+                current["access_ports"] = [p for p in current["access_ports"] if p != port]
+            continue
+
+    # Save last device
+    devices_data.append(current)
+
+    # Build TopologyNodes
+    nodes: list[TopologyNode] = []
+    for d in devices_data:
+        # Ensure vlans list is populated
+        if not d["vlans"]:
+            d["vlans"] = [{"id": vid, "name": vname} for vid, vname in vlan_map.items()]
+        # Convert SVI ip/mask for render_ascii_topology compatibility
+        for svi in d["svis"]:
+            if "/" in svi["ip"]:
+                parts = svi["ip"].split("/")
+                svi["ip"] = parts[0]
+                svi["mask"] = f"/{parts[1]}"
+        nodes.append(TopologyNode(
+            hostname=d["hostname"],
+            vlans=d["vlans"],
+            interfaces=d["interfaces"],
+            svis=d["svis"],
+            routing_enabled=d["routing_enabled"],
+            dhcp_pools=d["dhcp_pools"],
+            default_gateway=d["default_gateway"],
+            uplinks=d["uplinks"],
+            access_ports=d["access_ports"],
+        ))
+    return nodes
+
+
+def _empty_device_data(hostname: str) -> dict:
+    return {
+        "hostname": hostname,
+        "vlans": [],
+        "interfaces": [],
+        "svis": [],
+        "routing_enabled": False,
+        "dhcp_pools": [],
+        "default_gateway": None,
+        "uplinks": [],
+        "access_ports": [],
+    }
+
+
+def _get_or_create_iface(interfaces: list, port: str) -> dict:
+    for i in interfaces:
+        if i["name"] == port:
+            return i
+    iface = {"name": port}
+    interfaces.append(iface)
+    return iface
+
+
 def _prefix(mask: str) -> str:
     """Convert dotted-decimal subnet mask to prefix length."""
     try:

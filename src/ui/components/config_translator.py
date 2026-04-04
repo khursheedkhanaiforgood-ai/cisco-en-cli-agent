@@ -33,6 +33,7 @@ from src.agents.intent_verify_agent import (
 from src.parsers.cisco_config_parser import (
     parse_config,
     extract_topology,
+    extract_topology_from_exos,
     render_ascii_topology,
 )
 
@@ -643,7 +644,7 @@ padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:24px;fl
                 st.code(st.session_state[_SK_TOPO_BEFORE], language=None)
             with topo_col2:
                 st.markdown(f"**🟢 After ({tgt_info['version']})**")
-                after_topo_nodes = extract_topology(parse_config(result.full_script))
+                after_topo_nodes = extract_topology_from_exos(result.clean_script)
                 after_topo = render_ascii_topology(
                     after_topo_nodes,
                     label=f"Translated Config ({tgt_info['version']})"

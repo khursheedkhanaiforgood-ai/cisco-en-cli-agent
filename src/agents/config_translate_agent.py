@@ -154,7 +154,8 @@ class TranslationResult:
                 if stripped.startswith("# ──") or stripped.startswith("# ════"):
                     clean_lines.append(line.text)
                 # Keep actual EXOS commands (verified or unverified — not comment/caveat/no_equiv)
-                elif line.status in ("verified", "unverified"):
+                # Exclude annotation lines like "# Verified: ExtremeXOS 33.x" that carry status="verified"
+                elif line.status in ("verified", "unverified") and not stripped.startswith("#"):
                     clean_lines.append(line.text)
                 # Drop: # Verified, # Unverified, # CAVEAT, # NO EQUIVALENT, # NX-OS, # NOTE, # Source
             if clean_lines:
