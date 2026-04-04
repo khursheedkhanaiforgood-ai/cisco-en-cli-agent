@@ -67,6 +67,7 @@ h3 a:hover,li a:hover,td a:hover{color:#58a6ff;}
   <button class="tab-btn active" onclick="switchTab('day1',this)">&#128197; Day 1 &mdash; March 31, 2026</button>
   <button class="tab-btn" onclick="switchTab('day2',this)">&#128197; Day 2 &mdash; April 1, 2026</button>
   <button class="tab-btn" onclick="switchTab('day3',this)">&#128197; Day 3 &mdash; April 2, 2026</button>
+  <button class="tab-btn" onclick="switchTab('day4',this)">&#128197; Day 4 &mdash; April 3, 2026</button>
 </div>
 
 <div class="body-wrap">
@@ -140,6 +141,29 @@ h3 a:hover,li a:hover,td a:hover{color:#58a6ff;}
     <a href="#d2-pgdump">pg_dump Backup</a>
     <a href="#d2-sprints">Sprint Roadmap (0-9)</a>
     <a href="#d2-security">Security Notes</a>
+  </nav>
+
+  <!-- NAV DAY 4 -->
+  <nav id="nav-day4" style="display:none;">
+    <h2>Navigation</h2>
+    <div class="section-label">Sprint 14</div>
+    <a href="#d4-overview">Day 4 Overview</a>
+    <a href="#d4-commits">Commits</a>
+    <div class="section-label">Session 3</div>
+    <a href="#d4-confidence">Confidence Calculator</a>
+    <a href="#d4-clean-col">Clean Cisco Column</a>
+    <a href="#d4-css">Input CSS + Print Fix</a>
+    <a href="#d4-callouts">Step Callouts</a>
+    <div class="section-label">Session 4</div>
+    <a href="#d4-verified-fix">Fix: # Verified Lines</a>
+    <a href="#d4-topology-fix">Fix: EXOS Topology</a>
+    <a href="#d4-parser-routing">Parser Routing Logic</a>
+    <div class="section-label">Roadmap</div>
+    <a href="#d4-roadmap">Translation Directions</a>
+    <a href="#d4-topo-roadmap">Topology Parser Map</a>
+    <div class="section-label">Reference</div>
+    <a href="#d4-pending">Pending Items</a>
+    <a href="#d4-links">Key URLs</a>
   </nav>
 
   <!-- TAB PANEL: DAY 1 -->
@@ -1359,6 +1383,220 @@ Config snapshot saved to eve-ng-lab-platform DB</div>
 </div>
   <!-- ══════════════════════════════════════════════════════════════ END DAY 3 ══ -->
 
+  <!-- ══════════════════════════════════════════════════════════════ DAY 4 ══ -->
+  <div id="tab-day4" class="tab-panel">
+  <main>
+
+  <section id="d4-overview">
+    <h1>Sprint 14 — Config Translator (Day 4)</h1>
+    <div class="sub">April 3, 2026 &nbsp;·&nbsp; Sessions 3 &amp; 4 &nbsp;·&nbsp; Branch: <code>feature/sprint14-config-translator</code></div>
+
+    <div class="box ok"><p>Full-day sprint completing the Cisco → ExtremeXOS Config Translator: confidence calculator, clean two-column output, input highlight CSS across all tabs, topology parser fix, annotation bug fix, and translation direction roadmap.</p></div>
+
+    <table>
+      <thead><tr><th>Feature / Fix</th><th>Session</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Confidence Calculator — per-intent HTML table with formula</td><td>3</td><td><span class="badge g">done</span></td></tr>
+        <tr><td>Clean Cisco column — CLI only, prose stripped</td><td>3</td><td><span class="badge g">done</span></td></tr>
+        <tr><td>Global input highlight CSS (all tabs)</td><td>3</td><td><span class="badge g">done</span></td></tr>
+        <tr><td>Step-by-step input callouts (AI Query, Config Translator, DB Browser)</td><td>3</td><td><span class="badge g">done</span></td></tr>
+        <tr><td>Revert &lt;pre&gt; HTML → st.code() + @media print CSS (PDF fix)</td><td>3</td><td><span class="badge g">done</span></td></tr>
+        <tr><td>Fix: <code># Verified: ExtremeXOS 33.x</code> appearing as empty code blocks</td><td>4</td><td><span class="badge g">done</span></td></tr>
+        <tr><td>Fix: EXOS topology showing <code>[unknown]</code> node</td><td>4</td><td><span class="badge g">done</span></td></tr>
+        <tr><td>Add <code>extract_topology_from_exos()</code> to cisco_config_parser.py</td><td>4</td><td><span class="badge g">done</span></td></tr>
+        <tr><td>Topology parser routing — gated on source/target OS key</td><td>4</td><td><span class="badge g">done</span></td></tr>
+        <tr><td>Translation direction roadmap captured in memory + HTML</td><td>4</td><td><span class="badge g">done</span></td></tr>
+        <tr><td>Multi-device repetition in full_script / clean_script</td><td>—</td><td><span class="badge y">pending</span></td></tr>
+        <tr><td>Merge feature/sprint14 → main</td><td>—</td><td><span class="badge y">pending</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="d4-commits">
+    <h2>Commits — April 3, 2026</h2>
+    <table>
+      <thead><tr><th>Hash</th><th>Description</th><th>Files</th></tr></thead>
+      <tbody>
+        <tr><td><code>8f995b2</code></td><td>Topology parser routing by OS + EOD session HTML</td><td>config_translator.py · session_summary_20260403.html</td></tr>
+        <tr><td><code>c780771</code></td><td>Fix EXOS topology blank nodes + strip # Verified annotation lines</td><td>config_translate_agent.py · cisco_config_parser.py · config_translator.py</td></tr>
+        <tr><td><code>c152027</code></td><td>Revert to st.code() + add @media print CSS for PDF white backgrounds</td><td>app.py · config_translator.py</td></tr>
+        <tr><td><code>f3798af</code></td><td>Explicit step-by-step input callouts across all tabs</td><td>query_box.py · config_translator.py · db_browser.py</td></tr>
+        <tr><td><code>b85e3ed</code></td><td>Global input highlight CSS — color-coded widget accents</td><td>app.py</td></tr>
+        <tr><td><code>ac673c4</code></td><td>Confidence calculator + clean Cisco column + bounded EXOS view</td><td>config_translator.py · config_translate_agent.py</td></tr>
+        <tr><td><code>c45003b</code></td><td>Clean two-column Cisco | EXOS view as primary output</td><td>config_translator.py · config_translate_agent.py</td></tr>
+        <tr><td><code>5c0581d</code></td><td>Config Translator session logging + fix query history display</td><td>config_translator.py · db_browser.py</td></tr>
+        <tr><td><code>9bbe9df</code></td><td>Nested expander crash fix, extracted config download, comment colour</td><td>config_translator.py</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="d4-confidence">
+    <h2>Confidence Calculator (Section 8)</h2>
+    <p>Renamed from "Intent Verification". Per-intent HTML table with mini progress bars and full formula display.</p>
+    <div class="box"><p><strong>Formula:</strong> Overall = Σ(weight × score) / Σ(weight)<br><br>
+    <strong>Table columns:</strong> Intent ID · Category · Weight · Score (bar + %) · Status (PASS/REVIEW) · Contribution (w×score) · Note<br><br>
+    <strong>Colour coding:</strong> green ≥ threshold · amber within 15% · red below threshold</p></div>
+    <p>Totals row shows Σ weights, overall %, PASS/REVIEW icon, and the formula string explicitly — so the user can see exactly what went into the score.</p>
+  </section>
+
+  <section id="d4-clean-col">
+    <h2>Clean Cisco Column</h2>
+    <p>Left column in the two-column view now shows CLI-only Cisco commands — all prose/narrative stripped.</p>
+    <pre><code>_cisco_cli = "\n\n".join(
+    sec.raw_text for sec in pr.sections
+    if sec.section_type not in ("prose", "comment") and sec.raw_text.strip()
+)</code></pre>
+    <div class="box"><p><strong>Line count caption:</strong> "Left: Cisco CLI commands only · N lines | Right: ExtremeXOS · M lines · EXOS is longer because flat syntax requires one command per VLAN per port + explicit enables (ipforwarding, dhcp-server, ssh2)"</p></div>
+    <p>New <code>clean_script</code> property on <code>TranslationResult</code> keeps only actual EXOS commands and section divider headers — strips all <code># Verified</code>, <code># CAVEAT</code>, <code># NO EQUIVALENT</code>, <code># NX-OS PREREQUISITE</code> annotation lines.</p>
+  </section>
+
+  <section id="d4-css">
+    <h2>Input Highlight CSS + Print Fix</h2>
+    <h3>Global Input Highlight CSS</h3>
+    <p>Injected once in <code>app.py</code>, applies to all tabs:</p>
+    <table>
+      <thead><tr><th>Widget</th><th>Colour</th><th>Prefix</th></tr></thead>
+      <tbody>
+        <tr><td>Text input / textarea / number</td><td style="color:var(--pur);">Purple</td><td><code>▶</code></td></tr>
+        <tr><td>Selectbox / dropdown</td><td style="color:var(--acc);">Blue</td><td><code>▼</code></td></tr>
+        <tr><td>File uploader</td><td style="color:var(--grn);">Green</td><td><code>📂</code></td></tr>
+        <tr><td>Multiselect</td><td style="color:#f97316;">Orange</td><td><code>☰</code></td></tr>
+        <tr><td>Slider</td><td style="color:var(--yel);">Amber</td><td><code>⟵⟶</code></td></tr>
+        <tr><td>Radio</td><td style="color:#e879f9;">Pink</td><td><code>◉</code></td></tr>
+        <tr><td>Primary button</td><td style="color:var(--pur);">Purple glow ring</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <div class="box warn"><p><strong>Known limitation:</strong> Labels use <code>label_visibility="collapsed"</code> throughout the app — CSS <code>::before</code> on labels has no effect. Fixed with explicit <code>st.markdown</code> callout cards per tab instead.</p></div>
+    <h3>@media print Fix (PDF black pages)</h3>
+    <p>Previous <code>&lt;pre&gt;</code> HTML approach had two bugs: no HTML escaping + dark backgrounds print as solid black regardless of max-height CSS. Fix:</p>
+    <ol>
+      <li>Reverted both Cisco and EXOS columns to <code>st.code()</code></li>
+      <li>Added <code>@media print</code> rule in <code>app.py</code> — overrides all code block backgrounds to <code>#f6f8fa</code> (white) only when printing, preserving dark theme on screen</li>
+    </ol>
+  </section>
+
+  <section id="d4-callouts">
+    <h2>Step-by-Step Input Callouts</h2>
+    <table>
+      <thead><tr><th>Tab</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td>AI Query</td><td>User Guide expander starts collapsed (input visible immediately). 3-card step guide: Step 1 purple · Step 2 blue · Step 3 green. Column ratio 5:1:1 → 5:2:2. OS filter "All" → "All OSes".</td></tr>
+        <tr><td>Config Translator</td><td>3-card upload guide: Option A (file) · Option B (paste) · Then (analyse). Caption under OS pair dropdowns.</td></tr>
+        <tr><td>DB Browser</td><td>3-card guide: keyword · bin filter · row limit. Mini-labels above each search column.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="d4-verified-fix">
+    <h2>Fix: # Verified Lines as Empty Code Blocks</h2>
+    <div class="box red"><p><strong>Bug:</strong> Lines like <code># Verified: ExtremeXOS 33.x</code> appeared as empty-looking code blocks in the clean EXOS output.<br><br>
+    <strong>Root cause:</strong> <code>_parse_translated_output()</code> tagged these annotation lines with <code>status="verified"</code>. The <code>clean_script</code> property let all <code>status="verified"</code> lines through.</p></div>
+    <pre><code># Before (config_translate_agent.py:157)
+elif line.status in ("verified", "unverified"):
+    clean_lines.append(line.text)
+
+# After — annotation comments now always dropped
+elif line.status in ("verified", "unverified") and not stripped.startswith("#"):
+    clean_lines.append(line.text)</code></pre>
+  </section>
+
+  <section id="d4-topology-fix">
+    <h2>Fix: EXOS Topology Showing [unknown]</h2>
+    <div class="box red"><p><strong>Bug:</strong> "After (ExtremeXOS 33.x)" topology showed <code>[unknown] (Access / L2)</code> with no VLANs, interfaces, or device details.<br><br>
+    <strong>Root cause:</strong> Code called <code>extract_topology(parse_config(result.full_script))</code> — the Cisco modal parser on EXOS flat syntax. EXOS <code>create vlan DATA tag 10</code> produces no parsed sections → empty topology.</p></div>
+    <h3>New function: extract_topology_from_exos()</h3>
+    <p>Added to <code>cisco_config_parser.py</code>. Two-pass algorithm:</p>
+    <ol>
+      <li><strong>Pass 1 — global VLAN map:</strong> scan all lines for <code>create vlan NAME tag ID</code></li>
+      <li><strong>Pass 2 — per-device blocks:</strong> split on <code>configure snmp sysName "hostname"</code>, then parse SVIs, IP forwarding, default route, DHCP pools, access ports (untagged), trunk ports (tagged)</li>
+    </ol>
+    <p>After topology now calls <code>extract_topology_from_exos(result.clean_script)</code>.</p>
+  </section>
+
+  <section id="d4-parser-routing">
+    <h2>Topology Parser Routing Logic</h2>
+    <p>The topology expander in <code>config_translator.py</code> now selects parsers based on the OS session state keys — establishing the pattern for all future translation directions.</p>
+    <pre><code># Before topology — source always Cisco for now
+# Future: swap to extract_topology_from_exos() when source is EXOS/VOSS
+parse_result = parse_config(raw_config)
+topo_nodes   = extract_topology(parse_result)
+
+# After topology — gated on target OS key (_SK_TGT_OS)
+if _tgt_os_key == "extreme_exos":
+    after_topo_nodes = extract_topology_from_exos(result.clean_script)
+elif _tgt_os_key == "extreme_voss":
+    after_topo_nodes = []   # TODO Sprint 17: extract_topology_from_voss()
+elif _tgt_os_key == "extreme_slxos":
+    after_topo_nodes = []   # TODO Future: extract_topology_from_slx()</code></pre>
+  </section>
+
+  <section id="d4-roadmap">
+    <h2>Translation Direction Roadmap</h2>
+    <div class="box"><p><strong>Policy (2026-04-03):</strong> "For now only CISCO outward" — all Cisco-as-source directions completed first, reverse directions deferred.</p></div>
+    <table>
+      <thead><tr><th>Sprint</th><th>Direction</th><th>System Prompt</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>14</td><td>Cisco IOS/IOS-XE/NX-OS → ExtremeXOS 33.x</td><td><code>system_config_translator.md</code></td><td><span class="badge g">✅ Live</span></td></tr>
+        <tr><td>17</td><td>Cisco IOS/IOS-XE → VOSS 9.x</td><td><code>system_config_translator_cisco_to_voss.md</code> (TBD)</td><td><span class="badge y">⏳ Next</span></td></tr>
+        <tr><td>18</td><td>Cisco IOS-XE/NX-OS → SLX-OS 20.x</td><td>TBD</td><td><span class="badge b">📋 Planned</span></td></tr>
+        <tr><td>19</td><td>ExtremeXOS → Cisco IOS/IOS-XE</td><td><code>system_config_translator_exos_to_cisco.md</code> (TBD)</td><td><span class="badge p">⏸ Deferred</span></td></tr>
+        <tr><td>20</td><td>VOSS → Cisco IOS-XE</td><td>TBD</td><td><span class="badge p">⏸ Deferred</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="d4-topo-roadmap">
+    <h2>Topology Parser Map</h2>
+    <p>Each translation direction needs a before-parser and an after-parser registered in the <code>config_translator.py</code> routing block.</p>
+    <table>
+      <thead><tr><th>OS</th><th>Parser Function</th><th>Status</th><th>Used As</th></tr></thead>
+      <tbody>
+        <tr><td>Cisco IOS/IOS-XE/NX-OS</td><td><code>parse_config()</code> + <code>extract_topology()</code></td><td><span class="badge g">✅ Done</span></td><td>Before (all current configs)</td></tr>
+        <tr><td>ExtremeXOS 33.x</td><td><code>extract_topology_from_exos()</code></td><td><span class="badge g">✅ Done</span></td><td>After Sprint 14 · Before Sprint 19</td></tr>
+        <tr><td>VOSS 9.x</td><td><code>extract_topology_from_voss()</code></td><td><span class="badge y">⏳ Sprint 17</span></td><td>After Sprint 17 · Before Sprint 20</td></tr>
+        <tr><td>SLX-OS 20.x</td><td><code>extract_topology_from_slx()</code></td><td><span class="badge b">📋 Future</span></td><td>After Sprint 18</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="d4-pending">
+    <h2>Pending Items</h2>
+    <div class="box warn">
+      <p><strong>Before merging to main:</strong></p>
+      <ul style="margin-top:6px;">
+        <li><strong>Multi-device repetition:</strong> <code>full_script</code> / <code>clean_script</code> concatenate Access-Switch-01 + Core-Switch-01 sections. Fix: deduplicate by device or show per-device scripts separately.</li>
+        <li><strong>Merge</strong> <code>feature/sprint14-config-translator</code> → <code>main</code> once verified on Railway</li>
+      </ul>
+    </div>
+    <div class="box red">
+      <p><strong>Security (open):</strong></p>
+      <ul style="margin-top:6px;">
+        <li><strong>T-002</strong> — bcrypt password hashing (<code>auth.py:87</code>)</li>
+        <li><strong>T-004</strong> — SQL injection in <code>search.py:78-103</code></li>
+        <li><strong>T-007</strong> — Re-enable CORS + XSRF (<code>.streamlit/config.toml</code>)</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="d4-links">
+    <h2>Key URLs</h2>
+    <table>
+      <thead><tr><th>Resource</th><th>URL / Command</th></tr></thead>
+      <tbody>
+        <tr><td>Railway (live app)</td><td><a href="https://cisco-en-cli-agent-production-fbf7.up.railway.app" target="_blank">cisco-en-cli-agent-production-fbf7.up.railway.app</a></td></tr>
+        <tr><td>GitHub repo</td><td><a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent" target="_blank">github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent</a></td></tr>
+        <tr><td>Active branch</td><td><code>feature/sprint14-config-translator</code></td></tr>
+        <tr><td>Sprint 14 Architecture</td><td><a href="https://khursheedkhanaiforgood-ai.github.io/cisco-en-cli-agent/sprint14_architecture_20260403.html" target="_blank">GitHub Pages</a></td></tr>
+        <tr><td>Add user (Railway)</td><td>Railway → Variables → <code>APP_USERS</code> → add <code>"name": {"password": "X", "role": "user"}</code></td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--mut);">© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | April 3, 2026 | <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent" target="_blank">GitHub</a></p>
+  </section>
+
+  </main>
+  </div>
+  <!-- ══════════════════════════════════════════════════════════════ END DAY 4 ══ -->
+
 </div><!-- /body-wrap -->
 
 <script>
@@ -1369,6 +1607,7 @@ function switchTab(day, btn) {
   document.getElementById('nav-day1').style.display = 'none';
   document.getElementById('nav-day2').style.display = 'none';
   document.getElementById('nav-day3').style.display = 'none';
+  document.getElementById('nav-day4').style.display = 'none';
   document.getElementById('tab-' + day).classList.add('active');
   document.getElementById('nav-' + day).style.display = 'block';
   btn.classList.add('active');
