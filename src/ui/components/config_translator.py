@@ -320,6 +320,8 @@ def render_config_translator():
 
     if analyse_clicked and raw_config.strip():
         with st.spinner("Parsing configuration…"):
+            # ── Before topology: source is always Cisco (IOS / IOS-XE / NX-OS)
+            # Future sprint: when source OS is EXOS/VOSS, swap to extract_topology_from_exos()
             parse_result = parse_config(raw_config)
             topo_nodes   = extract_topology(parse_result)
             topo_ascii   = render_ascii_topology(topo_nodes, label="Input Config (Cisco)")
@@ -644,11 +646,21 @@ padding:14px 20px;margin-bottom:12px;display:flex;align-items:center;gap:24px;fl
                 st.code(st.session_state[_SK_TOPO_BEFORE], language=None)
             with topo_col2:
                 st.markdown(f"**🟢 After ({tgt_info['version']})**")
-                after_topo_nodes = extract_topology_from_exos(result.clean_script)
+                # ── After topology: select parser based on target OS
+                # extreme_exos  → extract_topology_from_exos()   (flat verb-noun syntax)
+                # extreme_voss  → TODO Sprint 17: extract_topology_from_voss()
+                # extreme_slxos → TODO Future:    extract_topology_from_slx()
+                _tgt_os_key = st.session_state.get(_SK_TGT_OS, "extreme_exos")
+                if _tgt_os_key == "extreme_exos":
+                    after_topo_nodes = extract_topology_from_exos(result.clean_script)
+                    _no_topo_msg = "(topology not parseable from EXOS output)"
+                else:
+                    after_topo_nodes = []
+                    _no_topo_msg = f"(topology parser for {tgt_info['version']} not yet implemented)"
                 after_topo = render_ascii_topology(
                     after_topo_nodes,
                     label=f"Translated Config ({tgt_info['version']})"
-                ) if after_topo_nodes else "(topology not parseable from EXOS output)"
+                ) if after_topo_nodes else _no_topo_msg
                 st.code(after_topo, language=None)
 
         # ── Intent Verification + Confidence Calculator ───────────
