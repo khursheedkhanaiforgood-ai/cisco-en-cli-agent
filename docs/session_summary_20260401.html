@@ -68,6 +68,7 @@ h3 a:hover,li a:hover,td a:hover{color:#58a6ff;}
   <button class="tab-btn" onclick="switchTab('day2',this)">&#128197; Day 2 &mdash; April 1, 2026</button>
   <button class="tab-btn" onclick="switchTab('day3',this)">&#128197; Day 3 &mdash; April 2, 2026</button>
   <button class="tab-btn" onclick="switchTab('day4',this)">&#128197; Day 4 &mdash; April 3, 2026</button>
+  <button class="tab-btn" onclick="switchTab('day5',this)">&#128197; Day 5 &mdash; April 6, 2026</button>
 </div>
 
 <div class="body-wrap">
@@ -141,6 +142,20 @@ h3 a:hover,li a:hover,td a:hover{color:#58a6ff;}
     <a href="#d2-pgdump">pg_dump Backup</a>
     <a href="#d2-sprints">Sprint Roadmap (0-9)</a>
     <a href="#d2-security">Security Notes</a>
+  </nav>
+
+  <!-- NAV DAY 5 -->
+  <nav id="nav-day5" style="display:none;">
+    <h2>Navigation</h2>
+    <div class="section-label">Demo Prep</div>
+    <a href="#d5-overview">Day 5 Overview</a>
+    <div class="section-label">Q &amp; A — Verbatim</div>
+    <a href="#d5-q1">Q1: RAG Learning</a>
+    <a href="#d5-q2">Q2: Hallucination Prevention</a>
+    <a href="#d5-q3">Q3: Database &amp; Backup</a>
+    <a href="#d5-q4">Q4: Why This App vs Claude</a>
+    <div class="section-label">Follow-up</div>
+    <a href="#d5-followup">Future Sprint Items</a>
   </nav>
 
   <!-- NAV DAY 4 -->
@@ -1597,6 +1612,155 @@ elif _tgt_os_key == "extreme_slxos":
   </div>
   <!-- ══════════════════════════════════════════════════════════════ END DAY 4 ══ -->
 
+  <!-- ══════════════════════════════════════════════════════════════ DAY 5 ══ -->
+  <div id="tab-day5" class="tab-panel">
+  <main>
+
+  <section id="d5-overview">
+    <h1>Day 5 — Demo Prep &amp; Architecture Q&amp;A</h1>
+    <div class="sub">April 6, 2026 &nbsp;·&nbsp; Team demo in 1 hour &nbsp;·&nbsp; Verbatim Q&amp;A captured below</div>
+    <div class="box ok"><p>Pre-demo session. Khursheed asked four foundational architecture questions about the RAG pipeline, hallucination prevention, database backup, and the business case for the app. Answers recorded verbatim for inclusion in future sprint planning.</p></div>
+    <div class="box warn"><p><strong>&#x23F0; Reminder:</strong> Khursheed — after the demo, come back and ask follow-up questions on all four points below. Several items need to be captured as future sprint requirements.</p></div>
+  </section>
+
+  <section id="d5-q1">
+    <h2>Q1: How does the RAG pipeline "learn" from previous iterations?</h2>
+
+    <div class="jcard">
+      <h4>&#x1F4AC; Khursheed asked:</h4>
+      <p>"The RAG-pipeline that we have built, how does it 'learn' from previous iterations and update memory?"</p>
+    </div>
+
+    <div class="jcard">
+      <h4>&#x1F916; Answer:</h4>
+      <p><strong>Short answer: it doesn't learn automatically — it learns when you feed it.</strong></p>
+      <p>The pipeline is a <strong>retrieval system, not a learning system</strong>. Here's what actually happens:</p>
+      <ul>
+        <li>The database holds <code>cli_mappings</code> rows, each with 6 OS columns + a <code>pgvector</code> embedding of the command text</li>
+        <li>Every time you add a new row (via CSV upload, PDF extraction, or the Add Data tab), it gets embedded and stored — that's the only "learning"</li>
+        <li>When a query comes in, it does cosine similarity search against those embeddings and returns the top-k matches</li>
+        <li><strong>There is no feedback loop</strong> from query results back into the database automatically</li>
+      </ul>
+      <p>What would make it "learn": the Query Log table (<code>query_log</code>) records every search. A future sprint could mine that log — if a query returned low similarity scores repeatedly, flag it as a gap and prompt an admin to add rows. That's a <strong>Sprint backlog item</strong>, not yet built.</p>
+    </div>
+
+    <div class="box warn"><p><strong>&#x1F6A9; Future sprint item:</strong> Query log mining — detect repeated low-similarity queries → flag as DB gaps → prompt admin to add rows. Needs follow-up questions from Khursheed.</p></div>
+  </section>
+
+  <section id="d5-q2">
+    <h2>Q2: How does Claude evaluate without hallucination and recommend further data?</h2>
+
+    <div class="jcard">
+      <h4>&#x1F4AC; Khursheed asked:</h4>
+      <p>"How do you / Claude evaluate what is being populated 'without hallucination' and then, recommend to the user whether you have further updated material to substantiate the RAG-database?"</p>
+    </div>
+
+    <div class="jcard">
+      <h4>&#x1F916; Answer:</h4>
+      <p><strong>Two separate mechanisms — be honest about what each does:</strong></p>
+
+      <h4>A) The RAG grounding (prevents hallucination on mappings)</h4>
+      <ul>
+        <li>Before Claude generates any CLI answer, <code>_rag_lookup()</code> retrieves the top-k real DB rows</li>
+        <li>Those rows are injected verbatim into the Claude prompt as context: <em>"Here are verified mappings from the database — use these, don't invent"</em></li>
+        <li>The system prompt (<code>system_master.md</code>) explicitly instructs: <em>"If no verified mapping exists, say so — do not guess"</em></li>
+        <li><strong>Limitation:</strong> Claude still writes the prose around the mappings. If the DB has no row for a command, it falls back to Claude's training knowledge and flags it as unverified</li>
+      </ul>
+
+      <h4>B) The Config Translator confidence score (intent preservation — not hallucination detection)</h4>
+      <ul>
+        <li>After translation, <code>intent_verify_agent.py</code> checks the EXOS output for keyword/pattern evidence of each intent category</li>
+        <li>Score = Σ(weight × confidence) / Σ(weight) — shown in the Confidence Calculator (Section 8)</li>
+        <li><strong>This is pattern-matching, not execution.</strong> A score of 95% means "we found the expected EXOS keywords" — not "this config will work in a switch"</li>
+        <li>True validation requires lab testing (EVE-NG Sprint 13 backlog)</li>
+      </ul>
+
+      <h4>Recommending further data</h4>
+      <p>Not yet built. The DB completeness dashboard in the sidebar shows fill percentages per bin — that's the closest proxy. An admin can see "L3-VIRT bin is 40% filled" and know to seed more rows there.</p>
+    </div>
+
+    <div class="box warn"><p><strong>&#x1F6A9; Future sprint items:</strong> (1) Surface "unverified fallback" warnings more explicitly in AI Query results. (2) DB gap recommendations based on low-similarity query history. (3) EVE-NG lab execution testing for Config Translator output. Needs follow-up questions from Khursheed.</p></div>
+  </section>
+
+  <section id="d5-q3">
+    <h2>Q3: The seeded database — is it stored, needs backup?</h2>
+
+    <div class="jcard">
+      <h4>&#x1F4AC; Khursheed asked:</h4>
+      <p>"The 40000 or so rows that you currently have 'seeded' is that database stored, need to backup etc."</p>
+    </div>
+
+    <div class="jcard">
+      <h4>&#x1F916; Answer:</h4>
+      <p><strong>Current row count: ~7,550</strong> (not 40,000 — that is the 12K short-term target, ~40K is a longer-term stretch). Breakdown:</p>
+      <ul>
+        <li>~500 hand-curated seed CSV rows</li>
+        <li>~7,000 from PDF extraction (VOSS 8.9, EXOS 22.7 docs)</li>
+      </ul>
+
+      <h4>Where it lives</h4>
+      <p>Railway PostgreSQL plugin — managed Postgres, persists independently of the app container. It does NOT reset on redeploy.</p>
+
+      <h4>Backup status</h4>
+      <ul>
+        <li>A <code>pg_dump</code> was taken after the initial seed (documented in memory)</li>
+        <li><strong>Risk:</strong> Railway hobby plan does not guarantee point-in-time recovery. If the PostgreSQL plugin is deleted or the project is removed, data is gone</li>
+        <li><strong>Recommendation:</strong> a fresh <code>pg_dump</code> should be scheduled — the last backup predates the PDF extraction rows</li>
+      </ul>
+      <pre><code># Take a backup now:
+pg_dump $DATABASE_URL &gt; backup_20260406.sql</code></pre>
+    </div>
+
+    <div class="box red"><p><strong>&#x26A0; Action needed:</strong> Take a fresh pg_dump that includes all PDF-extracted rows (~7,550 total). Last backup was ~500 rows only. If Railway hobby plan is cancelled, all 7,550 rows are lost.</p></div>
+    <div class="box warn"><p><strong>&#x1F6A9; Future sprint items:</strong> (1) Automated daily pg_dump to S3 / GitHub release. (2) Upgrade Railway plan or migrate to dedicated Postgres for point-in-time recovery. Needs follow-up questions from Khursheed.</p></div>
+  </section>
+
+  <section id="d5-q4">
+    <h2>Q4: Why use this app instead of asking Claude directly?</h2>
+
+    <div class="jcard">
+      <h4>&#x1F4AC; Khursheed asked:</h4>
+      <p>"Why would a user want to use the application I am creating instead of asking Claude and another LLM directly?"</p>
+    </div>
+
+    <div class="jcard">
+      <h4>&#x1F916; Answer — four distinct reasons:</h4>
+
+      <h4>1. Verified, version-pinned mappings</h4>
+      <p>Claude's training data is a mix of OS versions, some outdated. This DB is explicitly tagged <code>ExtremeXOS 33.x</code>, <code>IOS-XE 17.x</code>, <code>VOSS 9.x</code>. When you ask Claude directly you get "probably correct for some version" — here you get a row marked verified against a specific release.</p>
+
+      <h4>2. Extreme-specific knowledge Claude doesn't have</h4>
+      <p>EXOS and VOSS are niche. Claude's training corpus has vastly more Cisco content than Extreme. Ask Claude "what's the VOSS equivalent of <code>ip helper-address</code>?" and it will often hallucinate or hedge. This DB was built from Extreme's own PDFs — it knows <code>configure bootpforwarding add vlan</code>.</p>
+
+      <h4>3. Whole-config translation, not command-by-command</h4>
+      <p>The Config Translator takes an entire running-config and produces a section-by-section EXOS blueprint with caveats, NO EQUIVALENT markers, and a confidence score. You'd have to paste 200 commands one at a time to Claude to get the same coverage — and Claude wouldn't flag the EXOS-specific prerequisites (STP auto-edge, LLDP-MED, I-SID).</p>
+
+      <h4>4. Institutional memory and audit trail</h4>
+      <p>Every query is logged with timestamp, OS pair, similarity score, and username. A team of 10 SEs all using this app builds a shared corpus of what was searched and what was trusted. Asking Claude directly leaves no audit trail and no shared knowledge base.</p>
+    </div>
+
+    <div class="box ok"><p><strong>&#x1F3AF; Demo tip:</strong> Lead with point 4 and the Config Translator output — the side-by-side Cisco → EXOS view with the Confidence Calculator is the most visually convincing thing in the app right now.</p></div>
+    <div class="box warn"><p><strong>&#x1F6A9; Future sprint items:</strong> (1) "Why this mapping?" explainability — show which DB row sourced each translation. (2) Version mismatch warnings — flag if DB row is from older OS version than queried. (3) Team query analytics dashboard. Needs follow-up questions from Khursheed.</p></div>
+  </section>
+
+  <section id="d5-followup">
+    <h2>&#x23F0; Reminder — Follow-up Questions Pending</h2>
+    <div class="box red">
+      <p><strong>Khursheed: after the demo, come back and ask follow-up questions on all four points above.</strong> The following future sprint requirements need to be captured in detail:</p>
+      <ul style="margin-top:8px;">
+        <li><strong>RAG learning loop:</strong> query log mining, gap detection, admin notification</li>
+        <li><strong>Hallucination guardrails:</strong> explicit unverified warnings in UI, EVE-NG lab validation, DB gap recommendations</li>
+        <li><strong>Database:</strong> automated backup strategy, Railway plan decision, row count growth plan (7.5K → 12K → 40K)</li>
+        <li><strong>Business case:</strong> explainability ("why this mapping?"), version-pin warnings, team analytics dashboard</li>
+      </ul>
+    </div>
+    <p style="font-size:12px;color:var(--mut);">© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | April 6, 2026 | <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent" target="_blank">GitHub</a></p>
+  </section>
+
+  </main>
+  </div>
+  <!-- ══════════════════════════════════════════════════════════════ END DAY 5 ══ -->
+
 </div><!-- /body-wrap -->
 
 <script>
@@ -1608,6 +1772,7 @@ function switchTab(day, btn) {
   document.getElementById('nav-day2').style.display = 'none';
   document.getElementById('nav-day3').style.display = 'none';
   document.getElementById('nav-day4').style.display = 'none';
+  document.getElementById('nav-day5').style.display = 'none';
   document.getElementById('tab-' + day).classList.add('active');
   document.getElementById('nav-' + day).style.display = 'block';
   btn.classList.add('active');
