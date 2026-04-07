@@ -68,6 +68,7 @@ h3 a:hover,li a:hover,td a:hover{color:#58a6ff;}
   <button class="tab-btn" onclick="switchTab('day2',this)">&#128197; Day 2 &mdash; April 1, 2026</button>
   <button class="tab-btn" onclick="switchTab('day3',this)">&#128197; Day 3 &mdash; April 2, 2026</button>
   <button class="tab-btn" onclick="switchTab('day4',this)">&#128197; Day 4 &mdash; April 3, 2026</button>
+  <button class="tab-btn" onclick="switchTab('day5',this)">&#128197; Day 5 &mdash; April 6, 2026</button>
 </div>
 
 <div class="body-wrap">
@@ -1597,6 +1598,259 @@ elif _tgt_os_key == "extreme_slxos":
   </div>
   <!-- ══════════════════════════════════════════════════════════════ END DAY 4 ══ -->
 
+  <!-- NAV DAY 5 -->
+  <nav id="nav-day5" style="display:none;">
+    <h2>Navigation</h2>
+    <div class="section-label">Today's Work</div>
+    <a href="#d5-overview">Day 5 Overview</a>
+    <a href="#d5-demo">SA Demo Q&amp;A</a>
+    <a href="#d5-global-config">Global Config Repo</a>
+    <div class="section-label">References</div>
+    <a href="#d5-glossary">Glossary — All 16 Sources</a>
+    <div class="section-label">Roadmap</div>
+    <a href="#d5-pending">Pending Items</a>
+    <a href="#d5-sprints">Sprint Roadmap</a>
+  </nav>
+
+  <!-- TAB DAY 5 -->
+  <div id="tab-day5" class="tab-panel">
+  <main>
+
+  <h1>Day 5 &mdash; April 6, 2026</h1>
+  <p class="sub">SA Team Demo &bull; Global Claude Config Synthesized &bull; 16 Reference Sources Catalogued</p>
+
+  <section id="d5-overview">
+    <h2>Day 5 Overview</h2>
+    <div class="box ok"><p><strong>Demo Day.</strong> SA Team (babla + SA_Team users) full live demo completed. App declared 100% feature-complete for initial beta release. 4,144 rows, 13 functional tabs, multi-user auth, Railway stable.</p></div>
+    <table>
+      <thead><tr><th>Item</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>SA Team demo</td><td><span class="badge g">Done</span></td></tr>
+        <tr><td>Global Claude Config repo created</td><td><span class="badge g">Done</span></td></tr>
+        <tr><td>16 sources synthesized → global standards</td><td><span class="badge g">Done</span></td></tr>
+        <tr><td><code>~/.claude/CLAUDE.md</code> updated</td><td><span class="badge g">Done</span></td></tr>
+        <tr><td>Merge <code>feature/sprint14-config-translator</code> → <code>main</code></td><td><span class="badge y">Pending</span></td></tr>
+        <tr><td>Fresh pg_dump (rotated credentials)</td><td><span class="badge y">Pending</span></td></tr>
+        <tr><td>User guide text (AI Query landing tab)</td><td><span class="badge y">Pending</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="d5-demo">
+    <h2>SA Demo — Q&amp;A Highlights</h2>
+
+    <h3>Q1: How does the system learn?</h3>
+    <p>No automatic learning. Formal verification workflow: admins review rows, mark verified/rejected. Learning = deliberate bulk ingest cycles. Future Sprint 5: tier-3 web crawler crawls on query miss → user approves → rows insert permanently.</p>
+
+    <h3>Q2: How do you prevent hallucination?</h3>
+    <ul>
+      <li><strong>Zero-hallucination policy</strong> in <code>system_master.md</code> — Claude only outputs from retrieved DB rows</li>
+      <li><strong>Best-guess option</strong> — user explicitly requests speculative response → <code>⚠️ unverified</code> label</li>
+      <li><strong>Raw RAG results expander</strong> — every response shows exact DB rows, similarity scores, all OS columns</li>
+    </ul>
+
+    <h3>Q3: Backup &amp; Disaster Recovery?</h3>
+    <ul>
+      <li><code>railway_20260402_1340.dump</code> (7.7 MB) — full schema + 4,144 rows with pgvector embeddings</li>
+      <li><code>pg_restore</code> rebuilds in ~2 min. No need to regenerate embeddings (14 min + CPU cost if lost)</li>
+      <li>Raw data always recoverable from Git: <code>data/seed/*.csv</code> + <code>data/source_pdfs/</code></li>
+    </ul>
+
+    <h3>Q4: Why use this app vs. Claude directly?</h3>
+    <ol>
+      <li><strong>Guardrails + platform reasoning</strong> — 9 per-bin guardrail files + master prompt injected on every query. Claude alone has no EXOS dual-step L3, ZTF exclusivity, or I-SID vs VNI knowledge</li>
+      <li><strong>Cross-command context</strong> — 4,144+ verified command pairs, embeddings tuned for network intent</li>
+      <li><strong>Team artifact</strong> — saved queries, E2E wizard ordering, verification workflows</li>
+    </ol>
+    <div class="box"><p><em>Claude is the <strong>engine</strong>; the app is the <strong>control system + knowledge base + team workflow</strong>.</em></p></div>
+  </section>
+
+  <section id="d5-global-config">
+    <h2>Global Claude Config Repo</h2>
+    <div class="box ok">
+      <p><strong>Created:</strong> <a href="https://github.com/khursheedkhanaiforgood-ai/claude-global-config" target="_blank">github.com/khursheedkhanaiforgood-ai/claude-global-config</a></p>
+      <p style="margin-top:4px;">Synthesized from 16 sources. Applies to ALL projects. <code>~/.claude/CLAUDE.md</code> updated locally.</p>
+    </div>
+    <h3>What Changed in Global Config</h3>
+    <table>
+      <thead><tr><th>Area</th><th>New Pattern Added</th></tr></thead>
+      <tbody>
+        <tr><td>Token optimization</td><td>Edit not resend (80-90% savings) · model routing: Haiku/Sonnet/Opus · /context + /compact</td></tr>
+        <tr><td>Power commands</td><td>/teleport · /loop · /btw · /batch · /rewind · /chrome · --bare · Shift+Tab · "Ultra think"</td></tr>
+        <tr><td>.claude/ anatomy</td><td><code>rules/</code> with YAML frontmatter scoping · <code>skills/</code> as auto-triggered packages · CLAUDE.md ≤ 200 lines</td></tr>
+        <tr><td>everything-claude-code</td><td>38 agents, 156 skills · /learn → /evolve → /prune (continuous learning) · ECC_HOOK_PROFILE</td></tr>
+        <tr><td>Karpathy pattern</td><td>raw/ → wiki/ → Q&amp;A → outputs → linting knowledge base workflow</td></tr>
+        <tr><td>Quality gates</td><td>TDD mandatory · security audit before endpoints · verification loops · /save-session mandatory</td></tr>
+      </tbody>
+    </table>
+    <h3>Repo Structure</h3>
+    <pre><code>claude-global-config/
+├── CLAUDE.md                          # Global instructions (mirrors ~/.claude/CLAUDE.md)
+├── synthesis/
+│   ├── 01-token-optimization.md
+│   ├── 02-claude-code-power-commands.md
+│   ├── 03-architecture-patterns.md
+│   ├── 04-knowledge-base-pattern.md
+│   └── 05-quality-gates.md
+└── references/
+    ├── cisco-ios-xe.md
+    └── stanford-cs221.md</code></pre>
+  </section>
+
+  <section id="d5-glossary">
+    <h2>Glossary — All 16 Reference Sources</h2>
+    <p>All sources synthesized on 2026-04-06 into <a href="https://github.com/khursheedkhanaiforgood-ai/claude-global-config" target="_blank">claude-global-config</a> and applied globally.</p>
+    <table>
+      <thead><tr><th>#</th><th>Source</th><th>Key Insight</th><th>Applied To</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>Eduardo — Claude Usage Tips</strong><br><span style="color:var(--mut);font-size:11px;">Local .docx (Apr 6 2026)</span></td>
+          <td>8 token-saving tricks: edit not resend, batch questions, model routing (Haiku/Sonnet/Opus), pace across 5-hr window</td>
+          <td><span class="badge b">Global</span></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><strong>Andrej Karpathy — LLM Knowledge Base</strong><br><span style="color:var(--mut);font-size:11px;">Local .docx (Apr 6 2026)</span></td>
+          <td>raw/ → compile → Q&amp;A → outputs → linting. LLM owns the wiki. Synthetic data next frontier.</td>
+          <td><span class="badge b">Global</span> <span class="badge p">cisco-en</span></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><strong>Boris Cherny — 15 Claude Code Tips</strong><br><span style="color:var(--mut);font-size:11px;">Local .docx (Apr 6 2026)</span></td>
+          <td>/teleport, /loop, /schedule, /btw, /batch, git worktrees, --bare, --add-dir, --agent, /voice</td>
+          <td><span class="badge b">Global</span></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><strong>Eduardo — .claude/ Anatomy</strong><br><span style="color:var(--mut);font-size:11px;">Local .docx (Apr 6 2026)</span></td>
+          <td>CLAUDE.md ≤200 lines; rules/ with YAML frontmatter; skills/ auto-trigger; two .claude folders (global + project)</td>
+          <td><span class="badge b">Global</span></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><strong>This might be the most impressive</strong><br><span style="color:var(--mut);font-size:11px;">Local .docx (Apr 6 2026)</span></td>
+          <td>Claude Code as a production platform: skills + commands + hooks = real systems (career-ops: 700+ automated job apps)</td>
+          <td><span class="badge b">Global</span></td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td><a href="https://github.com/affaan-m/everything-claude-code" target="_blank"><strong>everything-claude-code (affaan-m)</strong></a></td>
+          <td>38 agents, 156 skills, hooks, instincts. /learn → /evolve. ECC_HOOK_PROFILE. AgentShield security.</td>
+          <td><span class="badge b">Global</span></td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td><strong>Claude Code has 93 commands</strong><br><span style="color:var(--mut);font-size:11px;">Local .docx (Apr 6 2026)</span></td>
+          <td>16 worth learning: /init, /plan, /context, /compact, /clear, /model, /btw, /rewind, /agents, /chrome, /loop, /simplify, /permissions, Shift+Tab, "Ultra think"</td>
+          <td><span class="badge b">Global</span></td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td><a href="https://taggart-tech.com/reckoning/" target="_blank"><strong>Taggart — The Reckoning</strong></a></td>
+          <td>Scope narrowly. TDD mandatory. Security audit mandatory. Auto-accept mode erodes expertise. Maintain human oversight.</td>
+          <td><span class="badge b">Global</span></td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td><a href="https://www.geekwire.com/2026/opinion-ai-coach-or-ai-ghostwriter-the-choice-is-yours/" target="_blank"><strong>GeekWire — AI Coach vs Ghostwriter</strong></a></td>
+          <td>AI as coach (teaches + challenges) vs ghostwriter (does work for you). Preserve the human in the loop.</td>
+          <td><span class="badge b">Global</span></td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td><a href="https://x.com/bcherny/status/2038454336355999749?s=46" target="_blank"><strong>bcherny (Twitter) — Creator Tips</strong></a></td>
+          <td>Boris Cherny's own usage patterns (mirrors tip set #3). Voice coding, Dispatch, Chrome extension.</td>
+          <td><span class="badge b">Global</span></td>
+        </tr>
+        <tr>
+          <td>11</td>
+          <td><a href="https://www.cisco.com/c/en/us/support/ios-nx-os-software/ios-xe-17/products-command-reference-list.html" target="_blank"><strong>Cisco IOS-XE 17.x Command Reference List</strong></a></td>
+          <td>Authoritative Cisco IOS-XE command syntax. Use to verify translations and seed data accuracy.</td>
+          <td><span class="badge p">cisco-en</span></td>
+        </tr>
+        <tr>
+          <td>12</td>
+          <td><a href="https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/17_xe/command/command-references.html" target="_blank"><strong>Cisco IOS-XE Command References (full)</strong></a></td>
+          <td>Full XML/table command reference for IOS-XE 17.x. Primary source for Config Translator NO EQUIVALENT decisions.</td>
+          <td><span class="badge p">cisco-en</span></td>
+        </tr>
+        <tr>
+          <td>13</td>
+          <td><a href="https://github.com/r7perezyera/Cisco-IOS-Command-CheatSheets" target="_blank"><strong>Cisco IOS Command CheatSheets (GitHub)</strong></a></td>
+          <td>Community cheatsheets: basic config, OSPF, EIGRP, BGP, VLANs, STP, trunking, security, NAT, ACLs.</td>
+          <td><span class="badge p">cisco-en</span></td>
+        </tr>
+        <tr>
+          <td>14</td>
+          <td><a href="https://github.com/santifer/career-ops" target="_blank"><strong>career-ops (santifer) — Representative Platform</strong></a></td>
+          <td>Claude Code production system: 14 skill modes, Go dashboard, 45+ company scrapers, 700+ applications. Blueprint for platform design.</td>
+          <td><span class="badge b">Global</span></td>
+        </tr>
+        <tr>
+          <td>15</td>
+          <td><strong>Full Architecture of LLM Knowledge Base</strong><br><span style="color:var(--mut);font-size:11px;">Local .docx (Apr 6 2026)</span></td>
+          <td>Duplicate of Karpathy workflow (#2) with architecture diagram. Confirms raw/ → wiki/ → Q&amp;A as canonical pattern.</td>
+          <td><span class="badge b">Global</span></td>
+        </tr>
+        <tr>
+          <td>16</td>
+          <td><a href="https://stanford-cs221.github.io/autumn2025/" target="_blank"><strong>Stanford CS221 Autumn 2025</strong></a></td>
+          <td>20 lectures: ML, search, MDP, game theory, Bayesian networks, logic, LLMs, AI &amp; Society, AI Supply Chains. Free on YouTube.</td>
+          <td><span class="badge b">Global</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--mut);margin-top:8px;">
+      <span class="badge b">Global</span> = added to <a href="https://github.com/khursheedkhanaiforgood-ai/claude-global-config" target="_blank">claude-global-config</a> &amp; <code>~/.claude/CLAUDE.md</code> &nbsp;|&nbsp;
+      <span class="badge p">cisco-en</span> = cisco-en-cli-agent specific reference
+    </p>
+  </section>
+
+  <section id="d5-pending">
+    <h2>Pending Items</h2>
+    <div class="box warn">
+      <p><strong>Immediate (next session):</strong></p>
+      <ul style="margin-top:6px;">
+        <li>Merge <code>feature/sprint14-config-translator</code> → <code>main</code> + push to GitHub</li>
+        <li>Fresh <code>pg_dump</code> with rotated PostgreSQL credentials</li>
+        <li>Publish user guide text for AI Query landing tab</li>
+      </ul>
+    </div>
+    <div class="box red">
+      <p><strong>Security (still open):</strong></p>
+      <ul style="margin-top:6px;">
+        <li><strong>T-002</strong> — bcrypt password hashing (<code>auth.py:87</code>)</li>
+        <li><strong>T-004</strong> — SQL injection in <code>search.py:78-103</code></li>
+        <li><strong>T-007</strong> — Re-enable CORS + XSRF (<code>.streamlit/config.toml</code>)</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="d5-sprints">
+    <h2>Sprint Roadmap</h2>
+    <table>
+      <thead><tr><th>Sprint</th><th>Scope</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>Sprint 1</td><td>Verification Workflow — admin review queue, ✅/❌ per row, voting mechanism</td><td><span class="badge g">High</span></td></tr>
+        <tr><td>T-002/004/007</td><td>Security patches: bcrypt, SQL injection, CORS/XSRF</td><td><span class="badge g">High</span></td></tr>
+        <tr><td>Sprint 9</td><td>OS version numbers in E2E Wizard + Config Translator output</td><td><span class="badge g">High</span></td></tr>
+        <tr><td>Sprint 11</td><td>Save Queries &amp; Designs — saved_items table + parameter templating</td><td><span class="badge y">Medium</span></td></tr>
+        <tr><td>Sprint 13</td><td>EVE-NG push API bridge — push configs directly into lab</td><td><span class="badge y">Medium</span></td></tr>
+        <tr><td>Sprint 16</td><td>EXOS→Cisco reverse translation — new system prompt + EXOS parser</td><td><span class="badge y">Medium</span></td></tr>
+        <tr><td>Sprint 17</td><td>Cisco→VOSS (Fabric Engine) translation direction</td><td><span class="badge p">Planned</span></td></tr>
+        <tr><td>Sprint 18</td><td>Cisco→SLX-OS translation direction</td><td><span class="badge p">Planned</span></td></tr>
+        <tr><td>User Mgmt</td><td>DB-backed users, bcrypt, first-time pw change, admin UI</td><td><span class="badge y">Medium</span></td></tr>
+        <tr><td>Concurrency</td><td>Streaming (1 day) or background threading (3 days) for non-blocking tabs</td><td><span class="badge y">Medium</span></td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--mut);margin-top:8px;">© 2026 Khursheed Khan. All rights reserved. | CISCO-EN CLI Mapping Agent | April 6, 2026 | <a href="https://github.com/khursheedkhanaiforgood-ai/cisco-en-cli-agent" target="_blank">GitHub</a></p>
+  </section>
+
+  </main>
+  </div>
+  <!-- ══════════════════════════════════════════════════════════════ END DAY 5 ══ -->
+
 </div><!-- /body-wrap -->
 
 <script>
@@ -1608,6 +1862,7 @@ function switchTab(day, btn) {
   document.getElementById('nav-day2').style.display = 'none';
   document.getElementById('nav-day3').style.display = 'none';
   document.getElementById('nav-day4').style.display = 'none';
+  document.getElementById('nav-day5').style.display = 'none';
   document.getElementById('tab-' + day).classList.add('active');
   document.getElementById('nav-' + day).style.display = 'block';
   btn.classList.add('active');
